@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approver Portal | DrawbackFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-item.active { background-color: #ECFDF5; color: #059669; border-right: 3px solid #059669; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 9999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #059669; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #toast { visibility: hidden; min-width: 250px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 24px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: all 0.3s; }
+        #toast.show { visibility: visible; bottom: 40px; opacity: 1; }
+        #toast.error { background-color: #EF4444; } #toast.success { background-color: #10B981; } #toast.warning { background-color: #F59E0B; color: #fff; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
+        .detail-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex overflow-hidden">
+
+    <div id="toast">Notification</div>
+    <div id="loading-overlay"><div class="text-center"><div class="spinner mx-auto mb-4"></div><p class="text-slate-600 font-semibold text-sm">Processing...</p></div></div>
+
+    <div id="details-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col animate-fadeIn overflow-hidden">
+            <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-slate-50">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-scale-balanced mr-2 text-emerald-600"></i>Match Details</h3>
+                    <p class="text-xs text-slate-500 mt-1">Match UUID: <span id="det-uuid" class="font-mono text-slate-700 bg-slate-200 px-1 rounded">...</span></p>
+                </div>
+                <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
+                        <div class="bg-blue-50 px-4 py-3 border-b border-blue-100"><span class="font-bold text-blue-800 text-sm uppercase">Export Record</span> <span id="det-exp-entry" class="float-right text-xs font-mono"></span></div>
+                        <div class="p-5 grid grid-cols-2 gap-y-4 text-sm">
+                            <div class="col-span-2"><div class="detail-label">Material</div><div id="det-exp-sku" class="font-bold"></div></div>
+                            <div><div class="detail-label">Qty</div><div id="det-exp-qty"></div></div>
+                            <div><div class="detail-label">Country</div><div id="det-exp-country"></div></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
+                        <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100"><span class="font-bold text-emerald-800 text-sm uppercase">Import Record</span> <span id="det-imp-entry" class="float-right text-xs font-mono"></span></div>
+                        <div class="p-5 grid grid-cols-2 gap-y-4 text-sm">
+                            <div class="col-span-2"><div class="detail-label">Material</div><div id="det-imp-sku" class="font-bold"></div></div>
+                            <div><div class="detail-label">Duty Rate</div><div id="det-imp-rate"></div></div>
+                            <div><div class="detail-label">Value</div><div id="det-imp-val"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-white p-5 rounded border">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-4">Financials</h4>
+                    <div class="grid grid-cols-4 gap-4 text-center">
+                        <div class="bg-slate-50 p-3 rounded"><div class="detail-label">Entered Value</div><div id="det-entered-val" class="font-bold"></div></div>
+                        <div class="bg-orange-50 p-3 rounded"><div class="detail-label">Export Duty</div><div id="det-export-duty" class="font-bold text-orange-700"></div></div>
+                        <div class="bg-emerald-50 p-3 rounded"><div class="detail-label">99% Duty</div><div id="det-99-duty" class="font-bold text-emerald-700"></div></div>
+                        <div class="bg-slate-50 p-3 rounded"><div class="detail-label">Total Refund</div><div id="det-total-refund" class="font-bold text-xl"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end"><button onclick="document.getElementById('details-modal').classList.add('hidden')" class="px-6 py-2 bg-slate-100 rounded">Close</button></div>
+        </div>
+    </div>
+
+    <div id="reject-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn border-t-4 border-red-500">
+            <h3 class="text-lg font-bold text-red-700 mb-2">Return to Reviewer</h3>
+            <p class="text-xs text-slate-500 mb-4">Provide a reason for rejection.</p>
+            <textarea id="reject-reason" rows="3" class="w-full border border-red-200 bg-red-50 rounded p-2 text-sm mb-4 outline-none focus:border-red-500"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('reject-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="confirmRejection()" class="px-3 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded font-bold">Confirm Return</button>
+            </div>
+        </div>
+    </div>
+
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+            <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white mr-3"><i class="fa-solid fa-stamp"></i></div>
+            <div>
+                <span class="font-bold text-lg tracking-tight block">DrawbackFlow</span>
+                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Approver</span>
+            </div>
+        </div>
+        <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
+            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-emerald-50 transition-all cursor-pointer"><i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="font-medium">Dashboard</span></a>
+            <div class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6">Workflow</div>
+            <a href="#" onclick="switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-emerald-50 transition-all cursor-pointer"><i class="fa-solid fa-inbox w-5 mr-2"></i> <span class="font-medium">Approval Queue</span></a>
+            <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-emerald-50 transition-all cursor-pointer"><i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">Archive</span></a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30">
+            <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard</h2>
+            <div class="flex gap-3">
+                <div class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-2 rounded">ROLE: APPROVER</div>
+                <button onclick="location.reload()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8" id="content-area">
+
+            <div id="view-dashboard" class="view-section fade-in">
+                <div class="grid grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-full -mr-10 -mt-10"></div>
+                        <span class="text-xs font-bold text-slate-400 uppercase">Awaiting Approval</span>
+                        <h3 class="text-3xl font-bold text-emerald-600 mt-2" id="stat-awaiting">0</h3>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Total Approved Value</span>
+                        <h3 class="text-3xl font-bold text-slate-800 mt-2" id="stat-total-approved">$0.00</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-approver" class="view-section hidden fade-in">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
+                        <h3 class="font-bold text-emerald-800">Pending Approvals</h3>
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('reject-modal').classList.remove('hidden')" class="text-sm bg-white border border-red-200 text-red-600 px-3 py-1 rounded hover:bg-red-50 font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                            <button onclick="processApprove()" class="text-sm bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 font-bold shadow-sm"><i class="fa-solid fa-check mr-1"></i> Approve Selected</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10">
+                                <tr>
+                                    <th class="w-8"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                                    <th>Imp Entry</th><th>Imp SKU</th><th>Exp Entry</th><th>Refund Amount</th><th>Reviewer Note</th><th>View</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50" id="approver-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-history" class="view-section hidden fade-in">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50"><h3 class="font-bold text-purple-800">Archive</h3></div>
+                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"><tr><th>ID</th><th>Refund</th><th>Status</th></tr></thead><tbody class="divide-y divide-slate-50" id="history-body"></tbody></table></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- DATA PERSISTENCE (READ SHARED) ---
+        const INITIAL_DB = { matches: [] }; // Fallback
+        function getDB() { return JSON.parse(localStorage.getItem('DRAWBACK_DB')) || INITIAL_DB; }
+        function saveDB(db) { localStorage.setItem('DRAWBACK_DB', JSON.stringify(db)); }
+
+        // --- GLOBAL VARS ---
+        let currentView = 'dashboard';
+        let approverSelection = new Set();
+
+        // --- UTIL ---
+        function toggleLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+        function formatMoney(v) { return "$" + parseFloat(v||0).toLocaleString(undefined,{minimumFractionDigits:2}); }
+        function showToast(m, t='success') { const el = document.getElementById('toast'); el.innerText=m; el.className=`show ${t}`; setTimeout(()=>el.className='', 3000); }
+        function escapeJSON(o) { return JSON.stringify(o).replace(/'/g,"&#39;").replace(/"/g,"&quot;"); }
+
+        // --- NAVIGATION ---
+        function switchView(view) {
+            document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            document.getElementById(`nav-${view}`).classList.add('active');
+            document.getElementById('page-title').innerText = view.charAt(0).toUpperCase() + view.slice(1);
+
+            if(view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); loadStats(); }
+            else if(view === 'approver') { document.getElementById('view-approver').classList.remove('hidden'); loadApproverQueue(); }
+            else if(view === 'history') { document.getElementById('view-history').classList.remove('hidden'); loadHistory(); }
+            currentView = view;
+        }
+
+        // --- DASHBOARD ---
+        function loadStats() {
+            const db = getDB();
+            const waiting = db.matches.filter(m => m.status === 'REVIEWED').length;
+            const approved = db.matches.filter(m => m.status === 'APPROVED').reduce((acc, m) => acc + parseFloat(m.refund_amount), 0);
+            document.getElementById('stat-awaiting').innerText = waiting;
+            document.getElementById('stat-total-approved').innerText = formatMoney(approved);
+        }
+
+        // --- APPROVER QUEUE ---
+        function loadApproverQueue() {
+            const db = getDB();
+            const data = db.matches.filter(m => m.status === 'REVIEWED');
+            const tbody = document.getElementById('approver-body');
+            approverSelection.clear();
+
+            if(!data.length) tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">All caught up!</td></tr>`;
+            else tbody.innerHTML = data.map(m => `
+                <tr class="hover:bg-emerald-50 border-b">
+                    <td class="p-3"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')"></td>
+                    <td>${m.import_entry_number}</td><td>${m.import_sku}</td><td>${m.export_entry_number}</td>
+                    <td class="text-emerald-700 font-bold">${formatMoney(m.refund_amount)}</td>
+                    <td class="text-xs italic text-slate-500">${m.notes || '-'}</td>
+                    <td><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleSelection(id) { if(approverSelection.has(id)) approverSelection.delete(id); else approverSelection.add(id); }
+        function toggleSelectAll(src) { document.querySelectorAll('#approver-body input[type=checkbox]').forEach(c => { c.checked = src.checked; toggleSelection(c.value); }); }
+
+        function processApprove() {
+            if(!approverSelection.size) return showToast("Select items first", "warning");
+            toggleLoading(true);
+            setTimeout(() => {
+                const db = getDB();
+                db.matches.forEach(m => { if(approverSelection.has(m.match_id)) m.status = 'APPROVED'; });
+                saveDB(db);
+                toggleLoading(false);
+                showToast("Items Approved");
+                loadApproverQueue();
+                loadStats();
+            }, 600);
+        }
+
+        function confirmRejection() {
+            const reason = document.getElementById('reject-reason').value;
+            if(!approverSelection.size) return showToast("Select items first", "warning");
+            if(!reason) return alert("Reason required");
+
+            toggleLoading(true);
+            setTimeout(() => {
+                const db = getDB();
+                db.matches.forEach(m => { if(approverSelection.has(m.match_id)) { m.status = 'DRAFT'; m.rejection_reason = reason; } });
+                saveDB(db);
+                document.getElementById('reject-modal').classList.add('hidden');
+                toggleLoading(false);
+                showToast("Items Returned to Reviewer");
+                loadApproverQueue();
+                loadStats();
+            }, 600);
+        }
+
+        // --- HISTORY ---
+        function loadHistory() {
+            const db = getDB();
+            const data = db.matches.filter(m => m.status === 'APPROVED');
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = data.length ? data.map(m => `<tr class="border-b"><td class="p-3">${m.match_id}</td><td>${formatMoney(m.refund_amount)}</td><td class="text-emerald-600 font-bold">APPROVED</td></tr>`).join('') : `<tr><td colspan="3" class="p-6 text-center text-slate-400">Empty</td></tr>`;
+        }
+
+        // --- DETAILS MODAL ---
+        function showMatchDetails(m) {
+            document.getElementById('det-uuid').innerText = m.match_uuid;
+            document.getElementById('det-exp-entry').innerText = m.export_entry_number;
+            document.getElementById('det-exp-sku').innerText = m.export_sku;
+            document.getElementById('det-exp-qty').innerText = m.export_qty_total;
+            document.getElementById('det-exp-country').innerText = m.export_country;
+            document.getElementById('det-imp-entry').innerText = m.import_entry_number;
+            document.getElementById('det-imp-sku').innerText = m.import_sku;
+            document.getElementById('det-imp-rate').innerText = m.import_duty_rate;
+            document.getElementById('det-imp-val').innerText = formatMoney(m.import_customs_val);
+
+            let enteredVal = (m.qty_matched / m.import_qty_original) * m.import_customs_val;
+            let exportDuty = enteredVal * m.import_duty_rate;
+
+            document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);
+            document.getElementById('det-export-duty').innerText = formatMoney(exportDuty);
+            document.getElementById('det-99-duty').innerText = formatMoney(exportDuty * 0.99);
+            document.getElementById('det-total-refund').innerText = formatMoney(m.refund_amount);
+
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        // Init
+        loadStats();
+    </script>
+</body>
+</html>
