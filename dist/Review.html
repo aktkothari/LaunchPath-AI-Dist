@@ -3,35 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reviewer Console | DrawbackFlow</title>
+    <title>DrawbackFlow Premium | Reviewer Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-item.active { background-color: #EFF6FF; color: #2563EB; border-right: 3px solid #2563EB; }
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 9999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #2563EB; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #toast { visibility: hidden; min-width: 250px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 24px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: all 0.3s; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F1F5F9;
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Card Hover Effects */
+        .dash-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .dash-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .clickable-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .clickable-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0);
+            transition: background 0.2s;
+        }
+        .clickable-card:hover::after {
+            background: rgba(255,255,255,0.1);
+        }
+        .clickable-card:hover .icon-bounce {
+            transform: scale(1.1);
+        }
+        .icon-bounce { transition: transform 0.2s; }
+
+        /* Navigation Active State */
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: #2563EB;
+            border-right: 3px solid #2563EB;
+        }
+
+        /* Robust Full-Screen Loader */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #2563EB;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px 24px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
         #toast.show { visibility: visible; bottom: 40px; opacity: 1; }
-        #toast.error { background-color: #EF4444; } #toast.success { background-color: #10B981; } #toast.warning { background-color: #F59E0B; color: #fff; }
-        .edit-input { width: 100%; background: transparent; padding: 4px; border-radius: 4px; border: 1px solid transparent; transition: all 0.2s; }
+        #toast.error { background-color: #EF4444; }
+        #toast.success { background-color: #10B981; }
+        #toast.warning { background-color: #F59E0B; color: #fff; }
+
+        /* Editable Inputs in Preview */
+        .edit-input {
+            width: 100%;
+            background: transparent;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            text-align: center;
+        }
         .edit-input:hover { border-color: #cbd5e1; background: #fff; }
-        .edit-input:focus { border-color: #3b82f6; background: #fff; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
-        .smart-note { font-size: 0.7rem; color: #d97706; background: #fef3c7; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; white-space: nowrap; border: 1px solid #fcd34d; }
-        .status-badge { padding: 2px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .edit-input:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .edit-input.invalid-cell {
+            background-color: #FEF2F2 !important;
+            border: 1px solid #EF4444 !important;
+        }
+
+        .edit-input.smart-filled-cell {
+            background-color: #FEF9C3 !important;
+            border: 1px solid #FDE047 !important;
+        }
+
+        /* Smart Label Styling */
+        .smart-note {
+            font-size: 0.7rem;
+            color: #d97706;
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 4px;
+            white-space: nowrap;
+            border: 1px solid #fcd34d;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
         .status-draft { background-color: #e2e8f0; color: #475569; }
+        .status-reviewed { background-color: #dbeafe; color: #1e40af; }
+        .status-approved { background-color: #dcfce7; color: #166534; }
+        .status-returned { background-color: #fee2e2; color: #991b1b; }
+
+        /* Row Status Colors */
         .error-row { background-color: #fee2e2 !important; }
         .warning-row { background-color: #fffbeb !important; }
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
-        th { font-weight: 600; color: #475569; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; background-color: #F8FAFC; white-space: nowrap; padding: 12px 8px; border-bottom: 2px solid #E2E8F0; }
-        td { white-space: nowrap; padding: 8px; vertical-align: middle; }
-        .detail-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
-        .detail-value { font-size: 0.875rem; color: #334155; font-weight: 500; min-height: 1.25rem; }
+
+        /* Modal */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Table Design */
+        th {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: #F8FAFC;
+            white-space: nowrap;
+            padding: 8px;
+            border-bottom: 2px solid #E2E8F0;
+            vertical-align: top;
+            position: relative;
+        }
+
+        .th-input {
+            width: 100%;
+            padding: 2px 4px;
+            font-size: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 3px;
+            font-weight: normal;
+            margin-top: 4px;
+            color: #334155;
+            background-color: #fff;
+            text-align: center;
+        }
+        .th-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        .th-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            cursor: pointer;
+            align-items: center;
+            text-align: center;
+        }
+        .th-container-inner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            gap: 4px;
+        }
+        .th-container:hover .fa-sort {
+            color: #64748b;
+        }
+
+        .th-static {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* Column Resizer Handle */
+        .resizer {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            cursor: col-resize;
+            user-select: none;
+            touch-action: none;
+        }
+        .resizer:hover, .resizing {
+            background-color: #3b82f6;
+            opacity: 0.5;
+        }
+
+        td {
+            white-space: nowrap;
+            padding: 8px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* Modal Details Labels */
+        .detail-label {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+        .detail-value {
+            font-size: 0.875rem;
+            color: #334155;
+            font-weight: 500;
+            min-height: 1.25rem;
+        }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -46,6 +280,7 @@
         <div class="text-center">
             <div class="spinner mx-auto mb-4"></div>
             <p class="text-slate-600 font-semibold text-sm" id="loader-text">Processing...</p>
+            <button onclick="forceCloseLoader()" class="mt-6 text-xs text-red-400 hover:text-red-600 underline">Force Close</button>
         </div>
     </div>
 
@@ -58,15 +293,19 @@
                 </div>
                 <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-2xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
+
             <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
                         <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
-                            <span class="font-bold text-blue-800 text-sm uppercase"><i class="fa-solid fa-plane-departure mr-2"></i>Export Record</span>
+                            <span class="font-bold text-blue-800 text-sm uppercase"><i class="fa-solid fa-plane-departure mr-2"></i>Export Record (Claim Basis)</span>
                             <span class="text-xs text-blue-600 bg-white px-2 py-1 rounded border border-blue-100 font-mono" id="det-exp-entry">...</span>
                         </div>
                         <div class="p-5 grid grid-cols-2 gap-y-5 gap-x-4 text-sm">
-                            <div class="col-span-2"><div class="detail-label">Material Number</div><div id="det-exp-sku" class="text-lg font-bold text-slate-800"></div></div>
+                            <div class="col-span-2">
+                                <div class="detail-label">Material Number</div>
+                                <div id="det-exp-material" class="text-lg font-bold text-slate-800"></div>
+                            </div>
                             <div><div class="detail-label">Quantity</div><div id="det-exp-qty" class="font-bold"></div></div>
                             <div><div class="detail-label">UOM</div><div id="det-exp-uom"></div></div>
                             <div><div class="detail-label">Export Date</div><div id="det-exp-date"></div></div>
@@ -74,17 +313,27 @@
                             <div class="col-span-2 border-t border-dashed border-slate-100"></div>
                             <div><div class="detail-label">Invoice No</div><div id="det-exp-inv"></div></div>
                             <div><div class="detail-label">Internal ID</div><div id="det-exp-id"></div></div>
-                            <div class="col-span-2"><div class="detail-label">Description</div><div id="det-exp-desc" class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100"></div></div>
+                            <div class="col-span-2">
+                                <div class="detail-label">Description</div>
+                                <div id="det-exp-desc" class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100"></div>
+                            </div>
                         </div>
                     </div>
+
                     <div class="bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
                         <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100 flex justify-between items-center">
-                            <span class="font-bold text-emerald-800 text-sm uppercase"><i class="fa-solid fa-ship mr-2"></i>Matched Import</span>
+                            <span class="font-bold text-emerald-800 text-sm uppercase"><i class="fa-solid fa-ship mr-2"></i>Matched Import (Source)</span>
                             <span class="text-xs text-emerald-600 bg-white px-2 py-1 rounded border border-emerald-100 font-mono" id="det-imp-entry">...</span>
                         </div>
                         <div class="p-5 grid grid-cols-3 gap-y-5 gap-x-4 text-sm">
-                            <div class="col-span-2"><div class="detail-label">Import Material</div><div id="det-imp-sku" class="text-lg font-bold text-slate-800"></div></div>
-                            <div><div class="detail-label">Import Date</div><div id="det-imp-date"></div></div>
+                            <div class="col-span-2">
+                                <div class="detail-label">Import Material</div>
+                                <div id="det-imp-material" class="text-lg font-bold text-slate-800"></div>
+                            </div>
+                            <div>
+                                <div class="detail-label">Import Date</div>
+                                <div id="det-imp-date"></div>
+                            </div>
                             <div><div class="detail-label">Declaration #</div><div id="det-imp-dec"></div></div>
                             <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
                             <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
@@ -99,20 +348,45 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="mt-6 bg-white rounded-lg shadow-sm border border-slate-200 p-5">
                     <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 border-b border-slate-100 pb-2">Match Logic & Calculation Breakdown</h4>
                     <div class="grid grid-cols-7 gap-4 text-center">
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100"><div class="detail-label">Algorithm</div><div id="det-algo" class="font-bold text-blue-600"></div></div>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100"><div class="detail-label">Consumed Qty</div><div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div></div>
-                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100"><div class="detail-label">Entered Value</div><div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div></div>
-                        <div class="bg-orange-50 p-3 rounded border border-orange-100"><div class="detail-label">Export Duty (100%)</div><div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div></div>
-                        <div class="bg-emerald-50 p-3 rounded border border-emerald-100"><div class="detail-label">99% Duty</div><div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div></div>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100"><div class="detail-label">Total Refund</div><div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div></div>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100"><div class="detail-label">Status</div><div id="det-status"></div></div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Algorithm</div>
+                            <div id="det-algo" class="font-bold text-blue-600"></div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Consumed Qty</div>
+                            <div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
+                            <div class="detail-label">Entered Value</div>
+                            <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded border border-orange-100">
+                            <div class="detail-label">Export Duty (100%)</div>
+                            <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
+                            <div class="detail-label">99% Duty</div>
+                            <div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Total Refund</div>
+                            <div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Status</div>
+                            <div id="det-status"></div>
+                        </div>
                     </div>
-                    <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100"><i class="fa-solid fa-circle-info mr-1 text-yellow-600"></i> <span id="det-notes"></span></div>
+                    <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
+                        <i class="fa-solid fa-circle-info mr-1 text-yellow-600"></i> <span id="det-notes"></span>
+                    </div>
                 </div>
             </div>
+
             <div class="p-4 border-t border-gray-100 bg-white flex justify-end gap-3">
                 <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="px-6 py-2 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 font-medium transition">Close</button>
             </div>
@@ -123,363 +397,1791 @@
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
             <h3 class="text-lg font-bold text-slate-800 mb-4">Edit Match Record</h3>
             <input type="hidden" id="edit-match-id">
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Matched SKU</label>
-            <input type="text" id="edit-sku" disabled class="w-full bg-slate-100 border border-slate-300 rounded p-2 text-sm mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Matched Material Number</label>
+            <input type="text" id="edit-material-number" disabled class="w-full bg-slate-100 border border-slate-300 rounded p-2 text-sm mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Refund Amount ($)</label>
             <input type="number" id="edit-refund" step="0.01" class="w-full border border-slate-300 rounded p-2 text-sm mb-3 focus:border-blue-500 outline-none">
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Reviewer Notes</label>
             <textarea id="edit-notes" rows="3" class="w-full border border-slate-300 rounded p-2 text-sm mb-4 focus:border-blue-500 outline-none"></textarea>
             <div class="flex justify-end gap-2">
-                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="closeEditModal()" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
                 <button onclick="saveMatchEdit()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">Save Changes</button>
             </div>
         </div>
     </div>
 
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg z-20">
-        <div class="h-16 flex items-center px-6 border-b border-gray-100">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-3"><i class="fa-solid fa-layer-group"></i></div>
-            <div>
-                <span class="font-bold text-lg tracking-tight block">DrawbackFlow</span>
-                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Reviewer</span>
+    <div id="void-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn border-t-4 border-red-600">
+            <h3 class="text-lg font-bold text-red-700 mb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Void Approved Claim</h3>
+            <p class="text-xs text-slate-600 mb-4 bg-red-50 p-2 rounded border border-red-100">
+                <b>Warning:</b> This will reverse the approval, reclaim the inventory to the import record, and keep the record for audit.
+            </p>
+            <input type="hidden" id="void-match-id">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Reason for Voiding</label>
+            <textarea id="void-reason" rows="3" placeholder="e.g. Post-audit failure, Export cancelled..." class="w-full border border-slate-300 rounded p-2 text-sm mb-4 focus:border-red-500 outline-none"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('void-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="confirmVoid()" class="px-3 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded font-bold">Confirm Void</button>
             </div>
         </div>
+    </div>
+
+    <div id="claim-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
+            <h3 class="text-lg font-bold text-blue-800 mb-2">Submit Claim Batch</h3>
+            <p class="text-xs text-slate-500 mb-4">Group selected matches into a specific Claim ID for the Approver.</p>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Claim ID / Reference</label>
+            <div class="relative">
+                <input type="text" id="claim-id-input" list="existing-claims" placeholder="e.g. XCLM-2025-001"
+                       class="w-full border border-blue-300 bg-blue-50 rounded p-2 text-sm mb-1 focus:border-blue-500 outline-none font-bold uppercase">
+                <datalist id="existing-claims"></datalist>
+            </div>
+            <p class="text-[10px] text-slate-400 mb-4">Type a new ID to create, or select existing to append.</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('claim-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="confirmClaimSubmission()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">Submit Claim</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="demo-banner" class="fixed bottom-0 left-0 w-full bg-amber-500 text-white p-3 z-50 hidden flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-wifi-slash text-xl"></i>
+            <div>
+                <p class="font-bold text-sm">Connection Lost</p>
+                <p class="text-xs opacity-90">Backend unreachable. Ensure app.py is running.</p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('demo-banner').classList.add('hidden')" class="text-white hover:text-amber-100 bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded text-xs transition">Dismiss</button>
+    </div>
+
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-3">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+                <span class="font-bold text-lg tracking-tight block">DrawbackFlow</span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Reviewer Node</span>
+            </div>
+        </div>
+
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
-            <div class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Analytics</div>
-            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="font-medium">Dashboard</span></a>
+            <div id="header-analytics" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 nav-header">Analytics</div>
+            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="font-medium">Dashboard</span>
+            </a>
 
-            <div class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6">Data Management</div>
-            <a href="#" onclick="switchView('products')" id="nav-products" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-box w-5 mr-2"></i> <span class="font-medium">Product Master</span></a>
-            <a href="#" onclick="switchView('material_mappings')" id="nav-material_mappings" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-link w-5 mr-2"></i> <span class="font-medium">Mappings</span></a>
-            <a href="#" onclick="switchView('imports')" id="nav-imports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-ship w-5 mr-2"></i> <span class="font-medium">Imports</span></a>
-            <a href="#" onclick="switchView('exports')" id="nav-exports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-plane-departure w-5 mr-2"></i> <span class="font-medium">Exports</span></a>
+            <div id="header-data" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Data Management</div>
+            <a href="#" onclick="switchView('products')" id="nav-products" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-box w-5 mr-2"></i> <span class="font-medium">Product Master</span>
+            </a>
+            <a href="#" onclick="switchView('material_mappings')" id="nav-material_mappings" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-link w-5 mr-2"></i> <span class="font-medium">Material Mappings</span>
+            </a>
+            <a href="#" onclick="switchView('imports')" id="nav-imports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-ship w-5 mr-2"></i> <span class="font-medium">Imports</span>
+            </a>
+            <a href="#" onclick="switchView('exports')" id="nav-exports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-plane-departure w-5 mr-2"></i> <span class="font-medium">Exports</span>
+            </a>
 
-            <div class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6">Process</div>
-            <a href="#" onclick="switchView('matching')" id="nav-matching" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-wand-magic-sparkles w-5 mr-2"></i> <span class="font-medium">Matching Engine</span></a>
-            <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="font-medium">Reviewer Console</span></a>
-            <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 transition-all cursor-pointer"><i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">History</span></a>
+            <div id="header-process" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Core Process</div>
+            <a href="#" onclick="switchView('matching')" id="nav-matching" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-wand-magic-sparkles w-5 mr-2"></i> <span class="font-medium">Matching Engine</span>
+            </a>
+
+            <div id="header-workflow" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Workflow / Preparation</div>
+            <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="font-medium">Reviewer Console</span>
+            </a>
+             <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">Claims History</span>
+            </a>
         </nav>
+
+        <div class="p-4 border-t border-gray-100 bg-gray-50 text-xs flex justify-between items-center">
+            <span class="text-slate-500">DB Status:</span>
+            <span id="server-status" class="flex items-center font-bold text-slate-500">
+                <span class="w-2 h-2 bg-slate-300 rounded-full mr-2"></span> Checking...
+            </span>
+        </div>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50">
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30">
-            <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard</h2>
+    <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50/50">
+        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
+            <div class="flex items-center gap-4">
+                 <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
+                 <div class="h-6 w-px bg-slate-200"></div>
+                 <div class="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full">
+                     <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                     <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Reviewer Console</span>
+                 </div>
+            </div>
+
             <div class="flex gap-3">
-                <div class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-2 rounded">ROLE: REVIEWER</div>
-                <button onclick="resetSystem()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 border border-red-200 transition">Reset DB</button>
+                <button onclick="loadStats()" class="p-2 text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-rotate-right"></i></button>
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8" id="content-area">
 
-            <div id="view-dashboard" class="view-section fade-in">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-full -mr-10 -mt-10"></div>
-                        <span class="text-xs font-bold text-slate-400 uppercase relative z-10">Unclaimed Potential</span>
-                        <h3 class="text-3xl font-bold text-slate-800 mt-2 relative z-10" id="stat-potential">...</h3>
+            <div id="view-dashboard" class="view-section fade-in space-y-8">
+                <section>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-blue-500 pl-3">Recovery Summary</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card relative overflow-hidden">
+                            <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-sack-dollar text-6xl text-blue-500"></i></div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">Total Recovery Potential</p>
+                            <h2 class="text-3xl font-bold text-slate-800 mt-2" id="stat-potential">$0.00</h2>
+                            <div class="mt-2 text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded">Gross Duty Available</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card relative overflow-hidden">
+                            <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-file-invoice-dollar text-6xl text-emerald-500"></i></div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">Actual Recovery</p>
+                            <h2 class="text-3xl font-bold text-emerald-600 mt-2" id="stat-recovered">$0.00</h2>
+                            <div class="mt-2 text-xs text-emerald-600 bg-emerald-50 inline-block px-2 py-1 rounded">Approved Claims</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Recovery Realized</p>
+                                    <h2 class="text-3xl font-bold text-slate-800 mt-2" id="stat-realized-pct">0%</h2>
+                                </div>
+                                <div class="h-10 w-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5 mt-4 overflow-hidden">
+                                <div id="prog-realized" class="bg-indigo-500 h-1.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div onclick="switchView('history')" class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl border border-slate-700 dash-card clickable-card text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Unrealized / Pending</p>
+                                    <h2 class="text-3xl font-bold text-white mt-2" id="stat-unrealized">$0.00</h2>
+                                </div>
+                                <div class="h-8 w-8 bg-slate-700 rounded-full flex items-center justify-center text-slate-300 icon-bounce">
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-3">Click to view approved claims history</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-full -mr-10 -mt-10"></div>
-                        <span class="text-xs font-bold text-slate-400 uppercase relative z-10">Recovered Duty</span>
-                        <h3 class="text-3xl font-bold text-emerald-600 mt-2 relative z-10" id="stat-recovered">...</h3>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-purple-500 pl-3">Approval Summary</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card flex items-center gap-4">
+                            <div class="h-12 w-12 bg-green-50 rounded-lg flex items-center justify-center text-green-600 text-xl shadow-sm">
+                                <i class="fa-solid fa-check-double"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-slate-800" id="stat-approved-count">0</h4>
+                                <p class="text-xs text-slate-500 font-medium uppercase">Total Approved Entries</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border-b-4 border-orange-400 shadow-sm dash-card flex items-center justify-between opacity-75 cursor-not-allowed" title="Approver Only">
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500 text-xl">
+                                    <i class="fa-solid fa-lock"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-slate-800" id="stat-pending-approval-count">0</h4>
+                                    <p class="text-xs text-slate-500 font-medium uppercase">Pending Approval Entries</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div onclick="switchView('history')" class="bg-white p-5 rounded-xl border-b-4 border-purple-400 shadow-sm dash-card clickable-card flex items-center justify-between group">
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 bg-purple-50 rounded-lg flex items-center justify-center text-purple-500 text-xl group-hover:bg-purple-100 transition">
+                                    <i class="fa-solid fa-folder-open icon-bounce"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-slate-800" id="stat-pending-claims-count">0</h4>
+                                    <p class="text-xs text-slate-500 font-medium uppercase">Total Processed Claims</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-purple-400 transition"></i>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-slate-400 uppercase">System Stats</span>
-                        <div class="flex justify-between mt-3 text-sm"><span class="text-slate-600">Import Entries</span><span class="font-bold text-slate-800" id="count-imports">-</span></div>
-                        <div class="flex justify-between mt-2 text-sm"><span class="text-slate-600">Export Entries</span><span class="font-bold text-slate-800" id="count-exports">-</span></div>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-indigo-500 pl-3">Matching Summary</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 text-center dash-card">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Products</p>
+                            <h4 class="text-xl font-bold text-slate-700" id="stat-products-count">-</h4>
+                        </div>
+                         <div class="bg-white p-4 rounded-lg border border-slate-200 text-center dash-card">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Imports</p>
+                            <h4 class="text-xl font-bold text-slate-700" id="count-imports">-</h4>
+                        </div>
+                         <div class="bg-white p-4 rounded-lg border border-slate-200 text-center dash-card">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Exports</p>
+                            <h4 class="text-xl font-bold text-slate-700" id="count-exports">-</h4>
+                        </div>
+                         <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100 text-center dash-card">
+                            <p class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Matches Success</p>
+                            <h4 class="text-xl font-bold text-emerald-700" id="stat-matches-success">-</h4>
+                        </div>
+                         <div onclick="switchView('matching')" class="bg-red-50 p-4 rounded-lg border border-red-100 text-center dash-card clickable-card group hover:bg-red-100">
+                            <p class="text-[10px] font-bold text-red-500 uppercase mb-1 group-hover:text-red-700">Unmatched / Fail</p>
+                            <h4 class="text-xl font-bold text-red-600" id="stat-matches-fail">-</h4>
+                            <div class="text-[9px] text-red-400 mt-1 opacity-0 group-hover:opacity-100 transition">Go to Engine</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-cyan-500 pl-3">Performance Metrics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div onclick="switchView('imports')" class="bg-white p-4 rounded-xl border border-slate-200 dash-card clickable-card flex justify-between items-center">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fa-solid fa-database text-cyan-500"></i>
+                                    <span class="text-xs font-bold text-slate-500 uppercase">Import Data Quality</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-slate-800" id="stat-import-quality">98%</h3>
+                            </div>
+                            <div class="h-10 w-10 rounded-full border-4 border-cyan-100 border-t-cyan-500 flex items-center justify-center text-[10px] font-bold text-slate-400">98</div>
+                        </div>
+                         <div onclick="switchView('exports')" class="bg-white p-4 rounded-xl border border-slate-200 dash-card clickable-card flex justify-between items-center">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fa-solid fa-file-export text-blue-500"></i>
+                                    <span class="text-xs font-bold text-slate-500 uppercase">Export Data Quality</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-slate-800" id="stat-export-quality">92%</h3>
+                            </div>
+                             <div class="h-10 w-10 rounded-full border-4 border-blue-100 border-t-blue-500 flex items-center justify-center text-[10px] font-bold text-slate-400">92</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 dash-card flex justify-between items-center">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fa-solid fa-stopwatch text-slate-400"></i>
+                                    <span class="text-xs font-bold text-slate-500 uppercase">Matching Time</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-slate-800" id="stat-matching-time">0.4s</h3>
+                            </div>
+                            <div class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Avg / Batch</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-700 text-sm">Inventory Health</h3>
+                            <span class="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">Pending Items</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm text-left" id="inventory-table">
+                                <thead class="bg-white text-slate-500 border-b"></thead>
+                                <tbody class="divide-y divide-slate-50 text-xs" id="inventory-body">
+                                    <tr><td colspan="4" class="p-6 text-center text-slate-400">Loading DB Stats...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-red-50 flex justify-between items-center">
+                            <h3 class="font-bold text-red-800 text-sm"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error Logs</h3>
+                            <span class="text-[10px] font-bold bg-white text-red-500 px-2 py-1 rounded-full">Recent</span>
+                        </div>
+                        <div class="p-4 flex-1 overflow-y-auto space-y-3 max-h-64">
+                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded border border-slate-100 hover:bg-slate-100 transition cursor-pointer">
+                                <i class="fa-solid fa-database text-red-400 mt-1 text-xs"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Duplicate Import Entry</p>
+                                    <p class="text-[10px] text-slate-500">Material: RAW-STEEL-COIL | IMP-2023-001</p>
+                                    <a href="#" onclick="switchView('imports')" class="text-[10px] text-blue-500 hover:underline">Fix in Imports &rarr;</a>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded border border-slate-100 hover:bg-slate-100 transition cursor-pointer">
+                                <i class="fa-solid fa-ban text-orange-400 mt-1 text-xs"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Unmapped Export Material</p>
+                                    <p class="text-[10px] text-slate-500">Material: NEW-ALLOY-X</p>
+                                    <a href="#" onclick="switchView('material_mappings')" class="text-[10px] text-blue-500 hover:underline">Add Mapping &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
 
             <div id="view-management" class="view-section hidden fade-in">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-6">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-slate-700 text-lg">Manage <span id="mgmt-title">Data</span></h3></div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-700 text-lg">Manage <span id="mgmt-title">Data</span></h3>
+                        <button onclick="downloadTemplate()" class="text-sm text-blue-600 hover:underline font-medium">
+                            <i class="fa-solid fa-download mr-1"></i> Download Template
+                        </button>
+                    </div>
+
                     <div class="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer relative group">
                         <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileUpload()">
                         <div class="pointer-events-none">
                             <i class="fa-solid fa-cloud-upload text-4xl text-slate-300 mb-3 group-hover:text-blue-500 transition"></i>
                             <p class="text-sm font-medium text-slate-600">Click to upload Data File</p>
+                            <p class="text-xs text-slate-400 mt-1">Excel (.xlsx) or CSV supported</p>
                         </div>
                     </div>
+
+                    <div id="smart-fill-legend" class="hidden mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md flex items-center gap-2">
+                        <i class="fa-solid fa-magic text-yellow-600"></i>
+                        <p class="text-xs text-yellow-800">
+                            <b>Smart Fill Active:</b> Cells highlighted in <span class="bg-yellow-200 px-1 rounded border border-yellow-300">yellow</span> have been auto-filled with default data. Please review.
+                        </p>
+                    </div>
+
                     <div id="staged-preview" class="hidden mt-6 border-t border-slate-100 pt-4">
                         <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-bold text-slate-700">Review</h4>
+                            <div>
+                                <h4 class="font-bold text-slate-700">Review & Edit</h4>
+                                <p class="text-xs text-slate-500" id="staged-count">0 rows ready • Click cells to edit</p>
+                            </div>
                             <div class="flex gap-2">
                                 <button onclick="resetUpload()" class="px-3 py-2 text-sm text-slate-500 hover:text-slate-800">Cancel</button>
-                                <button id="btn-commit" onclick="commitData()" class="px-4 py-2 text-sm bg-green-600 text-white rounded font-medium">Commit to DB</button>
+                                <button id="btn-clean" onclick="removeErrors()" class="hidden px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded font-medium transition">
+                                    <i class="fa-solid fa-broom mr-1"></i> Remove Invalid Rows
+                                </button>
+                                <button id="btn-commit" onclick="commitData()" disabled class="px-4 py-2 text-sm bg-gray-300 text-white rounded shadow font-medium cursor-not-allowed transition-colors">
+                                    <i class="fa-solid fa-database mr-1"></i> Commit to DB
+                                </button>
                             </div>
                         </div>
-                        <div class="bg-slate-50 rounded border border-slate-200 overflow-hidden"><div class="overflow-x-auto max-h-[300px]"><table class="min-w-full text-xs text-left"><thead class="bg-slate-100 text-slate-500 sticky top-0 z-10"><tr id="preview-header"></tr></thead><tbody id="preview-body" class="bg-white divide-y divide-slate-100"></tbody></table></div></div>
+
+                        <div id="validation-summary" class="hidden mb-4 p-3 rounded text-sm"></div>
+
+                        <div class="bg-slate-50 rounded border border-slate-200 overflow-hidden">
+                            <div class="overflow-x-auto max-h-[300px]">
+                                <table class="min-w-full text-xs text-left">
+                                    <thead class="bg-slate-100 text-slate-500 sticky top-0 z-10">
+                                        <tr id="preview-header"></tr>
+                                    </thead>
+                                    <tbody id="preview-body" class="bg-white divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between"><span class="font-bold text-slate-600 text-sm">Records</span><input type="text" id="table-search" onkeyup="filterTable('data-table', 1)" placeholder="Search..." class="text-xs p-2 border rounded w-48 outline-none"></div>
-                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full divide-y divide-slate-200 text-sm" id="data-table"><thead class="bg-slate-50 sticky top-0 shadow-sm z-10"></thead><tbody class="divide-y divide-slate-100 bg-white"></tbody></table></div>
+                <div id="data-table-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
+                    <div class="px-6 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                         <span class="font-bold text-slate-600 text-sm">Data Records</span>
+                         <div class="text-xs text-slate-400 italic">Use column headers to filter & sort</div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm" id="data-table">
+                            <thead class="bg-slate-50 sticky top-0 shadow-sm z-10"></thead>
+                            <tbody class="divide-y divide-slate-100 bg-white"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="view-matching" class="view-section hidden fade-in">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 class="font-bold text-slate-800 mb-4">Matching Logic</h3>
-                    <div class="flex gap-4 mb-6">
-                        <label class="flex-1 border p-4 rounded hover:bg-slate-50 cursor-pointer"><input type="radio" name="algo" value="FIFO" checked> <span class="font-bold ml-2">FIFO</span></label>
-                        <label class="flex-1 border p-4 rounded hover:bg-slate-50 cursor-pointer"><input type="radio" name="algo" value="MAX_RECOVERY"> <span class="font-bold ml-2">Maximize Duty</span></label>
+                    <div class="flex flex-col md:flex-row gap-4 mb-6">
+                        <label class="flex-1 flex items-center gap-3 border p-4 rounded-lg cursor-pointer hover:bg-slate-50 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                            <input type="radio" name="algo" value="FIFO" checked class="accent-blue-600 w-4 h-4">
+                            <div>
+                                <div class="font-bold text-slate-700">FIFO</div>
+                                <div class="text-xs text-slate-500">First-In, First-Out (Oldest imports used first)</div>
+                            </div>
+                        </label>
+                        <label class="flex-1 flex items-center gap-3 border p-4 rounded-lg cursor-pointer hover:bg-slate-50 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                            <input type="radio" name="algo" value="MAX_RECOVERY" class="accent-blue-600 w-4 h-4">
+                            <div>
+                                <div class="font-bold text-slate-700">Maximize Duty</div>
+                                <div class="text-xs text-slate-500">Prioritize high-duty imports for higher refund</div>
+                            </div>
+                        </label>
                     </div>
-                    <button onclick="runMatching()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-md transition">Execute Matching Transaction</button>
+                    <button onclick="runMatching()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-md transition transform active:scale-[0.99]">
+                        Execute Matching
+                    </button>
+                    <p class="text-xs text-center text-slate-400 mt-2"><i class="fa-solid fa-arrow-down mr-1"></i> After matching, proceed to <b>Reviewer Console</b> below.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold">Transaction Results</div>
-                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left"><thead class="bg-white text-slate-500 border-b sticky top-0"><tr><th>Imp Entry</th><th>Matched SKU</th><th>Refund</th><th>Status</th><th>View</th></tr></thead><tbody class="divide-y divide-slate-50" id="matches-body"><tr><td colspan="5" class="p-6 text-center text-slate-400">No matches run yet.</td></tr></tbody></table></div>
+                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold flex justify-between">
+                        <span>Transaction Results</span>
+                        <span class="text-xs font-normal text-slate-500 self-center">Showing latest matches from DB</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]">
+                        <table class="min-w-full text-xs text-left" id="matches-table">
+                            <thead class="bg-white text-slate-500 border-b sticky top-0 z-10"></thead>
+                            <tbody class="divide-y divide-slate-50 text-[11px]" id="matches-body">
+                                <tr><td colspan="23" class="p-8 text-center text-slate-400">No matches run yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="view-reviewer" class="view-section hidden fade-in">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-100 bg-blue-50 flex justify-between items-center">
-                        <h3 class="font-bold text-blue-800">Reviewer Queue</h3>
+                        <div>
+                            <h3 class="font-bold text-blue-800"><i class="fa-solid fa-magnifying-glass mr-2"></i>Reviewer Console</h3>
+                            <p class="text-xs text-blue-600 mt-1">Review matches before submitting to claim batch.</p>
+                        </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="processReviewerBulkAction()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm"><i class="fa-solid fa-paper-plane mr-1"></i> Submit Selected</button>
-                            <button onclick="loadReviewerQueue()" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100"><i class="fa-solid fa-rotate mr-1"></i></button>
+                            <button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition">
+                                <i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim
+                            </button>
+                            <button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto max-h-[600px]">
-                        <table class="min-w-full text-xs text-left">
-                            <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10">
-                                <tr>
-                                    <th class="w-8"><input type="checkbox" onchange="toggleReviewerSelectAll(this)"></th>
-                                    <th>Imp Entry</th><th>Imp SKU</th><th>Exp Entry</th><th>Refund Amount</th><th>Status / Notes</th><th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50" id="reviewer-body"></tbody>
+                        <table class="min-w-full text-xs text-left" id="reviewer-table">
+                            <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead>
+                            <tbody class="divide-y divide-slate-50 text-[11px]" id="reviewer-body">
+                                <tr><td colspan="24" class="p-8 text-center text-slate-400">Loading Queue...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <div id="view-history" class="view-section hidden fade-in">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50"><h3 class="font-bold text-purple-800">History</h3></div>
-                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"><tr><th>Imp Entry</th><th>Matched SKU</th><th>Refund</th><th>Approved By</th></tr></thead><tbody class="divide-y divide-slate-50" id="history-body"></tbody></table></div>
+                <div id="history-summary-view" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims Archive</h3>
+                            <p class="text-xs text-purple-600 mt-1">Audit historical claims and download reports.</p>
+                        </div>
+                        <div class="flex gap-2">
+                             <button onclick="window.open(API_BASE + '/drawback/api/export_matches')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium">
+                                <i class="fa-solid fa-file-csv mr-1"></i> Export All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left" id="history-summary-table">
+                            <thead class="bg-slate-50 text-slate-500 border-b"></thead>
+                            <tbody class="divide-y divide-slate-50" id="history-summary-body">
+                                <tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Loading Archive...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="history-detail-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition">
+                                <i class="fa-solid fa-arrow-left mr-1"></i> Back to List
+                            </button>
+                            <div class="h-6 w-px bg-purple-200"></div>
+                            <h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]">
+                        <table class="min-w-full text-xs text-left" id="history-table">
+                            <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead>
+                            <tbody class="divide-y divide-slate-50 text-[11px]" id="history-body">
+                                <tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Details...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </div>
     </main>
 
     <script>
-        // --- DATA PERSISTENCE (LOCAL STORAGE) ---
-        const INITIAL_DB = {
-            products: [{id: '1', sku: 'RAW-STEEL-COIL', description: 'Raw Steel', uom: 'KG', duty_rate: '0.08'}],
-            material_mappings: [],
-            imports: [{id: '1', sku: 'RAW-STEEL-COIL', entry_number: 'IMP-001', qty: '5000', customs_value: '5000', duty_paid: '400', uom: 'KG', duty_rate_1: '0.08'}],
-            exports: [{id: '1', sku: 'RAW-STEEL-COIL', entry_number: 'EXP-901', qty: '500', uom: 'KG', invoice_no: 'INV-A100'}],
-            matches: []
-        };
-        function getDB() { return JSON.parse(localStorage.getItem('DRAWBACK_DB')) || INITIAL_DB; }
-        function saveDB(db) { localStorage.setItem('DRAWBACK_DB', JSON.stringify(db)); }
-        function resetSystem() { if(confirm("Clear Local DB?")) { localStorage.removeItem('DRAWBACK_DB'); location.reload(); } }
-
-        // --- GLOBAL VARS ---
+        // ============================================
+        // 🔧 CONFIGURATION & GLOBAL STATE
+        // ============================================
+        const API_BASE = '';
+        let isOfflineMode = false;
         let currentView = 'dashboard';
         let stagedData = [];
         let reviewerSelection = new Set();
+        let sortDirections = {};
+        const currentUserRole = 'REVIEWER'; // HARDCODED FOR THIS UI EDITION
+
+        // --- STRICT COLUMN CONFIGURATION ---
         const TABLE_CONFIG = {
-            imports: [{k:'entry_number',l:'Entry #'}, {k:'sku',l:'SKU'}, {k:'qty',l:'Qty'}, {k:'duty_paid',l:'Duty Paid'}],
-            exports: [{k:'entry_number',l:'Entry #'}, {k:'sku',l:'SKU'}, {k:'qty',l:'Qty'}, {k:'invoice_no',l:'Invoice'}],
-            products: [{k:'sku',l:'SKU'}, {k:'description',l:'Desc'}, {k:'uom',l:'UOM'}],
-            material_mappings: [{k:'export_sku',l:'Export SKU'}, {k:'import_sku',l:'Import SKU'}]
+            imports: [
+                { k: 'entry_number', l: 'Entry Summary #' },
+                { k: 'material_number', l: 'Material #' },
+                { k: 'qty', l: 'Qty' },
+                { k: 'uom', l: 'UOM' },
+                { k: 'import_date', l: 'Date' },
+                { k: 'duty_paid', l: 'Duty Paid' },
+                { k: 'declaration_number', l: 'Dec Number' },
+                { k: 'declaration_line_number', l: 'Line #' },
+                { k: 'hts_code', l: 'HTS Code' },
+                { k: 'duty_rate_1', l: 'Duty Rate 1' },
+                { k: 'customs_value', l: 'Customs Value' }
+            ],
+            exports: [
+                { k: 'entry_number', l: 'Material Document' },
+                { k: 'material_number', l: 'Material' },
+                { k: 'description', l: 'Description' },
+                { k: 'qty', l: 'Quantity' },
+                { k: 'uom', l: 'UOM' },
+                { k: 'country', l: 'Country' },
+                { k: 'invoice_no', l: 'Invoice No' },
+                { k: 'export_date', l: 'Date' },
+                { k: 'origin_plant', l: 'Origin Plant' }
+            ],
+            products: [
+                { k: 'material_number', l: 'Material Number' },
+                { k: 'description', l: 'Description' },
+                { k: 'hts_code', l: 'HTS Code' },
+                { k: 'uom', l: 'UOM' },
+                { k: 'duty_rate', l: 'Default Duty Rate' },
+                { k: 'conversion_factor', l: 'Conv. Factor' }
+            ],
+            material_mappings: [
+                { k: 'export_material_number', l: 'Export Material Number' },
+                { k: 'import_material_number', l: 'Import Material Number' }
+            ]
         };
 
-        // --- UTIL ---
-        function toggleLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
-        function formatMoney(v) { return "$" + parseFloat(v||0).toLocaleString(undefined,{minimumFractionDigits:2}); }
-        function showToast(m, t='success') { const el = document.getElementById('toast'); el.innerText=m; el.className=`show ${t}`; setTimeout(()=>el.className='', 3000); }
-        function escapeJSON(o) { return JSON.stringify(o).replace(/'/g,"&#39;").replace(/"/g,"&quot;"); }
+        // --- UTILS ---
+        function toggleLoading(show, text="Processing...") {
+            document.getElementById('loader-text').innerText = text;
+            document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+        }
 
-        // --- NAVIGATION ---
-        function switchView(view) {
-            document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-            document.getElementById(`nav-${view}`).classList.add('active');
-            document.getElementById('page-title').innerText = view.charAt(0).toUpperCase() + view.slice(1);
+        function forceCloseLoader() { toggleLoading(false); }
 
-            if(view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); loadStats(); }
-            else if(view === 'matching') { document.getElementById('view-matching').classList.remove('hidden'); }
-            else if(view === 'reviewer') { document.getElementById('view-reviewer').classList.remove('hidden'); loadReviewerQueue(); }
-            else if(view === 'history') { document.getElementById('view-history').classList.remove('hidden'); loadHistory(); }
-            else {
-                document.getElementById('view-management').classList.remove('hidden');
-                document.getElementById('mgmt-title').innerText = view;
-                loadTableData(view);
+        function showToast(msg, type="normal") {
+            const x = document.getElementById("toast");
+            x.innerText = msg;
+            x.className = "show " + type;
+            setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+        }
+
+        function formatMoney(val) {
+            if(val === undefined || val === null) return "$0.00";
+            return "$" + parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // --- 🆕 EXCEL-LIKE SORTING & FILTERING LOGIC ---
+        function getHeaderHTML(title, tableId, colIdx) {
+            // FIX: Don't show inputs for checkboxes or Actions if title is empty or specific names
+            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || title === 'Final Acceptance') {
+                return `<div class="th-static font-bold text-xs uppercase">${title}</div>`;
             }
-            currentView = view;
+            return `
+            <div class="th-container" onclick="sortTable('${tableId}', ${colIdx})">
+                <div class="th-container-inner">
+                    <span>${title}</span>
+                    <i class="fa-solid fa-sort text-slate-300 hover:text-slate-600 transition" id="sort-icon-${tableId}-${colIdx}"></i>
+                </div>
+                <input type="text" class="th-input" onclick="event.stopPropagation()" onkeyup="filterMulti('${tableId}')" placeholder="Filter...">
+                <div class="resizer" onmousedown="initResize(event, this)"></div>
+            </div>`;
         }
 
-        // --- DASHBOARD STATS ---
-        function loadStats() {
-            const db = getDB();
-            const potential = db.imports.reduce((acc, i) => acc + (parseFloat(i.duty_paid)||0), 0);
-            const recovered = db.matches.filter(m => m.status === 'APPROVED').reduce((acc, m) => acc + m.refund_amount, 0);
-            document.getElementById('stat-potential').innerText = formatMoney(potential);
-            document.getElementById('stat-recovered').innerText = formatMoney(recovered);
-            document.getElementById('count-imports').innerText = db.imports.length;
-            document.getElementById('count-exports').innerText = db.exports.length;
+        // --- Issue 3: Column Resizing Logic ---
+        let startX, startWidth, resizingColumn;
+
+        function initResize(e, resizer) {
+            e.stopPropagation(); // Prevent sort
+            resizingColumn = resizer.closest('th');
+            startX = e.clientX;
+            startWidth = resizingColumn.offsetWidth;
+
+            resizer.classList.add('resizing');
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
         }
 
-        // --- DATA MGMT ---
-        function loadTableData(target) {
-            const db = getDB();
-            const data = db[target] || [];
-            const tbody = document.querySelector('#data-table tbody');
-            const thead = document.querySelector('#data-table thead');
-            const config = TABLE_CONFIG[target];
-            if(!config) return;
-            thead.innerHTML = '<tr>' + config.map(c => `<th class="px-6 py-3">${c.l}</th>`).join('') + '</tr>';
-            tbody.innerHTML = data.length ? data.map(r => `<tr>${config.map(c => `<td class="px-6 py-3">${r[c.k]}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="4" class="p-4 text-center">No Data</td></tr>';
+        function doResize(e) {
+            if (resizingColumn) {
+                const newWidth = startWidth + (e.clientX - startX);
+                // Enforce minimum width
+                if(newWidth > 50) {
+                    resizingColumn.style.width = newWidth + 'px';
+                    resizingColumn.style.minWidth = newWidth + 'px';
+                }
+            }
         }
 
-        function handleFileUpload() {
-            toggleLoading(true);
-            setTimeout(() => {
-                // SIMULATE PARSING
-                if(currentView === 'imports') stagedData = [{sku: 'NEW-IMP', entry_number: 'IMP-'+Date.now(), qty: '1000', duty_paid: '100', uom: 'KG'}];
-                else stagedData = [{sku: 'NEW-EXP', entry_number: 'EXP-'+Date.now(), qty: '200', uom: 'KG'}];
-
-                // Render Preview
-                document.getElementById('staged-preview').classList.remove('hidden');
-                const tbody = document.getElementById('preview-body');
-                const config = TABLE_CONFIG[currentView];
-                document.getElementById('preview-header').innerHTML = config.map(c => `<th class="px-4 py-2">${c.l}</th>`).join('') + '<th>Status</th>';
-                tbody.innerHTML = stagedData.map((r,i) => `<tr>${config.map(c => `<td class="p-2 border"><input value="${r[c.k]||''}" class="w-full"></td>`).join('')}<td class="text-green-600 font-bold p-2">OK</td></tr>`).join('');
-                toggleLoading(false);
-            }, 800);
+        function stopResize() {
+            if (resizingColumn) {
+                const resizer = resizingColumn.querySelector('.resizer');
+                if (resizer) resizer.classList.remove('resizing');
+                resizingColumn = null;
+                document.removeEventListener('mousemove', doResize);
+                document.removeEventListener('mouseup', stopResize);
+            }
         }
 
-        function resetUpload() { stagedData = []; document.getElementById('staged-preview').classList.add('hidden'); }
+        function sortTable(tableId, colIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+            // Skip sort if no data
+            if(rows.length === 0 || rows[0].cells.length <= 1) return;
 
-        function commitData() {
-            const db = getDB();
-            db[currentView].push(...stagedData);
-            saveDB(db);
-            showToast("Saved to DB");
-            resetUpload();
-            loadTableData(currentView);
-            loadStats();
-        }
+            // Toggle Direction
+            const key = tableId + '-' + colIndex;
+            const dir = sortDirections[key] === 'asc' ? 'desc' : 'asc';
+            sortDirections[key] = dir;
 
-        // --- MATCHING ENGINE ---
-        function runMatching() {
-            toggleLoading(true);
-            setTimeout(() => {
-                const db = getDB();
-                // MOCK MATCH ALGORITHM
-                const match = {
-                    match_id: 'M-'+Date.now(), match_uuid: 'UUID-'+Date.now(),
-                    import_entry_number: 'IMP-001', import_sku: 'RAW-STEEL-COIL',
-                    export_entry_number: 'EXP-901', export_sku: 'RAW-STEEL-COIL',
-                    refund_amount: 150.00, status: 'DRAFT', notes: '',
-                    qty_matched: 500, import_uom: 'KG',
-                    import_qty_original: 5000, import_customs_val: 5000, import_duty_rate: 0.08,
-                    export_qty_total: 500, export_uom: 'KG', export_invoice: 'INV-A100', export_country: 'CA'
-                };
-                db.matches.push(match);
-                saveDB(db);
+            // Update Icon UI
+            document.querySelectorAll(`#${tableId} .fa-sort`).forEach(i => i.className = 'fa-solid fa-sort text-slate-300 hover:text-slate-600 transition');
+            const activeIcon = document.getElementById(`sort-icon-${tableId}-${colIndex}`);
+            if(activeIcon) activeIcon.className = dir === 'asc' ? 'fa-solid fa-sort-up text-blue-600' : 'fa-solid fa-sort-down text-blue-600';
 
-                document.getElementById('matches-body').innerHTML = db.matches.map(m => `
-                    <tr><td>${m.import_entry_number}</td><td>${m.import_sku}</td><td>${formatMoney(m.refund_amount)}</td><td>${m.status}</td>
-                    <td><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600"><i class="fa-solid fa-eye"></i></button></td></tr>
-                `).join('');
+            rows.sort((a, b) => {
+                let valA = a.cells[colIndex].innerText.trim();
+                let valB = b.cells[colIndex].innerText.trim();
 
-                toggleLoading(false);
-                showToast("Matching Complete");
-                loadStats();
-            }, 1000);
-        }
+                // FIX: Strip HTML tags if any (for status badges etc)
+                valA = valA.replace(/<[^>]*>?/gm, '');
+                valB = valB.replace(/<[^>]*>?/gm, '');
 
-        // --- REVIEWER CONSOLE ---
-        function loadReviewerQueue() {
-            const db = getDB();
-            const tbody = document.getElementById('reviewer-body');
-            const data = db.matches.filter(m => m.status === 'DRAFT');
-            reviewerSelection.clear();
-            if(!data.length) tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Queue Empty</td></tr>`;
-            else tbody.innerHTML = data.map(m => {
-                let note = m.rejection_reason ? `<span class="text-red-600 font-bold">Returned: ${m.rejection_reason}</span>` : (m.notes || '-');
-                return `
-                <tr id="reviewer-row-${m.match_id}" class="${m.rejection_reason ? 'bg-red-50' : 'hover:bg-blue-50'} border-b">
-                    <td class="p-3"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')"></td>
-                    <td>${m.import_entry_number}</td><td>${m.import_sku}</td><td>${m.export_entry_number}</td>
-                    <td class="font-bold text-slate-700">${formatMoney(m.refund_amount)}</td>
-                    <td class="text-xs">${note}</td>
-                    <td>
-                        <button onclick='showMatchDetails(${escapeJSON(m)})' class="mr-2 text-slate-500"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600"><i class="fa-solid fa-pen-to-square"></i></button>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
+                // FIX: Strip currency formatting
+                const cleanA = valA.replace(/[$,]/g, '');
+                const cleanB = valB.replace(/[$,]/g, '');
 
-        function toggleReviewerSelection(id) { if(reviewerSelection.has(id)) reviewerSelection.delete(id); else reviewerSelection.add(id); }
-        function toggleReviewerSelectAll(src) { document.querySelectorAll('#reviewer-body input[type=checkbox]').forEach(c => { c.checked = src.checked; toggleReviewerSelection(c.value); }); }
+                // Detect Numbers
+                if(!isNaN(cleanA) && !isNaN(cleanB) && cleanA !== '' && cleanB !== '') {
+                    const numA = parseFloat(cleanA);
+                    const numB = parseFloat(cleanB);
+                    return dir === 'asc' ? numA - numB : numB - numA;
+                }
 
-        function processReviewerBulkAction() {
-            if(!reviewerSelection.size) return showToast("Select items first", "warning");
-            const db = getDB();
-            let count = 0;
-            db.matches.forEach(m => {
-                if(reviewerSelection.has(m.match_id)) { m.status = 'REVIEWED'; m.rejection_reason = null; count++; }
+                // FIX: Detect Dates (Simple check for YYYY-MM-DD or MM/DD/YYYY)
+                const dateA = Date.parse(valA);
+                const dateB = Date.parse(valB);
+                if (!isNaN(dateA) && !isNaN(dateB) && valA.length > 5 && valB.length > 5) {
+                     return dir === 'asc' ? dateA - dateB : dateB - dateA;
+                }
+
+                // String Comparison
+                if (valA < valB) return dir === 'asc' ? -1 : 1;
+                if (valA > valB) return dir === 'asc' ? 1 : -1;
+                return 0;
             });
-            saveDB(db);
-            showToast(`Sent ${count} items to Approver`);
-            loadReviewerQueue();
+
+            rows.forEach(row => tbody.appendChild(row));
         }
 
-        // --- EDIT MATCH ---
-        function openEditModal(m) {
-            document.getElementById('edit-match-id').value = m.match_id;
-            document.getElementById('edit-sku').value = m.import_sku;
-            document.getElementById('edit-refund').value = m.refund_amount;
-            document.getElementById('edit-notes').value = m.notes || '';
-            document.getElementById('edit-modal').classList.remove('hidden');
-        }
-        function saveMatchEdit() {
-            const id = document.getElementById('edit-match-id').value;
-            const db = getDB();
-            const m = db.matches.find(x => x.match_id === id);
-            if(m) {
-                m.refund_amount = parseFloat(document.getElementById('edit-refund').value);
-                m.notes = document.getElementById('edit-notes').value;
-                saveDB(db);
-                showToast("Updated");
-                document.getElementById('edit-modal').classList.add('hidden');
-                loadReviewerQueue();
+        function filterMulti(tableId) {
+            const table = document.getElementById(tableId);
+            const headers = table.tHead.rows[0].cells;
+            const inputs = [];
+
+            // Collect filters
+            for (let i = 0; i < headers.length; i++) {
+                // FIX: Only select inputs with class 'th-input' (the text search boxes) to avoid grabbing the checkbox
+                const input = headers[i].querySelector('input.th-input');
+                if (input && input.value) inputs.push({ idx: i, val: input.value.toUpperCase() });
+            }
+
+            const rows = table.tBodies[0].rows;
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.cells.length <= 1) continue; // Skip "Loading..." or "No data" rows
+
+                let show = true;
+                for (let filter of inputs) {
+                    if (filter.val) {
+                        const cellText = row.cells[filter.idx].innerText || "";
+                        if (cellText.toUpperCase().indexOf(filter.val) === -1) {
+                            show = false;
+                            break;
+                        }
+                    }
+                }
+                row.style.display = show ? "" : "none";
             }
         }
 
-        // --- DETAILS MODAL ---
-        function showMatchDetails(m) {
-            // Fill details
-            document.getElementById('det-uuid').innerText = m.match_uuid;
-            document.getElementById('det-imp-entry').innerText = m.import_entry_number;
-            document.getElementById('det-exp-entry').innerText = m.export_entry_number;
-            document.getElementById('det-total-refund').innerText = formatMoney(m.refund_amount);
-            document.getElementById('det-status').innerText = m.status;
-            // Calculations
-            let enteredVal = (m.qty_matched / m.import_qty_original) * m.import_customs_val;
-            let exportDuty = enteredVal * m.import_duty_rate;
+        // --- SAFE FETCH (The core connector to your Python Backend) ---
+        async function safeFetch(endpoint, options={}) {
+            if (window.location.protocol === 'file:') {
+                 // ALERT: If opened as file://, API calls will fail due to CORS.
+                 updateServerStatus(false);
+                 console.error("Cannot call API from file:// protocol. Please serve via Flask.");
+                 return { success: false, data: [] };
+            }
+            try {
+                // This builds the full URL: e.g. http://localhost:7011/drawback/api/stats
+                const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+                const res = await fetch(url, options);
+                if (!res.ok) throw new Error("API Error");
+
+                const json = await res.json();
+                updateServerStatus(true);
+                return json;
+            } catch (e) {
+                console.error("API Failed:", e);
+                updateServerStatus(false);
+                return { success: false, data: [] };
+            }
+        }
+
+        // --- APP LOGIC ---
+        function updateServerStatus(isOnline) {
+            const statusEl = document.getElementById('server-status');
+            const banner = document.getElementById('demo-banner');
+
+            // Check for file protocol first
+            if (window.location.protocol === 'file:') {
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> FILE MODE (No API)';
+                statusEl.className = 'flex items-center font-bold text-amber-600';
+                return;
+            }
+
+            if(isOnline) {
+                statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> Connected (RDS)';
+                statusEl.className = 'flex items-center font-bold text-green-600';
+                if(banner) banner.classList.add('hidden'); // SAFE CHECK
+            } else {
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Connection Lost';
+                statusEl.className = 'flex items-center font-bold text-red-600';
+            }
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navEl = document.getElementById(`nav-${viewId}`);
+            if(navEl) navEl.classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+
+            document.getElementById(`page-title`).innerText =
+                viewId === 'reviewer' ? 'Reviewer Console' :
+                viewId === 'history' ? 'Claims History' :
+                viewId.charAt(0).toUpperCase() + viewId.slice(1);
+
+            if(viewId === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                loadStats();
+            } else if(viewId === 'matching') {
+                document.getElementById('view-matching').classList.remove('hidden');
+                // 🆕 Load empty table with headers if needed
+                const matchHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];
+                renderDynamicHeaders('matches-table', matchHeaders, 0); // No checkboxes
+            } else if(viewId === 'reviewer') {
+                document.getElementById('view-reviewer').classList.remove('hidden');
+                loadWorkflowData('reviewer');
+            } else if(viewId === 'history') {
+                document.getElementById('view-history').classList.remove('hidden');
+                showHistorySummary();
+            } else {
+                document.getElementById('view-management').classList.remove('hidden');
+                let title = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+                if(viewId === 'material_mappings') title = 'Material Mappings';
+                document.getElementById('mgmt-title').innerText = title;
+                resetUpload();
+                loadTableData(viewId);
+            }
+            currentView = viewId;
+        }
+
+        // --- DASHBOARD (UPDATED FOR NEW DESIGN) ---
+        async function loadStats() {
+            toggleLoading(true, "Updating Dashboard...");
+            try {
+                // CALLS BACKEND: /drawback/api/stats
+                const json = await safeFetch('/drawback/api/stats');
+                const potential = json?.data?.kpis?.potential_duty || 0;
+                const recovered = json?.data?.kpis?.recovered_duty || 0;
+                const realized = potential > 0 ? ((recovered / potential) * 100).toFixed(1) : 0;
+                const unrealized = potential - recovered;
+
+                const approvedCount = json?.data?.counts?.approved || 0;
+                const pendingApproval = json?.data?.counts?.pending_approval || 0;
+                const pendingClaims = json?.data?.counts?.claims || 0;
+
+                const prodCount = json?.data?.counts?.products || 0;
+                const impCount = json?.data?.counts?.imports || 0;
+                const expCount = json?.data?.counts?.exports || 0;
+                const matchSuccess = json?.data?.counts?.matches_success || 0;
+                const matchFail = json?.data?.counts?.matches_fail || 0;
+
+                document.getElementById('stat-potential').innerText = formatMoney(potential);
+                document.getElementById('stat-recovered').innerText = formatMoney(recovered);
+                document.getElementById('stat-realized-pct').innerText = realized + "%";
+                document.getElementById('prog-realized').style.width = realized + "%";
+                document.getElementById('stat-unrealized').innerText = formatMoney(unrealized);
+
+                document.getElementById('stat-approved-count').innerText = approvedCount;
+                document.getElementById('stat-pending-approval-count').innerText = pendingApproval;
+                document.getElementById('stat-pending-claims-count').innerText = pendingClaims;
+
+                document.getElementById('stat-products-count').innerText = prodCount;
+                document.getElementById('count-imports').innerText = impCount;
+                document.getElementById('count-exports').innerText = expCount;
+                document.getElementById('stat-matches-success').innerText = matchSuccess;
+                document.getElementById('stat-matches-fail').innerText = matchFail;
+
+                document.getElementById('stat-import-quality').innerText = "0%";
+                document.getElementById('stat-export-quality').innerText = "0%";
+                document.getElementById('stat-matching-time').innerText = "0s";
+
+                // FIX: Add Dynamic Headers to Inventory Table Here
+                renderDynamicHeaders('inventory-table', ['Material Number', 'Total Imported', 'Available', 'Utilization'], 0);
+
+                const invBody = document.getElementById('inventory-body');
+                if (json.data && json.data.inventory && json.data.inventory.length > 0) {
+                    invBody.innerHTML = json.data.inventory.map(item => {
+                        const utilization = item.total_original > 0 ? ((1 - (item.total_available / item.total_original)) * 100).toFixed(1) : 0;
+                        let color = "bg-blue-600";
+                        if (utilization > 80) color = "bg-emerald-500";
+                        if (utilization < 20) color = "bg-slate-300";
+
+                        return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                            <td class="px-6 py-3 font-medium text-slate-700">${item.material_number}</td>
+                            <td class="px-6 py-3 text-center text-slate-600 font-mono">${item.total_original.toLocaleString()}</td>
+                            <td class="px-6 py-3 text-center text-blue-600 font-mono font-bold">${item.total_available.toLocaleString()}</td>
+                            <td class="px-6 py-3">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="${color} h-2 rounded-full" style="width: ${utilization}%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-500">${utilization}%</span>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('');
+                } else {
+                    invBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">No inventory data found.</td></tr>`;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // --- 🆕 TABLE HEADER GENERATOR (FIXED) ---
+        function renderDynamicHeaders(tableId, labels, hasCheckbox = 0) {
+            const thead = document.querySelector(`#${tableId} thead`);
+            let html = '<tr>';
+            let offset = 0;
+
+            // Checkbox/Action Column (No Filter/Sort)
+            if (hasCheckbox === 1) { // Checkbox
+                // 🚨 FIX: Dynamically choose the correct toggle function based on the table ID
+                let toggleFn = 'toggleSelectAll'; // Default (Approver)
+                if (tableId === 'reviewer-table') {
+                    toggleFn = 'toggleReviewerSelectAll';
+                }
+
+                html += `<th class="w-8 text-center bg-slate-50 th-static"><input type="checkbox" onchange="${toggleFn}(this)" class="accent-blue-600"></th>`;
+                offset = 1;
+            } else if (hasCheckbox === 2) { // Actions (Delete)
+                html += `<th class="w-16 text-center bg-slate-50 th-static">Action</th>`;
+                offset = 1;
+            }
+
+            labels.forEach((l, i) => {
+                html += `<th>${getHeaderHTML(l, tableId, i + offset)}</th>`;
+            });
+            html += '</tr>';
+            thead.innerHTML = html;
+        }
+
+        // --- TABLE DATA LOADER ---
+        async function loadTableData(target) {
+            toggleLoading(true, "Loading Data...");
+            const tbody = document.querySelector('#data-table tbody');
+            const tableContainer = document.getElementById('data-table-container'); // Issue 1: Get container
+            tbody.innerHTML = "";
+
+            try {
+                // CALLS BACKEND: /drawback/api/view/<target>
+                const data = await safeFetch(`/drawback/api/view/${target}`);
+                const rows = Array.isArray(data) ? data : [];
+                const config = TABLE_CONFIG[target];
+                if (!config) return;
+
+                // 🆕 Generate Headers dynamically
+                const labels = config.map(c => c.l);
+                renderDynamicHeaders('data-table', labels, 2); // 2 = Has Delete Action Column
+
+                if(rows.length === 0) {
+                    // Issue 1: Hide Table Container completely if empty
+                    tableContainer.classList.add('hidden');
+                } else {
+                    // Issue 1: Show Table Container if data exists
+                    tableContainer.classList.remove('hidden');
+
+                    let bRows = "";
+                    rows.forEach(row => {
+                        let rowClass = "hover:bg-slate-50 border-b border-slate-100 transition";
+                        if (row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";
+
+                        bRows += `<tr class="${rowClass}">`;
+
+                        let deleteBtn = `<button onclick="deleteRow('${target}', '${row.id}')" class="text-slate-300 hover:text-red-600 transition p-2"><i class="fa-solid fa-trash"></i></button>`;
+                        if(['imports', 'exports', 'products'].includes(target)) {
+                             deleteBtn = `<span class="text-gray-300 cursor-not-allowed" title="Deletion Restricted"><i class="fa-solid fa-lock"></i></span>`;
+                        }
+                        bRows += `<td class="px-6 py-3 text-center">${deleteBtn}</td>`;
+
+                        config.forEach(col => {
+                            let val = row[col.k] || "";
+                            if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
+                                val = formatMoney(val);
+                            }
+                            bRows += `<td class="px-6 py-3 text-slate-600 whitespace-nowrap text-center">${val}</td>`;
+                        });
+                        bRows += `</tr>`;
+                    });
+                    tbody.innerHTML = bRows;
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // --- HELPER TO ESCAPE JSON FOR ONCLICK ---
+        function escapeJSON(obj) {
+            return JSON.stringify(obj)
+                .replace(/'/g, "&#39;")
+                .replace(/"/g, "&quot;");
+        }
+
+        // --- NEW: SHOW MATCH DETAILS MODAL (SIDE BY SIDE) ---
+        function showMatchDetails(match) {
+            document.getElementById('det-uuid').innerText = match.match_uuid || match.id;
+
+            // Export Side
+            document.getElementById('det-exp-entry').innerText = match.export_entry_number || '-';
+            document.getElementById('det-exp-material').innerText = match.export_material_number || '-';
+            document.getElementById('det-exp-date').innerText = match.export_date || '-';
+            document.getElementById('det-exp-qty').innerText = match.export_qty_total || '-';
+            document.getElementById('det-exp-uom').innerText = match.export_uom || '-';
+            document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';
+            document.getElementById('det-exp-country').innerText = match.export_country || '-';
+            document.getElementById('det-exp-desc').innerText = match.export_desc || '-';
+            document.getElementById('det-exp-id').innerText = match.export_id || '-';
+
+            // Import Side
+            document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';
+            document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
+            document.getElementById('det-imp-date').innerText = match.import_date || '-';
+            document.getElementById('det-imp-dec').innerText = match.import_dec_number || '-';
+            document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';
+            document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';
+            document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';
+            document.getElementById('det-imp-uom').innerText = match.import_uom || '-';
+            document.getElementById('det-imp-hts').innerText = match.import_hts || '-';
+            document.getElementById('det-imp-rate').innerText = match.import_duty_rate || '-';
+            document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);
+            document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);
+
+            document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;
+
+            let enteredVal = 0;
+            if (parseFloat(match.import_qty_original) > 0) {
+                 enteredVal = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_customs_val);
+            }
             document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);
+
+            // UPDATED: Calculate Export Duty based on ACTUAL IMPORT DUTY PAID, NOT RATE
+            let exportDuty = 0;
+            if(parseFloat(match.import_qty_original) > 0) {
+                exportDuty = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_duty_paid);
+            }
             document.getElementById('det-export-duty').innerText = formatMoney(exportDuty);
-            document.getElementById('det-99-duty').innerText = formatMoney(exportDuty * 0.99);
+
+            let duty99 = exportDuty * 0.99;
+            document.getElementById('det-99-duty').innerText = formatMoney(duty99);
+
+
+            document.getElementById('det-total-refund').innerText = formatMoney(match.refund_amount);
+            document.getElementById('det-algo').innerText = match.algorithm_used || 'FIFO';
+            document.getElementById('det-status').innerText = match.status;
+            document.getElementById('det-notes').innerText = match.notes || 'No comments.';
+
             document.getElementById('details-modal').classList.remove('hidden');
         }
 
-        function loadHistory() {
-             const db = getDB();
-             const data = db.matches.filter(m => m.status === 'APPROVED');
-             document.getElementById('history-body').innerHTML = data.map(m => `<tr><td class="p-3">${m.import_entry_number}</td><td>${m.import_sku}</td><td>${formatMoney(m.refund_amount)}</td><td>Admin</td></tr>`).join('');
+        // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC ---
+        function openClaimModal() {
+            if (reviewerSelection.size === 0) { showToast("Select matches first", "warning"); return; }
+            document.getElementById('claim-modal').classList.remove('hidden');
+            const suggestedId = `XCLM-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+            document.getElementById('claim-id-input').value = suggestedId;
         }
 
-        // Init
+        async function confirmClaimSubmission() {
+            const claimId = document.getElementById('claim-id-input').value.trim().toUpperCase();
+            if (!claimId) { showToast("Claim ID is required", "error"); return; }
+
+            const ids = Array.from(reviewerSelection);
+            toggleLoading(true, "Grouping and Submitting...");
+
+            try {
+                // CALLS BACKEND: /drawback/api/workflow/action
+                const res = await safeFetch('/drawback/api/workflow/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ids: ids,
+                        status: 'REVIEWED',
+                        claim_id: claimId,
+                        user: currentUserRole
+                    })
+                });
+
+                if(res.success) {
+                    showToast(`Submitted to Claim ${claimId}`, "success");
+                    document.getElementById('claim-modal').classList.add('hidden');
+                    loadWorkflowData('reviewer');
+                } else {
+                    showToast("Submission Failed", "error");
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // --- 🆕 APPROVER CLAIM DROPDOWN LOGIC ---
+        // (Removed in this file as it is Reviewer Only)
+
+        // --- 🚀 NEW HISTORY UI LOGIC ---
+        function showHistorySummary() {
+            document.getElementById('history-summary-view').classList.remove('hidden');
+            document.getElementById('history-detail-view').classList.add('hidden');
+            loadHistorySummary();
+        }
+
+        async function loadHistorySummary() {
+            toggleLoading(true, "Loading Claim History...");
+            const tbody = document.getElementById('history-summary-body');
+            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;
+
+            try {
+                const json = await safeFetch('/drawback/api/claims/list/HISTORY');
+                if (json.data && json.data.length > 0) {
+
+                    // 🆕 Render Headers for History Summary
+                    const headers = ['Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date', 'Final Acceptance'];
+                    renderDynamicHeaders('history-summary-table', headers, 0);
+
+                    // 🛠️ HELPER: Force DD/MM/YYYY formatting manually
+                    const toDDMMYYYY = (isoStr) => {
+                        if(!isoStr) return '-';
+                        const d = new Date(isoStr);
+                        if(isNaN(d)) return isoStr.substring(0,10);
+                        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                    };
+
+                    tbody.innerHTML = json.data.map(c => {
+                        let displayId = c.claim_id;
+                        if (!displayId.startsWith('X')) {
+                            displayId = 'X' + displayId;
+                        }
+
+                        let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
+                        if (c.voided_entries > 0 && c.valid_entries == 0) {
+                            statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
+                        } else if (c.voided_entries > 0) {
+                            statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
+                        }
+
+                        // 🔥 Final Acceptance Logic (Truncated Date: DD/MM/YYYY)
+                        let acceptanceHtml = '';
+                        if (c.finalized_date) {
+                            const simpleFinalDate = toDDMMYYYY(c.finalized_date);
+
+                            acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">
+                                <i class="fa-solid fa-circle-check text-lg"></i>
+                                <div class="text-left leading-tight">
+                                    <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
+                                    <div class="text-xs font-mono">${simpleFinalDate}</div>
+                                </div>
+                            </div>`;
+                        } else if (c.valid_entries > 0) {
+                             // Reviewers cannot Mark Final. Just show status.
+                            acceptanceHtml = `<span class="text-xs text-gray-400 italic">Pending Acceptance</span>`;
+                        } else {
+                            acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;
+                        }
+
+                        // Approved Date (Truncated Date: DD/MM/YYYY)
+                        const simpleApprovedDate = toDDMMYYYY(c.approved_date);
+
+                        return `
+                        <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
+                            <td class="px-6 py-4 text-center">
+                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">
+                                    <i class="fa-solid fa-download text-lg"></i>
+                                </button>
+                                <button onclick="viewClaimDetails('${c.claim_id}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
+                                    <i class="fa-solid fa-circle-info text-lg"></i>
+                                </button>
+                            </td>
+
+                            <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>
+                            <td class="px-6 py-4 text-center">${statusBadge}</td>
+                            <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>
+                            <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>
+                            <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
+                            <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
+                            <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${simpleApprovedDate}</td>
+                            <td class="px-6 py-4 text-center">${acceptanceHtml}</td>
+                        </tr>
+                    `}).join('');
+            } else {
+                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // 🔥 New Function: Mark Claim as Final (Reviewers generally can't do this, but keeping function structure for safety if code reused)
+        async function markClaimFinal(claimId) {
+             showToast("Only Approvers can finalize claims.", "warning");
+        }
+
+        function viewClaimDetails(claimId) {
+            document.getElementById('history-summary-view').classList.add('hidden');
+            document.getElementById('history-detail-view').classList.remove('hidden');
+            document.getElementById('history-active-claim').innerText = claimId;
+            loadWorkflowData('history', claimId);
+        }
+
+        // --- CLIENT-SIDE CSV EXPORT FOR SINGLE CLAIM ---
+        async function exportClaimLocal(claimId) {
+             toggleLoading(true, `Generating Export for ${claimId}...`);
+             try {
+                const url = `/drawback/api/workflow/queue/APPROVED?claim_id=${encodeURIComponent(claimId)}`;
+                const json = await safeFetch(url);
+                const data = json.data || [];
+
+                if(data.length === 0) {
+                    showToast("No data to export", "warning");
+                    return;
+                }
+
+                const validData = data.filter(row => row.status !== 'VOIDED');
+                if(validData.length === 0) {
+                    showToast("All items in this claim are voided.", "warning");
+                    return;
+                }
+
+                const headers = ['claim_id', 'match_uuid', 'approved_at', 'approved_by', 'status', 'export_entry_number', 'export_material_number', 'qty_matched', 'refund_amount', 'import_entry_number', 'import_material_number', 'import_date'];
+                let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
+
+                validData.forEach(row => {
+                    const vals = headers.map(h => {
+                        let val = row[h] || '';
+                        return `"${String(val).replace(/"/g, '""')}"`;
+                    });
+                    csvContent += vals.join(",") + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Claim_${claimId}_Export.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast("Download Started", "success");
+
+             } catch(e) {
+                 console.error(e);
+                 showToast("Export Failed", "error");
+             } finally {
+                 toggleLoading(false);
+             }
+        }
+
+        // --- SHARED WORKFLOW LOADER ---
+        async function loadWorkflowData(role, filterClaimId = null) {
+            // Safety check although 'approver' case removed from switchView
+            if(role === 'approver') return;
+
+            toggleLoading(true, `Loading ${role} queue...`);
+
+            try {
+                const statusMap = { 'reviewer': 'DRAFT', 'history': 'APPROVED' };
+                const reqStatus = statusMap[role];
+
+                let url = `/drawback/api/workflow/queue/${reqStatus}`;
+                if (role === 'history' && filterClaimId) {
+                     url += `?claim_id=${encodeURIComponent(filterClaimId)}`;
+                }
+
+                const json = await safeFetch(url);
+                const data = json.data || [];
+
+                if (role === 'reviewer') renderReviewerTable(data);
+                else if (role === 'history') renderHistoryTable(data);
+
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // --- RENDER FUNCTIONS (Separated for clarity) ---
+        const calcUnitValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
+        const calcEnteredValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);
+
+        // UPDATED: Use import_duty_paid instead of duty rate for accuracy
+        const calcExportDuty = (m) => {
+            if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
+            return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_duty_paid);
+        }
+
+        const calc99Duty = (m) => calcExportDuty(m) * 0.99;
+
+        function renderReviewerTable(data) {
+            const tbody = document.getElementById('reviewer-body');
+            reviewerSelection.clear();
+
+            // 🆕 Render Headers for Reviewer Table (Updated with Export Material)
+            const headers = ['Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount', 'Notes', 'Status','View'];
+            renderDynamicHeaders('reviewer-table', headers, 1); // Has Checkbox
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(m => {
+                let noteHtml = m.notes || '-';
+                let rowClass = "border-b border-slate-50 hover:bg-blue-50 transition";
+                if(m.rejection_reason) {
+                    rowClass = "border-l-4 border-red-500 bg-red-50 hover:bg-red-100 transition";
+                    noteHtml = `<div class="text-red-600 font-bold text-xs mb-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Returned: ${m.rejection_reason}</div>` + noteHtml;
+                }
+                return `
+                <tr class="${rowClass}" id="reviewer-row-${m.match_id}">
+                    <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>
+                    <td>${m.import_entry_number}</td>
+                    <td>${m.import_dec_line}</td>
+                    <td>${m.import_material_number}</td>
+                    <td>${m.export_material_number || m.matched_material_number}</td>
+                    <td>${m.import_date}</td>
+                    <td>${m.export_desc}</td>
+                    <td>${formatMoney(calcExportDuty(m))}</td>
+                    <td>${m.import_hts}</td>
+                    <td>${m.qty_matched}</td>
+                    <td>${m.import_uom}</td>
+                    <td>${m.export_entry_number}</td>
+                    <td>${m.export_date}</td>
+                    <td>${m.export_country}</td>
+                    <td>HTS</td>
+                    <td>${m.import_hts}</td>
+                    <td>${m.import_duty_rate}</td>
+                    <td>${formatMoney(calcUnitValue(m))}</td>
+                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
+                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
+                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
+                    <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
+                    <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>
+                    <td class="text-xs text-slate-500 font-bold">DRAFT</td>
+                    <td class="text-center">
+                        <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-600 hover:text-blue-600 mr-2"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800 mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
+                    </td>
+                </tr>`}).join('');
+        }
+
+        // Render Approver Table Function REMOVED as not needed for Reviewer UI
+
+        function renderHistoryTable(data) {
+            const tbody = document.getElementById('history-body');
+
+            // 🆕 Render Headers for History Detail (Updated with Export Material)
+            const headers = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','Approve Date','View','Actions'];
+            renderDynamicHeaders('history-table', headers, 0);
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(m => {
+                const isVoided = m.status === 'VOIDED';
+                let rowClass = isVoided ? "bg-gray-100 text-gray-400 border-b border-gray-200" : "border-b border-slate-50 hover:bg-purple-50 transition";
+                let statusBadge = isVoided ? `<span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>` : `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
+
+                let actionBtn = '';
+                if(!isVoided) {
+                    actionBtn = `<button onclick='openVoidModal(${escapeJSON(m)})' class="text-red-400 hover:text-red-700 font-bold" title="Void & Reclaim"><i class="fa-solid fa-ban"></i></button>`;
+                } else {
+                    actionBtn = `<span class="text-xs text-gray-300">-</span>`;
+                }
+
+                let noteDisplay = m.claim_id || 'Legacy';
+                if(isVoided && m.rejection_reason) {
+                     noteDisplay += `<br><span class="text-[9px] text-red-400 italic">${m.rejection_reason}</span>`;
+                }
+
+                return `
+                <tr class="${rowClass}">
+                    <td>${m.import_entry_number}</td>
+                    <td>${m.import_dec_line}</td>
+                    <td>${m.import_material_number}</td>
+                    <td>${m.export_material_number || m.matched_material_number}</td>
+                    <td>${m.import_date}</td>
+                    <td>${m.export_desc}</td>
+                    <td>${formatMoney(calcExportDuty(m))}</td>
+                    <td>${m.import_hts}</td>
+                    <td>${m.qty_matched}</td>
+                    <td>${m.import_uom}</td>
+                    <td>${m.export_entry_number}</td>
+                    <td>${m.export_date}</td>
+                    <td>${m.export_country}</td>
+                    <td>HTS</td>
+                    <td>${m.import_hts}</td>
+                    <td>${m.import_duty_rate}</td>
+                    <td>${formatMoney(calcUnitValue(m))}</td>
+                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
+                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
+                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
+                    <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
+                    <td class="text-xs text-slate-500">
+                        <i class="fa-solid fa-user-check mr-1"></i>${m.approved_by || 'Admin'}<br>
+                        <span class="text-[9px] bg-gray-100 px-1 rounded">${noteDisplay}</span>
+                    </td>
+                    <td class="text-center">${statusBadge}</td>
+                    <td class="bg-purple-50 border-l border-purple-100 text-center">
+                        <span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>
+                    </td>
+                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>
+                    <td class="text-center bg-red-50">${actionBtn}</td>
+                </tr>`
+            }).join('');
+        }
+
+        // --- NEW REVIEWER BULK LOGIC ---
+        function toggleReviewerSelection(id) {
+            const row = document.getElementById(`reviewer-row-${id}`);
+            if (reviewerSelection.has(id)) {
+                reviewerSelection.delete(id);
+                if(row) row.classList.remove('bg-blue-100');
+            } else {
+                reviewerSelection.add(id);
+                if(row) row.classList.add('bg-blue-100');
+            }
+        }
+
+        function toggleReviewerSelectAll(source) {
+            const checkboxes = document.querySelectorAll('#reviewer-body input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+                const id = cb.value;
+                const row = document.getElementById(`reviewer-row-${id}`);
+
+                if(source.checked) {
+                    reviewerSelection.add(id);
+                    if(row) row.classList.add('bg-blue-100');
+                } else {
+                    reviewerSelection.delete(id);
+                    if(row) row.classList.remove('bg-blue-100');
+                }
+            });
+        }
+
+        // Approver Selection Toggles REMOVED
+
+        // Bulk Actions (Approver) REMOVED
+
+        function openEditModal(match) {
+            document.getElementById('edit-match-id').value = match.match_id || match.id;
+            document.getElementById('edit-material-number').value = match.matched_material_number;
+            document.getElementById('edit-refund').value = match.refund_amount;
+            document.getElementById('edit-notes').value = match.notes || "";
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        async function saveMatchEdit() {
+            const id = document.getElementById('edit-match-id').value;
+            const refund = document.getElementById('edit-refund').value;
+            const notes = document.getElementById('edit-notes').value;
+
+            toggleLoading(true, "Saving Changes...");
+            try {
+                const res = await safeFetch('/drawback/api/workflow/edit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, refund, notes })
+                });
+
+                if(res.success) {
+                    closeEditModal();
+                    showToast("Match Updated", "success");
+                    loadWorkflowData('reviewer');
+                } else {
+                    showToast("Update Failed", "error");
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function openVoidModal(match) {
+            document.getElementById('void-match-id').value = match.match_id || match.id;
+            document.getElementById('void-reason').value = '';
+            document.getElementById('void-modal').classList.remove('hidden');
+        }
+
+        async function confirmVoid() {
+            const id = document.getElementById('void-match-id').value;
+            const reason = document.getElementById('void-reason').value;
+
+            if(!reason.trim()) { showToast("Reason is required to void.", "error"); return; }
+
+            toggleLoading(true, "Voiding & Reclaiming Inventory...");
+            try {
+                const res = await safeFetch('/drawback/api/workflow/void', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id, reason, user: currentUserRole })
+                });
+
+                if(res.success) {
+                    showToast("Claim Voided. Inventory Restored.", "success");
+                    document.getElementById('void-modal').classList.add('hidden');
+                    loadWorkflowData('history');
+                    loadStats();
+                } else {
+                    showToast(res.message || "Void Failed", "error");
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+
+        // --- UPLOAD & STAGING ---
+        function downloadTemplate() { window.location.href = `${API_BASE}/drawback/api/template/${currentView}`; }
+
+        async function handleFileUpload() {
+            const fileInput = document.getElementById('file-input');
+            if(fileInput.files.length === 0) return;
+            toggleLoading(true, "Parsing File...");
+
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                const json = await safeFetch(`/drawback/api/stage/${currentView}`, { method: 'POST', body: formData });
+
+                if(json && json.success) {
+                    stagedData = json.data;
+                    renderPreview(stagedData);
+                    showToast("File loaded. Review & Edit below.", "success");
+                } else {
+                    showToast(json?.message || "Upload Failed", "error");
+                }
+            } catch (error) {
+                showToast("An unexpected error occurred during upload.", "error");
+                console.error(error);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function renderPreview(data) {
+            if(!data || data.length === 0) return;
+            document.getElementById('staged-preview').classList.remove('hidden');
+            document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
+
+            // Check for Smart Fill logic to toggle Legend (Strictly for Imports per user request)
+            const hasSmartFill = data.some(r => r._smart_filled_fields && r._smart_filled_fields.length > 0);
+            const legend = document.getElementById('smart-fill-legend');
+            if(hasSmartFill && currentView === 'imports') legend.classList.remove('hidden');
+            else legend.classList.add('hidden');
+
+            const header = document.getElementById('preview-header');
+            const body = document.getElementById('preview-body');
+
+            const config = TABLE_CONFIG[currentView];
+            let keys = config ? config.map(c => c.k) : Object.keys(data[0]).filter(k => !['_warnings', '_errors', '_error_fields', '_smart_filled_fields'].includes(k));
+            let labels = config ? config.map(c => c.l) : keys;
+
+            header.innerHTML = `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">Status</th>` +
+                               labels.map(l => `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">${l}</th>`).join('');
+
+            body.innerHTML = data.map((row, i) => {
+                let statusHtml = "";
+                let rowClass = "border-b border-slate-50";
+
+                // Correct Status Logic based on Backend response
+                if (row._errors && row._errors.length > 0) {
+                    rowClass = "error-row border-b border-red-200";
+                    let errorMsg = row._errors[0];
+                    let tooltip = row._errors.join('\n');
+                    if (row._errors.length > 1) {
+                        errorMsg += ` (+${row._errors.length - 1} more)`;
+                    }
+                    statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" id="status-${i}" title="${tooltip}"><i class="fa-solid fa-circle-xmark mr-1"></i>${errorMsg}</span>`;
+                } else {
+                    // Valid rows (even with warnings) show OK
+                    statusHtml = `<span class="text-green-600 font-bold text-xs" id="status-${i}"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
+                }
+
+                const getCellClass = (key, val) => {
+                    let classes = 'edit-input text-xs text-slate-600';
+                    if (row._error_fields && row._error_fields.includes(key)) return classes + ' invalid-cell';
+                    if (row._smart_filled_fields && row._smart_filled_fields.includes(key)) return classes + ' smart-filled-cell';
+                    return classes;
+                };
+
+                return `<tr class="${rowClass}" id="row-${i}">` +
+                    `<td class="p-2 text-center">${statusHtml}</td>` +
+                    keys.map(k => {
+                        let cellVal = row[k] !== undefined ? row[k] : '';
+                        let cellClass = getCellClass(k, cellVal);
+                        return `<td class="p-2"><input type="text" value="${cellVal}" onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass}" id="cell-${i}-${k}"></td>`;
+                    }).join('') +
+                    `</tr>`;
+            }).join('');
+            recalcStatus();
+        }
+
+        // Updated Update Logic to Handle "Fixed" vs "OK" vs "Error" correctly
+        function updateStagedValue(index, key, value) {
+            stagedData[index][key] = value.trim();
+            const row = stagedData[index];
+            const rowEl = document.getElementById(`row-${index}`);
+            const statusEl = document.getElementById(`status-${index}`);
+            const cellEl = document.getElementById(`cell-${index}-${key}`);
+
+            // Reset strict highlighting for this cell
+            cellEl.classList.remove('invalid-cell');
+
+            let newErrors = [];
+
+            // 1. SPECIFIC VALIDATION: Material Mappings
+            if (currentView === 'material_mappings') {
+                if (['export_material_number', 'import_material_number'].includes(key)) {
+                     if (!value) {
+                         newErrors.push("Missing Material #");
+                         cellEl.classList.add('invalid-cell');
+                     }
+                }
+            }
+
+            // 2. GENERAL VALIDATION
+            // Dates
+            if (['import_date', 'export_date'].includes(key)) {
+                if (!value) { newErrors.push("Date Required"); cellEl.classList.add('invalid-cell'); }
+                else {
+                    const d = new Date(value);
+                    if (isNaN(d.getTime())) { newErrors.push("Invalid Date"); cellEl.classList.add('invalid-cell'); }
+                    else if (d > new Date()) { newErrors.push("Future Date"); cellEl.classList.add('invalid-cell'); }
+                }
+            }
+            // Numerics
+            if (['qty', 'duty_paid', 'duty_rate', 'conversion_factor'].includes(key)) {
+                if (!value || isNaN(parseFloat(value)) || parseFloat(value) <= 0) { newErrors.push("Must be > 0"); cellEl.classList.add('invalid-cell'); }
+            }
+            // Required Text (Generic)
+            if (['material_number', 'uom', 'hts_code', 'description'].includes(key)) {
+                if (!value) { newErrors.push("Required"); cellEl.classList.add('invalid-cell'); }
+            }
+            // HTS specific
+            if (key === 'hts_code' && value && !value.match(/^[\d\.]+$/)) {
+                 newErrors.push("Invalid HTS Format"); cellEl.classList.add('invalid-cell');
+            }
+
+            // Sync with row._error_fields
+            if (newErrors.length === 0) {
+                 if (row._error_fields) {
+                     const idx = row._error_fields.indexOf(key);
+                     if (idx > -1) row._error_fields.splice(idx, 1);
+                 }
+            } else {
+                 if (!row._error_fields) row._error_fields = [];
+                 if (!row._error_fields.includes(key)) row._error_fields.push(key);
+            }
+
+            // Determine Overall Row Status
+            // Note: We don't have full backend validation here, so we rely on remaining _error_fields
+            const hasRemainingErrors = (row._error_fields && row._error_fields.length > 0);
+
+            if (hasRemainingErrors || newErrors.length > 0) {
+                rowEl.className = "error-row border-b border-red-200 transition";
+                // Show the specific error found
+                const displayError = newErrors.length > 0 ? newErrors[0] : (row._errors && row._errors.length > 0 ? row._errors[0] : "Fix Errors");
+                statusEl.innerHTML = `<span class="text-red-600 font-bold text-xs"><i class="fa-solid fa-circle-xmark mr-1"></i>${displayError}</span>`;
+            } else {
+                // If valid, revert to OK (Green), NOT "Fixed" (Blue)
+                rowEl.className = "border-b border-slate-50 transition"; // Normal row
+                statusEl.innerHTML = `<span class="text-green-600 font-bold text-xs"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
+                row._errors = []; // Clear top-level errors
+            }
+
+            recalcStatus();
+        }
+
+        function removeErrors() {
+            const initialCount = stagedData.length;
+            stagedData = stagedData.filter(row => (!row._error_fields || row._error_fields.length === 0) && (!row._errors || row._errors.length === 0));
+            if(stagedData.length === 0) { resetUpload(); showToast(`Removed all invalid rows.`, "warning"); }
+            else { renderPreview(stagedData); showToast(`Removed ${initialCount - stagedData.length} invalid rows.`, "success"); }
+        }
+
+        function recalcStatus() {
+            // Check if any row has strictly *errors*
+            const hasErrors = stagedData.some(r => (r._errors && r._errors.length > 0) || (r._error_fields && r._error_fields.length > 0));
+            const hasWarnings = stagedData.some(r => r._warnings && r._warnings.length > 0);
+
+            const btn = document.getElementById('btn-commit');
+            const cleanBtn = document.getElementById('btn-clean');
+            const summary = document.getElementById('validation-summary');
+
+            cleanBtn.classList.add('hidden'); summary.classList.add('hidden');
+
+            if (hasErrors) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> Fix Errors to Commit`;
+                btn.className = "px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded shadow font-medium transition-colors";
+                cleanBtn.classList.remove('hidden');
+                summary.classList.remove('hidden');
+                summary.className = "mb-4 p-3 rounded text-sm bg-red-100 text-red-700 border border-red-200 flex items-center";
+                summary.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-2"></i> <b>Errors Found:</b> Please fix highlighted red cells or remove rows.`;
+            } else {
+                // Issue 6: Green button even if warnings exist
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check mr-1"></i> Commit Data`;
+                btn.className = "px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded shadow font-medium transition-colors";
+
+                if (hasWarnings) {
+                    summary.classList.remove('hidden');
+                    summary.className = "mb-4 p-3 rounded text-sm bg-yellow-100 text-yellow-800 border border-yellow-200 flex items-center";
+                    summary.innerHTML = `<i class="fa-solid fa-magic mr-2"></i> <b>Smart Fill Active:</b> Yellow cells were auto-filled. Review before committing.`;
+                }
+            }
+        }
+
+        async function commitData() {
+            if(stagedData.some(r => (r._errors && r._errors.length > 0) || (r._error_fields && r._error_fields.length > 0))) {
+                showToast("Please remove invalid rows first.", "error"); return;
+            }
+            toggleLoading(true, "Saving to Database...");
+            try {
+                const json = await safeFetch(`/drawback/api/commit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target: currentView, data: stagedData })
+                });
+
+                if(json && (json.success || json.data)) { showToast(`Success! Records saved.`, "success"); resetUpload(); loadTableData(currentView); }
+                else { showToast("Save failed", "error"); }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function resetUpload() {
+            stagedData = [];
+            document.getElementById('file-input').value = "";
+            document.getElementById('staged-preview').classList.add('hidden');
+            // FIX: Ensure Smart Fill Legend is hidden on reset
+            document.getElementById('smart-fill-legend').classList.add('hidden');
+        }
+
+        async function deleteRow(target, id) { if(!confirm("Delete this record?")) return; toggleLoading(true, "Deleting..."); await safeFetch(`/drawback/api/delete/${target}/${id}`, { method: 'DELETE' }); toggleLoading(false); loadTableData(target); }
+
+        async function runMatching() {
+            toggleLoading(true, "Running Matching Algorithm...");
+            const strategy = document.querySelector('input[name="algo"]:checked').value;
+            const json = await safeFetch(`/drawback/api/match`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ strategy: strategy })
+            });
+            toggleLoading(false);
+            const tbody = document.getElementById('matches-body');
+
+            // Issue 13: Accurate "No Matches Found" Popup
+            const matchCount = json && json.data ? json.data.length : 0;
+
+            if (matchCount === 0) {
+                 tbody.innerHTML = `<tr><td colspan="23" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;
+                 showToast("Matching Complete: No successful matches found.", "warning");
+            } else {
+                // ... (Existing Rendering Logic) ...
+                const calcUnitValue = (m) => {
+                     if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
+                     return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
+                }
+                const calcEnteredValue = (m) => {
+                    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
+                    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);
+                };
+
+                const calcExportDuty = (m) => {
+                    return calcEnteredValue(m) * (parseFloat(m.import_duty_rate) || 0);
+                }
+
+                const calc99Duty = (m) => {
+                    return calcExportDuty(m) * 0.99;
+                }
+
+                tbody.innerHTML = json.data.map(m => `
+                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">
+                        <td>${m.import_entry_number}</td>
+                        <td>${m.import_dec_line}</td>
+                        <td>${m.import_material_number}</td>
+                        <td>${m.export_material_number || m.matched_material_number}</td>
+                        <td>${m.import_date}</td>
+                        <td>${m.export_desc}</td>
+                        <td>${formatMoney(calcExportDuty(m))}</td>
+                        <td>${m.import_hts}</td>
+                        <td>${m.qty_matched}</td>
+                        <td>${m.import_uom}</td>
+                        <td>${m.export_entry_number}</td>
+                        <td>${m.export_date}</td>
+                        <td>${m.export_country}</td>
+                        <td>HTS</td>
+                        <td>${m.import_hts}</td>
+                        <td>${m.import_duty_rate}</td>
+                        <td>${formatMoney(calcUnitValue(m))}</td>
+
+                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">
+                            ${formatMoney(calcEnteredValue(m))}
+                        </td>
+                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">
+                            ${formatMoney(calcExportDuty(m))}
+                        </td>
+                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">
+                            ${formatMoney(calc99Duty(m))}
+                        </td>
+                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
+
+                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span> <span class="status-badge status-draft">DRAFT</span></td>
+                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>
+                    </tr>`).join('');
+
+                showToast(`Success: ${matchCount} matches generated.`, "success");
+            }
+            loadStats();
+        }
+        async function resetSystem() { if(confirm("WARNING: Delete ALL data?")) { toggleLoading(true, "Cleaning System..."); await safeFetch(`/drawback/api/reset`, { method: 'POST' }); window.location.reload(); } }
+
+
+        // --- MOCK API ---
+        async function mockApi(endpoint, options) {
+            // MOCK API REMOVED - Returning Empty/Error state only to satisfy strict mode logic if called explicitly
+            return { success: false, message: "Mock Mode Disabled" };
+        }
+
+        // --- 🚀 INITIALIZATION: Force initial UI update for Reviewer default ---
         loadStats();
     </script>
 </body>
