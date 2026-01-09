@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DrawbackFlow Premium | Reviewer Console</title>
+    <title>DrawbackFlow Premium | Enterprise Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -131,21 +131,21 @@
         }
 
         .edit-input.smart-filled-cell {
-            background-color: #FEF9C3 !important;
-            border: 1px solid #FDE047 !important;
+            background-color: #FEF9C3 !important; /* Yellow-100 */
+            border: 1px solid #FDE047 !important; /* Yellow-300 */
         }
 
         /* Smart Label Styling */
         .smart-note {
             font-size: 0.7rem;
-            color: #d97706;
-            background: #fef3c7;
+            color: #065f46;       /* 🟢 Emerald-800 Text */
+            background: #ecfdf5;  /* 🟢 Emerald-50 Background */
             padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
             margin-top: 4px;
             white-space: nowrap;
-            border: 1px solid #fcd34d;
+            border: 1px solid #6ee7b7; /* 🟢 Emerald-300 Border */
         }
 
         .status-badge {
@@ -159,6 +159,9 @@
         .status-reviewed { background-color: #dbeafe; color: #1e40af; }
         .status-approved { background-color: #dcfce7; color: #166534; }
         .status-returned { background-color: #fee2e2; color: #991b1b; }
+        .status-complete { background-color: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .status-void { background-color: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
+
 
         /* Row Status Colors */
         .error-row { background-color: #fee2e2 !important; }
@@ -182,9 +185,10 @@
             padding: 8px;
             border-bottom: 2px solid #E2E8F0;
             vertical-align: top;
-            position: relative;
+            position: relative; /* For resizer */
         }
 
+        /* 🆕 NEW STYLES FOR EXCEL-LIKE HEADERS */
         .th-input {
             width: 100%;
             padding: 2px 4px;
@@ -221,6 +225,7 @@
             color: #64748b;
         }
 
+        /* Fix alignment for non-sortable headers */
         .th-static {
             vertical-align: middle;
             text-align: center;
@@ -270,6 +275,23 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Guide Styles */
+        .guide-step-number {
+            width: 32px; height: 32px;
+            background: #EFF6FF; color: #2563EB;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.875rem;
+            margin-bottom: 0.5rem; border: 2px solid #BFDBFE;
+        }
+        .guide-card {
+            background: white; border: 1px solid #E2E8F0;
+            border-radius: 12px; padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .guide-card:hover { border-color: #CBD5E1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="text-slate-800 h-screen flex overflow-hidden">
@@ -296,6 +318,7 @@
 
             <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
                 <div class="grid grid-cols-2 gap-6">
+
                     <div class="bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
                         <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
                             <span class="font-bold text-blue-800 text-sm uppercase"><i class="fa-solid fa-plane-departure mr-2"></i>Export Record (Claim Basis)</span>
@@ -306,13 +329,18 @@
                                 <div class="detail-label">Material Number</div>
                                 <div id="det-exp-material" class="text-lg font-bold text-slate-800"></div>
                             </div>
+
                             <div><div class="detail-label">Quantity</div><div id="det-exp-qty" class="font-bold"></div></div>
                             <div><div class="detail-label">UOM</div><div id="det-exp-uom"></div></div>
+
                             <div><div class="detail-label">Export Date</div><div id="det-exp-date"></div></div>
                             <div><div class="detail-label">Country</div><div id="det-exp-country"></div></div>
+
                             <div class="col-span-2 border-t border-dashed border-slate-100"></div>
+
                             <div><div class="detail-label">Invoice No</div><div id="det-exp-inv"></div></div>
                             <div><div class="detail-label">Internal ID</div><div id="det-exp-id"></div></div>
+
                             <div class="col-span-2">
                                 <div class="detail-label">Description</div>
                                 <div id="det-exp-desc" class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100"></div>
@@ -334,14 +362,19 @@
                                 <div class="detail-label">Import Date</div>
                                 <div id="det-imp-date"></div>
                             </div>
+
                             <div><div class="detail-label">Declaration #</div><div id="det-imp-dec"></div></div>
                             <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
                             <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
+
                             <div class="col-span-3 border-t border-dashed border-slate-100"></div>
+
                             <div><div class="detail-label">Original Qty</div><div id="det-imp-orig"></div></div>
                             <div><div class="detail-label">Available Qty</div><div id="det-imp-avail"></div></div>
                             <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
+
                             <div class="col-span-3 border-t border-dashed border-slate-100"></div>
+
                             <div><div class="detail-label">Customs Value (Total)</div><div id="det-imp-val"></div></div>
                             <div><div class="detail-label">Duty Paid</div><div id="det-imp-paid"></div></div>
                             <div><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
@@ -360,18 +393,22 @@
                             <div class="detail-label">Consumed Qty</div>
                             <div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div>
                         </div>
+
                         <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
                             <div class="detail-label">Entered Value</div>
                             <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
                         </div>
+
                         <div class="bg-orange-50 p-3 rounded border border-orange-100">
                             <div class="detail-label">Export Duty (100%)</div>
                             <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
                         </div>
+
                         <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
                             <div class="detail-label">99% Duty</div>
                             <div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div>
                         </div>
+
                         <div class="bg-slate-50 p-3 rounded border border-slate-100">
                             <div class="detail-label">Total Refund</div>
                             <div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div>
@@ -397,15 +434,34 @@
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
             <h3 class="text-lg font-bold text-slate-800 mb-4">Edit Match Record</h3>
             <input type="hidden" id="edit-match-id">
+
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Matched Material Number</label>
             <input type="text" id="edit-material-number" disabled class="w-full bg-slate-100 border border-slate-300 rounded p-2 text-sm mb-3">
+
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Refund Amount ($)</label>
             <input type="number" id="edit-refund" step="0.01" class="w-full border border-slate-300 rounded p-2 text-sm mb-3 focus:border-blue-500 outline-none">
+
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Reviewer Notes</label>
             <textarea id="edit-notes" rows="3" class="w-full border border-slate-300 rounded p-2 text-sm mb-4 focus:border-blue-500 outline-none"></textarea>
+
             <div class="flex justify-end gap-2">
                 <button onclick="closeEditModal()" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
                 <button onclick="saveMatchEdit()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reject-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn border-t-4 border-red-500">
+            <h3 class="text-lg font-bold text-red-700 mb-2">Return to Reviewer</h3>
+            <p class="text-xs text-slate-500 mb-4">Please provide a reason why these items are being returned. The reviewer will see this message.</p>
+
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Rejection Reason</label>
+            <textarea id="reject-reason" rows="3" placeholder="e.g. Incorrect Duty Rate used..." class="w-full border border-red-200 bg-red-50 rounded p-2 text-sm mb-4 focus:border-red-500 outline-none"></textarea>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('reject-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="confirmRejection()" class="px-3 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded font-bold">Confirm Return</button>
             </div>
         </div>
     </div>
@@ -417,8 +473,10 @@
                 <b>Warning:</b> This will reverse the approval, reclaim the inventory to the import record, and keep the record for audit.
             </p>
             <input type="hidden" id="void-match-id">
+
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Reason for Voiding</label>
             <textarea id="void-reason" rows="3" placeholder="e.g. Post-audit failure, Export cancelled..." class="w-full border border-slate-300 rounded p-2 text-sm mb-4 focus:border-red-500 outline-none"></textarea>
+
             <div class="flex justify-end gap-2">
                 <button onclick="document.getElementById('void-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
                 <button onclick="confirmVoid()" class="px-3 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded font-bold">Confirm Void</button>
@@ -430,16 +488,41 @@
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
             <h3 class="text-lg font-bold text-blue-800 mb-2">Submit Claim Batch</h3>
             <p class="text-xs text-slate-500 mb-4">Group selected matches into a specific Claim ID for the Approver.</p>
+
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Claim ID / Reference</label>
             <div class="relative">
                 <input type="text" id="claim-id-input" list="existing-claims" placeholder="e.g. XCLM-2025-001"
                        class="w-full border border-blue-300 bg-blue-50 rounded p-2 text-sm mb-1 focus:border-blue-500 outline-none font-bold uppercase">
-                <datalist id="existing-claims"></datalist>
+                <datalist id="existing-claims">
+                    </datalist>
             </div>
             <p class="text-[10px] text-slate-400 mb-4">Type a new ID to create, or select existing to append.</p>
+
             <div class="flex justify-end gap-2">
                 <button onclick="document.getElementById('claim-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
-                <button onclick="confirmClaimSubmission()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">Submit Claim</button>
+                <button onclick="confirmClaimSubmission()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">
+                    Submit Claim
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="final-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn border-t-4 border-emerald-500">
+            <h3 class="text-lg font-bold text-emerald-800 mb-2"><i class="fa-solid fa-flag-checkered mr-2"></i>Finalize Claim</h3>
+            <p class="text-xs text-slate-500 mb-4">Mark this claim as "Complete" and lock it for history. Please enter the official Broker Claim ID for reference.</p>
+
+            <input type="hidden" id="final-claim-id">
+
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Broker Claim ID (Required)</label>
+            <input type="text" id="final-broker-id" placeholder="e.g. BRK-998877"
+                   class="w-full border border-emerald-300 bg-emerald-50 rounded p-2 text-sm mb-4 focus:border-emerald-500 outline-none font-bold uppercase text-emerald-800">
+
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('final-modal').classList.add('hidden')" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="confirmFinalization()" class="px-3 py-2 text-sm bg-emerald-600 text-white hover:bg-emerald-700 rounded font-bold shadow-sm">
+                    Confirm Finalization
+                </button>
             </div>
         </div>
     </div>
@@ -448,8 +531,8 @@
         <div class="flex items-center gap-3">
             <i class="fa-solid fa-wifi-slash text-xl"></i>
             <div>
-                <p class="font-bold text-sm">Connection Lost</p>
-                <p class="text-xs opacity-90">Backend unreachable. Ensure app.py is running.</p>
+                <p class="font-bold text-sm">Demo Mode Active</p>
+                <p class="text-xs opacity-90">Backend unreachable. Using simulated data. To connect, check your AWS configuration.</p>
             </div>
         </div>
         <button onclick="document.getElementById('demo-banner').classList.add('hidden')" class="text-white hover:text-amber-100 bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded text-xs transition">Dismiss</button>
@@ -462,7 +545,7 @@
             </div>
             <div>
                 <span class="font-bold text-lg tracking-tight block">DrawbackFlow</span>
-                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Reviewer Node</span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Enterprise DB</span>
             </div>
         </div>
 
@@ -491,13 +574,22 @@
                 <i class="fa-solid fa-wand-magic-sparkles w-5 mr-2"></i> <span class="font-medium">Matching Engine</span>
             </a>
 
-            <div id="header-workflow" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Workflow / Preparation</div>
+            <div id="header-workflow" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Workflow / Approval</div>
             <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="font-medium">Reviewer Console</span>
+            </a>
+            <a href="#" onclick="switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-stamp w-5 mr-2"></i> <span class="font-medium">Approver Portal</span>
             </a>
              <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">Claims History</span>
             </a>
+
+            <div class="mt-8 border-t border-slate-100 pt-2">
+                <a href="#" onclick="switchView('help')" id="nav-help" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
+                    <i class="fa-solid fa-circle-question w-5 mr-2"></i> <span class="font-medium">Help / User Guide</span>
+                </a>
+            </div>
         </nav>
 
         <div class="p-4 border-t border-gray-100 bg-gray-50 text-xs flex justify-between items-center">
@@ -509,13 +601,13 @@
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50/50">
+
         <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
             <div class="flex items-center gap-4">
                  <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
                  <div class="h-6 w-px bg-slate-200"></div>
-                 <div class="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full">
-                     <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                     <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Reviewer Console</span>
+                 <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
+                    <i class="fa-solid fa-user-tag mr-2"></i>Role: Reviewer
                  </div>
             </div>
 
@@ -524,31 +616,67 @@
             </div>
         </header>
 
+
+
+
+<!--        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">-->
+<!--            <div class="flex items-center gap-4">-->
+<!--                 <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>-->
+<!--                 <div class="h-6 w-px bg-slate-200"></div>-->
+<!--                 <select id="role-switcher" onchange="updateRoleUI()" class="text-xs bg-slate-100 border border-slate-200 rounded px-2 py-1 outline-none focus:border-blue-500 text-slate-600 font-semibold cursor-pointer">-->
+<!--                     <option value="REVIEWER" selected>Simulate: Reviewer</option>-->
+<!--                     <option value="APPROVER">Simulate: Approver</option>-->
+<!--                 </select>-->
+<!--            </div>-->
+
+<!--            <div class="flex gap-3">-->
+<!--                <button onclick="loadStats()" class="p-2 text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-rotate-right"></i></button>-->
+<!--                <button onclick="resetSystem()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 border border-red-200 transition">-->
+<!--                    <i class="fa-solid fa-database mr-2"></i> Truncate Database-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </header>-->
+
         <div class="flex-1 overflow-y-auto p-8" id="content-area">
 
             <div id="view-dashboard" class="view-section fade-in space-y-8">
                 <section>
-                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-blue-500 pl-3">Recovery Summary</h3>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-blue-500 pl-3">Inventory Management Summary</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card relative overflow-hidden">
-                            <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-sack-dollar text-6xl text-blue-500"></i></div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase">Total Recovery Potential</p>
-                            <h2 class="text-3xl font-bold text-slate-800 mt-2" id="stat-potential">$0.00</h2>
-                            <div class="mt-2 text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded">Gross Duty Available</div>
-                        </div>
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card relative overflow-hidden">
-                            <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-file-invoice-dollar text-6xl text-emerald-500"></i></div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase">Actual Recovery</p>
-                            <h2 class="text-3xl font-bold text-emerald-600 mt-2" id="stat-recovered">$0.00</h2>
-                            <div class="mt-2 text-xs text-emerald-600 bg-emerald-50 inline-block px-2 py-1 rounded">Approved Claims</div>
-                        </div>
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card">
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card flex flex-col justify-between min-h-[160px]">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-400 uppercase">Recovery Realized</p>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Total Duty Recovery Potential</p>
+                                    <h2 class="text-3xl font-bold text-slate-800 mt-2" id="stat-potential">$0.00</h2>
+                                    <div class="mt-2 text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded">Gross Duty Available (99%)</div>
+                                </div>
+                                <div class="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-xl">
+                                    <i class="fa-solid fa-sack-dollar"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Approved Claims</p>
+                                    <h2 class="text-3xl font-bold text-emerald-600 mt-2" id="stat-recovered">$0.00</h2>
+                                    <div class="mt-2 text-xs text-emerald-600 bg-emerald-50 inline-block px-2 py-1 rounded">Approved Claims</div>
+                                </div>
+                                <div class="h-12 w-12 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 text-xl">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Total Claimed Drawbacks</p>
                                     <h2 class="text-3xl font-bold text-slate-800 mt-2" id="stat-realized-pct">0%</h2>
                                 </div>
-                                <div class="h-10 w-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
+                                <div class="h-12 w-12 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 text-xl">
                                     <i class="fa-solid fa-chart-line"></i>
                                 </div>
                             </div>
@@ -556,165 +684,180 @@
                                 <div id="prog-realized" class="bg-indigo-500 h-1.5 rounded-full" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div onclick="switchView('history')" class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl border border-slate-700 dash-card clickable-card text-white">
+
+                        <div id="card-unrealized" class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl border border-slate-700 dash-card text-white flex flex-col justify-between min-h-[160px]">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-400 uppercase">Unrealized / Pending</p>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase">Unrealized Claims</p>
                                     <h2 class="text-3xl font-bold text-white mt-2" id="stat-unrealized">$0.00</h2>
                                 </div>
-                                <div class="h-8 w-8 bg-slate-700 rounded-full flex items-center justify-center text-slate-300 icon-bounce">
-                                    <i class="fa-solid fa-arrow-right"></i>
+                                <div class="flex flex-col items-center gap-1">
+                                    <i id="arrow-unrealized" class="fa-solid fa-arrow-right text-2xl text-slate-500 mt-1 hidden"></i>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-3">Click to view approved claims history</p>
+                            <p class="text-[10px] text-slate-400 mt-3">Unrealized Claim Inventory Value (99%)</p>
                         </div>
+
+
                     </div>
                 </section>
 
                 <section>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-purple-500 pl-3">Approval Summary</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 dash-card flex items-center gap-4">
-                            <div class="h-12 w-12 bg-green-50 rounded-lg flex items-center justify-center text-green-600 text-xl shadow-sm">
-                                <i class="fa-solid fa-check-double"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-2xl font-bold text-slate-800" id="stat-approved-count">0</h4>
-                                <p class="text-xs text-slate-500 font-medium uppercase">Total Approved Entries</p>
-                            </div>
-                        </div>
 
-                        <div class="bg-white p-5 rounded-xl border-b-4 border-orange-400 shadow-sm dash-card flex items-center justify-between opacity-75 cursor-not-allowed" title="Approver Only">
-                            <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500 text-xl">
-                                    <i class="fa-solid fa-lock"></i>
-                                </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 border-b-4 border-b-green-500 shadow-sm dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start">
                                 <div>
-                                    <h4 class="text-2xl font-bold text-slate-800" id="stat-pending-approval-count">0</h4>
-                                    <p class="text-xs text-slate-500 font-medium uppercase">Pending Approval Entries</p>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase">Total Approved Entries</p>
+                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-approved-count">0</h4>
+                                </div>
+                                <div class="h-12 w-12 bg-green-50 rounded-lg flex items-center justify-center text-green-600 text-xl shadow-sm">
+                                    <i class="fa-solid fa-check-double"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div onclick="switchView('history')" class="bg-white p-5 rounded-xl border-b-4 border-purple-400 shadow-sm dash-card clickable-card flex items-center justify-between group">
-                            <div class="flex items-center gap-4">
+
+
+                        <div id="card-pending-approval" class="bg-white p-5 rounded-xl border border-slate-200 border-b-4 border-b-orange-500 shadow-sm dash-card flex flex-col justify-between min-h-[160px] group transition-all">
+                            <div class="flex justify-between items-start w-full">
+                                <div class="text-left">
+                                    <p class="text-xs font-semibold text-slate-500 uppercase">Pending Approval Entries</p>
+                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-pending-approval-count">0</h4>
+                                </div>
+
+                                <div class="flex flex-col items-center gap-1">
+                                    <div class="h-12 w-12 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500 text-xl group-hover:bg-orange-100 transition">
+                                        <i class="fa-solid fa-hourglass-half"></i>
+                                    </div>
+
+                                    <i id="arrow-pending-approval" class="fa-solid fa-arrow-right text-2xl text-orange-400 mt-1 hidden"></i>
+                                </div>
+                            </div>
+                        </div>
+<div class="bg-white p-5 rounded-xl border border-slate-200 border-b-4 border-b-purple-500 shadow-sm dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase">Total Processed Entries</p>
+                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-pending-claims-count">0</h4>
+                                </div>
                                 <div class="h-12 w-12 bg-purple-50 rounded-lg flex items-center justify-center text-purple-500 text-xl group-hover:bg-purple-100 transition">
-                                    <i class="fa-solid fa-folder-open icon-bounce"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-2xl font-bold text-slate-800" id="stat-pending-claims-count">0</h4>
-                                    <p class="text-xs text-slate-500 font-medium uppercase">Total Processed Claims</p>
+                                    <i class="fa-solid fa-folder-open"></i>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-purple-400 transition"></i>
                         </div>
                     </div>
                 </section>
 
-                <section>
+                <section id="dashboard-matching-section">
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-indigo-500 pl-3">Matching Summary</h3>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <div class="bg-white p-4 rounded-lg border border-slate-200 text-center dash-card">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Products</p>
-                            <h4 class="text-xl font-bold text-slate-700" id="stat-products-count">-</h4>
+
+
+
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start w-full">
+                                <div class="text-left">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Products</p>
+                                    <h4 class="text-xl font-bold text-slate-700" id="stat-products-count">-</h4>
+                                </div>
+                                <div class="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-xl">
+                                    <i class="fa-solid fa-box"></i>
+                                </div>
+                            </div>
+                             <div class="w-full bg-blue-100 h-1.5 mt-4 rounded-full overflow-hidden">
+                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                         <div class="bg-white p-4 rounded-lg border border-slate-200 text-center dash-card">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Imports</p>
-                            <h4 class="text-xl font-bold text-slate-700" id="count-imports">-</h4>
+
+
+                         <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start w-full">
+                                <div class="text-left">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Imports</p>
+                                    <h4 class="text-xl font-bold text-slate-700" id="count-imports">-</h4>
+                                </div>
+                                <div class="h-12 w-12 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 text-xl">
+                                    <i class="fa-solid fa-ship"></i>
+                                </div>
+                            </div>
+                            <div class="w-full bg-indigo-100 h-1.5 mt-4 rounded-full overflow-hidden">
+                                <div class="bg-indigo-500 h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                         <div class="bg-white p-4 rounded-lg border border-slate-200 text-center dash-card">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Exports</p>
-                            <h4 class="text-xl font-bold text-slate-700" id="count-exports">-</h4>
+                         <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start w-full">
+                                <div class="text-left">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Exports</p>
+                                    <h4 class="text-xl font-bold text-slate-700" id="count-exports">-</h4>
+                                </div>
+                                <div class="h-12 w-12 bg-cyan-50 rounded-lg flex items-center justify-center text-cyan-600 text-xl">
+                                    <i class="fa-solid fa-plane-departure"></i>
+                                </div>
+                            </div>
+                            <div class="w-full bg-cyan-100 h-1.5 mt-4 rounded-full overflow-hidden">
+                                <div class="bg-cyan-500 h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                         <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100 text-center dash-card">
-                            <p class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Matches Success</p>
-                            <h4 class="text-xl font-bold text-emerald-700" id="stat-matches-success">-</h4>
+                         <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start w-full">
+                                <div class="text-left">
+                                    <p class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Successful Matches</p>
+                                    <h4 class="text-xl font-bold text-emerald-700" id="stat-matches-success">-</h4>
+                                </div>
+                                <div class="h-12 w-12 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 text-xl">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div class="w-full bg-emerald-100 h-1.5 mt-4 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                         <div onclick="switchView('matching')" class="bg-red-50 p-4 rounded-lg border border-red-100 text-center dash-card clickable-card group hover:bg-red-100">
-                            <p class="text-[10px] font-bold text-red-500 uppercase mb-1 group-hover:text-red-700">Unmatched / Fail</p>
-                            <h4 class="text-xl font-bold text-red-600" id="stat-matches-fail">-</h4>
-                            <div class="text-[9px] text-red-400 mt-1 opacity-0 group-hover:opacity-100 transition">Go to Engine</div>
+
+
+
+                        <div onclick="switchView('exports')" class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card clickable-card group hover:bg-red-50 flex flex-col justify-between min-h-[160px]">
+                            <div class="flex justify-between items-start w-full">
+                                <div class="text-left">
+                                    <p class="text-[10px] font-bold text-red-500 uppercase mb-1 group-hover:text-red-700">Unmatched Exports</p>
+                                    <h4 class="text-xl font-bold text-red-600" id="stat-matches-fail">-</h4>
+                                </div>
+
+                                <div class="flex flex-col items-center gap-1">
+                                    <div class="h-12 w-12 bg-red-50 rounded-lg flex items-center justify-center text-red-600 text-xl group-hover:bg-red-100 transition icon-bounce">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                    </div>
+
+                                    <i class="fa-solid fa-arrow-right text-2xl text-red-400 mt-1"></i>
+                                </div>
+                            </div>
+                            <div class="w-full bg-red-100 h-1.5 mt-4 rounded-full overflow-hidden">
+                                <div class="bg-red-500 h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                    </div>
+
+</div>
                 </section>
 
-                <section>
-                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-cyan-500 pl-3">Performance Metrics</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div onclick="switchView('imports')" class="bg-white p-4 rounded-xl border border-slate-200 dash-card clickable-card flex justify-between items-center">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="fa-solid fa-database text-cyan-500"></i>
-                                    <span class="text-xs font-bold text-slate-500 uppercase">Import Data Quality</span>
-                                </div>
-                                <h3 class="text-2xl font-bold text-slate-800" id="stat-import-quality">98%</h3>
-                            </div>
-                            <div class="h-10 w-10 rounded-full border-4 border-cyan-100 border-t-cyan-500 flex items-center justify-center text-[10px] font-bold text-slate-400">98</div>
-                        </div>
-                         <div onclick="switchView('exports')" class="bg-white p-4 rounded-xl border border-slate-200 dash-card clickable-card flex justify-between items-center">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="fa-solid fa-file-export text-blue-500"></i>
-                                    <span class="text-xs font-bold text-slate-500 uppercase">Export Data Quality</span>
-                                </div>
-                                <h3 class="text-2xl font-bold text-slate-800" id="stat-export-quality">92%</h3>
-                            </div>
-                             <div class="h-10 w-10 rounded-full border-4 border-blue-100 border-t-blue-500 flex items-center justify-center text-[10px] font-bold text-slate-400">92</div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 dash-card flex justify-between items-center">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="fa-solid fa-stopwatch text-slate-400"></i>
-                                    <span class="text-xs font-bold text-slate-500 uppercase">Matching Time</span>
-                                </div>
-                                <h3 class="text-2xl font-bold text-slate-800" id="stat-matching-time">0.4s</h3>
-                            </div>
-                            <div class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Avg / Batch</div>
-                        </div>
-                    </div>
-                </section>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="w-full">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-700 text-sm">Inventory Health</h3>
+                            <h3 class="font-bold text-slate-700 text-sm">Available Quantity</h3>
                             <span class="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">Pending Items</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-sm text-left" id="inventory-table">
-                                <thead class="bg-white text-slate-500 border-b"></thead>
+                                <thead class="bg-white text-slate-500 border-b">
+                                    </thead>
                                 <tbody class="divide-y divide-slate-50 text-xs" id="inventory-body">
                                     <tr><td colspan="4" class="p-6 text-center text-slate-400">Loading DB Stats...</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-                        <div class="px-6 py-4 border-b border-slate-100 bg-red-50 flex justify-between items-center">
-                            <h3 class="font-bold text-red-800 text-sm"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error Logs</h3>
-                            <span class="text-[10px] font-bold bg-white text-red-500 px-2 py-1 rounded-full">Recent</span>
-                        </div>
-                        <div class="p-4 flex-1 overflow-y-auto space-y-3 max-h-64">
-                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded border border-slate-100 hover:bg-slate-100 transition cursor-pointer">
-                                <i class="fa-solid fa-database text-red-400 mt-1 text-xs"></i>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-700">Duplicate Import Entry</p>
-                                    <p class="text-[10px] text-slate-500">Material: RAW-STEEL-COIL | IMP-2023-001</p>
-                                    <a href="#" onclick="switchView('imports')" class="text-[10px] text-blue-500 hover:underline">Fix in Imports &rarr;</a>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded border border-slate-100 hover:bg-slate-100 transition cursor-pointer">
-                                <i class="fa-solid fa-ban text-orange-400 mt-1 text-xs"></i>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-700">Unmapped Export Material</p>
-                                    <p class="text-[10px] text-slate-500">Material: NEW-ALLOY-X</p>
-                                    <a href="#" onclick="switchView('material_mappings')" class="text-[10px] text-blue-500 hover:underline">Add Mapping &rarr;</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
             </div>
 
             <div id="view-management" class="view-section hidden fade-in">
@@ -725,7 +868,6 @@
                             <i class="fa-solid fa-download mr-1"></i> Download Template
                         </button>
                     </div>
-
                     <div class="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer relative group">
                         <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileUpload()">
                         <div class="pointer-events-none">
@@ -734,39 +876,42 @@
                             <p class="text-xs text-slate-400 mt-1">Excel (.xlsx) or CSV supported</p>
                         </div>
                     </div>
-
                     <div id="smart-fill-legend" class="hidden mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md flex items-center gap-2">
                         <i class="fa-solid fa-magic text-yellow-600"></i>
-                        <p class="text-xs text-yellow-800">
-                            <b>Smart Fill Active:</b> Cells highlighted in <span class="bg-yellow-200 px-1 rounded border border-yellow-300">yellow</span> have been auto-filled with default data. Please review.
-                        </p>
+                        <p class="text-xs text-yellow-800"><b>Smart Fill Active:</b> Cells highlighted in <span class="bg-yellow-200 px-1 rounded border border-yellow-300">yellow</span> have been auto-filled with default data. Please review.</p>
                     </div>
-
                     <div id="staged-preview" class="hidden mt-6 border-t border-slate-100 pt-4">
-                        <div class="flex justify-between items-center mb-3">
+
+
+
+
+                   <div class="flex justify-between items-center mb-3">
                             <div>
                                 <h4 class="font-bold text-slate-700">Review & Edit</h4>
                                 <p class="text-xs text-slate-500" id="staged-count">0 rows ready • Click cells to edit</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="resetUpload()" class="px-3 py-2 text-sm text-slate-500 hover:text-slate-800">Cancel</button>
-                                <button id="btn-clean" onclick="removeErrors()" class="hidden px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded font-medium transition">
-                                    <i class="fa-solid fa-broom mr-1"></i> Remove Invalid Rows
-                                </button>
-                                <button id="btn-commit" onclick="commitData()" disabled class="px-4 py-2 text-sm bg-gray-300 text-white rounded shadow font-medium cursor-not-allowed transition-colors">
-                                    <i class="fa-solid fa-database mr-1"></i> Commit to DB
-                                </button>
+
+                            <div class="flex items-center gap-3">
+                                <div class="hidden md:flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-md shadow-sm">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
+                                    <span class="text-xs font-extrabold text-amber-700 uppercase tracking-wide">
+                                        Commit is Irreversible
+                                    </span>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button onclick="resetUpload()" class="px-3 py-2 text-sm text-slate-500 hover:text-slate-800 transition">Cancel</button>
+                                    <button id="btn-clean" onclick="removeErrors()" class="hidden px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded font-medium transition"><i class="fa-solid fa-broom mr-1"></i> Remove Invalid Rows</button>
+                                    <button id="btn-commit" onclick="commitData()" disabled class="px-4 py-2 text-sm bg-gray-300 text-white rounded shadow font-medium cursor-not-allowed transition-colors"><i class="fa-solid fa-database mr-1"></i> Commit to DB</button>
+                                </div>
                             </div>
-                        </div>
+                            </div>
 
-                        <div id="validation-summary" class="hidden mb-4 p-3 rounded text-sm"></div>
-
+<div id="validation-summary" class="hidden mb-4 p-3 rounded text-sm"></div>
                         <div class="bg-slate-50 rounded border border-slate-200 overflow-hidden">
                             <div class="overflow-x-auto max-h-[300px]">
                                 <table class="min-w-full text-xs text-left">
-                                    <thead class="bg-slate-100 text-slate-500 sticky top-0 z-10">
-                                        <tr id="preview-header"></tr>
-                                    </thead>
+                                    <thead class="bg-slate-100 text-slate-500 sticky top-0 z-10"><tr id="preview-header"></tr></thead>
                                     <tbody id="preview-body" class="bg-white divide-y divide-slate-100"></tbody>
                                 </table>
                             </div>
@@ -788,63 +933,90 @@
             </div>
 
             <div id="view-matching" class="view-section hidden fade-in">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 class="font-bold text-slate-800 mb-4">Matching Logic</h3>
                     <div class="flex flex-col md:flex-row gap-4 mb-6">
                         <label class="flex-1 flex items-center gap-3 border p-4 rounded-lg cursor-pointer hover:bg-slate-50 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                             <input type="radio" name="algo" value="FIFO" checked class="accent-blue-600 w-4 h-4">
-                            <div>
-                                <div class="font-bold text-slate-700">FIFO</div>
-                                <div class="text-xs text-slate-500">First-In, First-Out (Oldest imports used first)</div>
-                            </div>
+                            <div><div class="font-bold text-slate-700">FIFO</div><div class="text-xs text-slate-500">First-In, First-Out (Oldest imports used first)</div></div>
                         </label>
                         <label class="flex-1 flex items-center gap-3 border p-4 rounded-lg cursor-pointer hover:bg-slate-50 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                             <input type="radio" name="algo" value="MAX_RECOVERY" class="accent-blue-600 w-4 h-4">
-                            <div>
-                                <div class="font-bold text-slate-700">Maximize Duty</div>
-                                <div class="text-xs text-slate-500">Prioritize high-duty imports for higher refund</div>
-                            </div>
+                            <div><div class="font-bold text-slate-700">Maximize Duty</div><div class="text-xs text-slate-500">Prioritize high-duty imports for higher refund</div></div>
                         </label>
                     </div>
-                    <button onclick="runMatching()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-md transition transform active:scale-[0.99]">
-                        Execute Matching
-                    </button>
+                    <button onclick="runMatching()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-md transition transform active:scale-[0.99]">Execute Matching</button>
                     <p class="text-xs text-center text-slate-400 mt-2"><i class="fa-solid fa-arrow-down mr-1"></i> After matching, proceed to <b>Reviewer Console</b> below.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold flex justify-between">
-                        <span>Transaction Results</span>
-                        <span class="text-xs font-normal text-slate-500 self-center">Showing latest matches from DB</span>
-                    </div>
-                    <div class="overflow-x-auto max-h-[600px]">
-                        <table class="min-w-full text-xs text-left" id="matches-table">
-                            <thead class="bg-white text-slate-500 border-b sticky top-0 z-10"></thead>
-                            <tbody class="divide-y divide-slate-50 text-[11px]" id="matches-body">
-                                <tr><td colspan="23" class="p-8 text-center text-slate-400">No matches run yet.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold flex justify-between"><span>Transaction Results</span><span class="text-xs font-normal text-slate-500 self-center">Showing latest matches from DB</span></div>
+                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left" id="matches-table"><thead class="bg-white text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="matches-body"><tr><td colspan="23" class="p-8 text-center text-slate-400">No matches run yet.</td></tr></tbody></table></div>
                 </div>
             </div>
 
             <div id="view-reviewer" class="view-section hidden fade-in">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-100 bg-blue-50 flex justify-between items-center">
+                        <div><h3 class="font-bold text-blue-800"><i class="fa-solid fa-magnifying-glass mr-2"></i>Reviewer Console</h3><p class="text-xs text-blue-600 mt-1">Review matches before approval.</p></div>
+                        <div class="flex items-center gap-3"><button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition"><i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim</button><button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left" id="reviewer-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="reviewer-body"><tr><td colspan="24" class="p-8 text-center text-slate-400">Loading Queue...</td></tr></tbody></table></div>
+                </div>
+            </div>
+
+
+            <div id="view-approver" class="view-section hidden fade-in">
+                <div id="approver-summary-view" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-blue-800"><i class="fa-solid fa-magnifying-glass mr-2"></i>Reviewer Console</h3>
-                            <p class="text-xs text-blue-600 mt-1">Review matches before submitting to claim batch.</p>
+                            <h3 class="font-bold text-emerald-800"><i class="fa-solid fa-inbox mr-2"></i>Pending Approvals</h3>
+                            <p class="text-xs text-emerald-600 mt-1">Select a claim batch to review and finalize.</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition">
-                                <i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim
+                        <button onclick="loadApproverSummary()" class="text-sm bg-white border border-emerald-200 text-emerald-600 px-3 py-1 rounded hover:bg-emerald-100 transition">
+                            <i class="fa-solid fa-rotate mr-1"></i>Refresh List
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-500 border-b text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold align-middle text-left">Claim ID</th>
+                                    <th class="px-6 py-3 font-semibold text-center align-middle">Total Items</th>
+                                    <th class="px-6 py-3 font-semibold text-right align-middle">Total Value</th>
+                                    <th class="px-6 py-3 font-semibold text-center align-middle">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50" id="approver-summary-body">
+                                <tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Loading pending claims...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="approver-detail-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <button onclick="backToApproverList()" class="text-emerald-700 hover:bg-emerald-100 px-3 py-1 rounded text-xs font-bold transition">
+                                <i class="fa-solid fa-arrow-left mr-1"></i> Back
                             </button>
-                            <button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+                            <div class="h-6 w-px bg-emerald-200"></div>
+                            <div>
+                                <h3 class="font-bold text-emerald-800"><i class="fa-solid fa-stamp mr-2"></i>Audit Claim: <span id="approver-active-claim" class="font-mono bg-emerald-100 px-2 rounded">...</span></h3>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <button onclick="processBulkAction('return')" class="text-sm bg-white border border-red-200 text-red-600 px-3 py-1 rounded hover:bg-red-50 font-medium">
+                                <i class="fa-solid fa-rotate-left mr-1"></i>Return Selected
+                            </button>
+                            <button onclick="processBulkAction('approve')" class="text-sm bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 font-bold shadow-sm">
+                                <i class="fa-solid fa-check mr-1"></i>Approve Selected
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto max-h-[600px]">
-                        <table class="min-w-full text-xs text-left" id="reviewer-table">
+                        <table class="min-w-full text-xs text-left" id="approver-table">
                             <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead>
-                            <tbody class="divide-y divide-slate-50 text-[11px]" id="reviewer-body">
+                            <tbody class="divide-y divide-slate-50 text-[11px]" id="approver-body">
                                 <tr><td colspan="24" class="p-8 text-center text-slate-400">Loading Queue...</td></tr>
                             </tbody>
                         </table>
@@ -852,48 +1024,245 @@
                 </div>
             </div>
 
-            <div id="view-history" class="view-section hidden fade-in">
-                <div id="history-summary-view" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims Archive</h3>
-                            <p class="text-xs text-purple-600 mt-1">Audit historical claims and download reports.</p>
-                        </div>
-                        <div class="flex gap-2">
-                             <button onclick="window.open(API_BASE + '/drawback/api/export_matches')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium">
-                                <i class="fa-solid fa-file-csv mr-1"></i> Export All
-                            </button>
-                        </div>
+<div id="view-history" class="view-section hidden fade-in">
+                 <div id="history-summary-view" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                      <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
+                        <div><h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims History</h3><p class="text-xs text-purple-600 mt-1">Select a Claim ID to view details or download specific reports.</p></div>
+                        <div class="flex gap-2"><button onclick="window.open(API_BASE + '/drawback/api/export_matches')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium"><i class="fa-solid fa-file-csv mr-1"></i> Export All</button></div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-left" id="history-summary-table">
-                            <thead class="bg-slate-50 text-slate-500 border-b"></thead>
-                            <tbody class="divide-y divide-slate-50" id="history-summary-body">
-                                <tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Loading Archive...</td></tr>
-                            </tbody>
-                        </table>
+                    <div class="overflow-x-auto"><table class="min-w-full text-sm text-left" id="history-summary-table"><thead class="bg-slate-50 text-slate-500 border-b"></thead><tbody class="divide-y divide-slate-50" id="history-summary-body"><tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Loading History...</td></tr></tbody></table></div>
+                </div>
+                <div id="history-detail-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
+                        <div class="flex items-center gap-4"><button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back to List</button><div class="h-6 w-px bg-purple-200"></div><div><h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3></div></div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left" id="history-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="history-body"><tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Claim Data...</td></tr></tbody></table></div>
+                </div>
+            </div>
+
+            <div id="view-help" class="view-section hidden fade-in max-w-5xl mx-auto pb-20">
+
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-10 text-white mb-10 shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h1 class="text-4xl font-bold mb-4 tracking-tight">DrawbackFlow Enterprise Guide</h1>
+                        <p class="text-lg opacity-90 max-w-2xl">The complete manual for managing your Duty Drawback program. From data ingestion to financial recovery, master every step of the workflow.</p>
+                    </div>
+                    <i class="fa-solid fa-book-open absolute -bottom-6 -right-6 text-9xl opacity-10 text-white transform rotate-12"></i>
+                </div>
+
+                <div class="mb-12">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span> The Core Workflow</h2>
+                    <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+                         <div class="flex flex-col md:flex-row justify-between items-center text-center gap-6 relative">
+                            <div class="hidden md:block absolute top-1/3 left-0 w-full h-1 bg-slate-100 -z-0 transform -translate-y-1/2"></div>
+
+                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
+                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">
+                                    <i class="fa-solid fa-cloud-upload"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-700">Data Upload/ Ingest</h4>
+                                    <p class="text-xs text-slate-400">Upload & Validate Data</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
+                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-indigo-500 group-hover:text-indigo-600 transition-all duration-300">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-700">Match</h4>
+                                    <p class="text-xs text-slate-400">Execute Import-Export Matching</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
+                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-700">Review</h4>
+                                    <p class="text-xs text-slate-400">Review The Matching & Create Claims</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
+                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-emerald-500 group-hover:text-emerald-600 transition-all duration-300">
+                                    <i class="fa-solid fa-stamp"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-700">Approve</h4>
+                                    <p class="text-xs text-slate-400">Approve & Local Claims</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
+                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-purple-500 group-hover:text-purple-600 transition-all duration-300">
+                                    <i class="fa-solid fa-flag-checkered"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-700">Finalize</h4>
+                                    <p class="text-xs text-slate-400">Broker Handshake</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div id="history-detail-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition">
-                                <i class="fa-solid fa-arrow-left mr-1"></i> Back to List
-                            </button>
-                            <div class="h-6 w-px bg-purple-200"></div>
-                            <h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3>
+                <div class="mb-12">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">2</span> Data Management Rules</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="guide-card">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                <h3 class="font-bold text-lg text-slate-700">Strict Validation</h3>
+                            </div>
+                            <p class="text-sm text-slate-500 mb-4">The system rejects bad data *before* it enters the database. Common rejection reasons:</p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3 text-sm text-slate-600">
+                                    <i class="fa-solid fa-calendar-xmark text-red-400 mt-1"></i>
+                                    <div><strong class="text-slate-800">Future Dates:</strong> Import/Export dates cannot be in the future.</div>
+                                </li>
+                                <li class="flex items-start gap-3 text-sm text-slate-600">
+                                    <i class="fa-solid fa-ruler-combined text-red-400 mt-1"></i>
+                                    <div><strong class="text-slate-800">Invalid UOM:</strong> Must match whitelist (KG, PCS, M, SQM, L, etc).</div>
+                                </li>
+                                <li class="flex items-start gap-3 text-sm text-slate-600">
+                                    <i class="fa-solid fa-hashtag text-red-400 mt-1"></i>
+                                    <div><strong class="text-slate-800">Entry Number Format:</strong> Must contain alphanumeric characters (not just text).</div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-card">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <h3 class="font-bold text-lg text-slate-700">Smart Fill & Warnings</h3>
+                            </div>
+                             <p class="text-sm text-slate-500 mb-4">Yellow cells indicate the system has auto-corrected or defaulted data.</p>
+                             <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
+                                 <span class="text-xs font-bold text-yellow-800 uppercase">Example:</span>
+                                 <p class="text-xs text-yellow-700 mt-1">If a UOM is missing in the upload, the system may default it to <b>'PCS'</b> based on the Product Master. Always review yellow cells.</p>
+                             </div>
+                             <div class="flex items-center gap-2">
+                                 <div class="h-6 w-20 bg-yellow-100 border border-yellow-300 rounded text-center text-xs flex items-center justify-center text-yellow-800 font-mono">PCS</div>
+                                 <span class="text-xs text-slate-400">← Staging Area Appearance</span>
+                             </div>
                         </div>
                     </div>
-                    <div class="overflow-x-auto max-h-[600px]">
-                        <table class="min-w-full text-xs text-left" id="history-table">
-                            <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead>
-                            <tbody class="divide-y divide-slate-50 text-[11px]" id="history-body">
-                                <tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Details...</td></tr>
-                            </tbody>
-                        </table>
+                </div>
+
+                <div class="mb-12">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span> The Matching Engine</h2>
+                    <div class="guide-card">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div class="col-span-1 border-r border-slate-100 pr-8">
+                                <h4 class="font-bold text-slate-700 mb-4">Strategy Selection</h4>
+                                <div class="space-y-4">
+                                    <div class="p-3 border rounded-lg bg-slate-50">
+                                        <div class="font-bold text-sm text-slate-800">FIFO (Default)</div>
+                                        <div class="text-xs text-slate-500 mt-1">First-In, First-Out. Consumes oldest inventory first. Best for compliance standard.</div>
+                                    </div>
+                                    <div class="p-3 border rounded-lg bg-slate-50">
+                                        <div class="font-bold text-sm text-slate-800">Maximize Duty</div>
+                                        <div class="text-xs text-slate-500 mt-1">Prioritizes imports with highest duty paid. Best for financial optimization.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <h4 class="font-bold text-slate-700 mb-4">Core Calculations</h4>
+                                <ul class="space-y-4">
+                                    <li class="flex gap-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">1</div>
+                                        <div>
+                                            <h5 class="font-bold text-sm text-slate-800">Date Integrity Check</h5>
+                                            <p class="text-xs text-slate-500">The engine strictly compares <span class="font-mono bg-slate-100 px-1 rounded">Import Date <= Export Date</span>. Any import arriving after the export is skipped.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex gap-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">2</div>
+                                        <div>
+                                            <h5 class="font-bold text-sm text-slate-800">Unit Conversion</h5>
+                                            <p class="text-xs text-slate-500">
+                                                Uses Product Master to convert units. <br>
+                                                Formula: <span class="font-mono bg-slate-100 px-1 rounded">Export Qty * Conversion Factor = Required Import Qty</span>
+                                            </p>
+                                        </div>
+                                    </li>
+                                     <li class="flex gap-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">3</div>
+                                        <div>
+                                            <h5 class="font-bold text-sm text-slate-800">Financials</h5>
+                                            <p class="text-xs text-slate-500">
+                                                Refund is calculated as: <span class="font-mono bg-slate-100 px-1 rounded">(Matched Qty * Unit Duty) * 99%</span>. The 1% is retained by government statute.
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                     <div class="guide-card">
+                        <h3 class="font-bold text-lg text-slate-700 mb-4">Roles & Responsibilities</h3>
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded flex items-center justify-center"><i class="fa-solid fa-magnifying-glass"></i></div>
+                                <div>
+                                    <div class="font-bold text-sm text-slate-800">Reviewer</div>
+                                    <p class="text-xs text-slate-500">Audits Draft matches. Can edit refund amounts. Groups items into Claims.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded flex items-center justify-center"><i class="fa-solid fa-stamp"></i></div>
+                                <div>
+                                    <div class="font-bold text-sm text-slate-800">Approver</div>
+                                    <p class="text-xs text-slate-500"> audits "Reviewed" claims. Can Approve (Lock) or Return (Reject) items.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-card">
+                        <h3 class="font-bold text-lg text-slate-700 mb-4">Status Glossary</h3>
+                        <div class="space-y-2">
+                             <div class="flex justify-between items-center text-xs">
+                                <span class="status-badge status-draft">DRAFT</span>
+                                <span class="text-slate-500">Raw match. Visible to Reviewer.</span>
+                            </div>
+                             <div class="flex justify-between items-center text-xs">
+                                <span class="status-badge status-reviewed">REVIEWED</span>
+                                <span class="text-slate-500">Grouped in Claim. Visible to Approver.</span>
+                            </div>
+                             <div class="flex justify-between items-center text-xs">
+                                <span class="status-badge status-approved">APPROVED</span>
+                                <span class="text-slate-500">Internally accepted. Ready for Broker.</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="status-badge status-complete">COMPLETE</span>
+                                <span class="text-slate-500">Filed with Customs. Broker ID attached.</span>
+                            </div>
+                             <div class="flex justify-between items-center text-xs">
+                                <span class="status-badge status-void">VOIDED</span>
+                                <span class="text-slate-500">Cancelled. Inventory Restored.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start">
+                    <i class="fa-solid fa-circle-exclamation text-purple-600 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-purple-800 text-sm">Critical: The Broker Handshake</h3>
+                        <p class="text-sm text-purple-700 mt-1 leading-relaxed">
+                            A claim is <b>not</b> considered finished until you locate it in the <b>History</b> tab and click <b>"Mark Final"</b>. You must enter the external Broker Claim ID (e.g., from ACE). This action stamps the final approval date and locks the record as "COMPLETE".
+                        </p>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -905,18 +1274,27 @@
         // ============================================
         const API_BASE = '';
         let isOfflineMode = false;
+
         let currentView = 'dashboard';
         let stagedData = [];
+
+        // --- SELECTION SETS ---
+        let approverSelection = new Set();
         let reviewerSelection = new Set();
-        let sortDirections = {};
-        const currentUserRole = 'REVIEWER'; // HARDCODED FOR THIS UI EDITION
+        let sortDirections = {}; // 🆕 Stores sort state per column
+
+        // UPDATED: Default Role is REVIEWER
+        let currentUserRole = 'REVIEWER';
 
         // --- STRICT COLUMN CONFIGURATION ---
+        // 🚨 FIX Issue 20: Added 'origin_plant' to Exports
+        // 🆕 ADDED 'qty_consumed' to imports and exports
         const TABLE_CONFIG = {
             imports: [
                 { k: 'entry_number', l: 'Entry Summary #' },
                 { k: 'material_number', l: 'Material #' },
                 { k: 'qty', l: 'Qty' },
+                { k: 'qty_consumed', l: 'Consumed' }, // NEW
                 { k: 'uom', l: 'UOM' },
                 { k: 'import_date', l: 'Date' },
                 { k: 'duty_paid', l: 'Duty Paid' },
@@ -931,6 +1309,7 @@
                 { k: 'material_number', l: 'Material' },
                 { k: 'description', l: 'Description' },
                 { k: 'qty', l: 'Quantity' },
+                { k: 'qty_consumed', l: 'Consumed' }, // NEW
                 { k: 'uom', l: 'UOM' },
                 { k: 'country', l: 'Country' },
                 { k: 'invoice_no', l: 'Invoice No' },
@@ -983,7 +1362,7 @@
                     <span>${title}</span>
                     <i class="fa-solid fa-sort text-slate-300 hover:text-slate-600 transition" id="sort-icon-${tableId}-${colIdx}"></i>
                 </div>
-                <input type="text" class="th-input" onclick="event.stopPropagation()" onkeyup="filterMulti('${tableId}')" placeholder="Filter...">
+                <input type="text" class="th-input" onclick="event.stopPropagation()" onkeyup="filterMulti('${tableId}')" placeholder="Search...">
                 <div class="resizer" onmousedown="initResize(event, this)"></div>
             </div>`;
         }
@@ -1106,16 +1485,109 @@
             }
         }
 
-        // --- SAFE FETCH (The core connector to your Python Backend) ---
-        async function safeFetch(endpoint, options={}) {
-            if (window.location.protocol === 'file:') {
-                 // ALERT: If opened as file://, API calls will fail due to CORS.
-                 updateServerStatus(false);
-                 console.error("Cannot call API from file:// protocol. Please serve via Flask.");
-                 return { success: false, data: [] };
+
+
+            // --- ROLE MANAGEMENT & UI LOGIC (UPDATED) ---
+            function updateRoleUI() {
+
+                currentUserRole = 'REVIEWER';
+<!--                currentUserRole = document.getElementById('role-switcher').value;-->
+<!--                showToast(`Role Switched to ${currentUserRole}`, "success");-->
+
+                const navProducts = document.getElementById('nav-products');
+                const navMappings = document.getElementById('nav-material_mappings');
+                const navImports = document.getElementById('nav-imports');
+                const navExports = document.getElementById('nav-exports');
+                const navMatching = document.getElementById('nav-matching');
+                const navReviewer = document.getElementById('nav-reviewer');
+                const navApprover = document.getElementById('nav-approver');
+                const navHistory = document.getElementById('nav-history');
+
+                // Header Elements
+                const headData = document.getElementById('header-data');
+                const headProcess = document.getElementById('header-process');
+                const headWorkflow = document.getElementById('header-workflow');
+
+                // Dashboard Sections
+                const matchSummarySection = document.getElementById('dashboard-matching-section');
+
+                // 🆕 Pending Approval Card Elements
+                const pendingCard = document.getElementById('card-pending-approval');
+                const pendingArrow = document.getElementById('arrow-pending-approval');
+
+                // 🆕 Unrealized Claims Card Elements
+                const unrealizedCard = document.getElementById('card-unrealized');
+                const unrealizedArrow = document.getElementById('arrow-unrealized');
+
+                // 1. Reset Visibility (Show All by default)
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.nav-header').forEach(el => el.classList.remove('hidden'));
+
+                // Reset Dashboard Visibility (Show Matching Summary by default)
+                if(matchSummarySection) matchSummarySection.classList.remove('hidden');
+
+                if (currentUserRole === 'REVIEWER') {
+                    navApprover.classList.add('hidden');
+                    if(currentView === 'approver') {
+                        switchView('reviewer');
+                    }
+
+                    // 🆕 REVIEWER: Disable Click & Hide Arrow on Pending Card
+                    if(pendingCard) {
+                        pendingCard.classList.remove('clickable-card', 'cursor-pointer');
+                        pendingCard.removeAttribute('onclick');
+                    }
+                    if(pendingArrow) pendingArrow.classList.add('hidden');
+
+                    // 🆕 REVIEWER: Enable Click & Show Arrow on Unrealized Card (Nav to Imports)
+                    if (unrealizedCard) {
+                        unrealizedCard.classList.add('clickable-card', 'cursor-pointer');
+                        unrealizedCard.setAttribute('onclick', "switchView('imports')");
+                    }
+                    if (unrealizedArrow) unrealizedArrow.classList.remove('hidden');
+
+                } else if (currentUserRole === 'APPROVER') {
+                    navProducts.classList.add('hidden');
+                    navMappings.classList.add('hidden');
+                    navImports.classList.add('hidden');
+                    navExports.classList.add('hidden');
+                    navMatching.classList.add('hidden');
+                    navReviewer.classList.add('hidden');
+
+                    headData.classList.add('hidden');
+                    headProcess.classList.add('hidden');
+
+                    // Hide Matching Summary for Approver
+                    if(matchSummarySection) matchSummarySection.classList.add('hidden');
+
+                    // 🆕 APPROVER: Enable Click & Show Arrow on Pending Card
+                    if(pendingCard) {
+                        pendingCard.classList.add('clickable-card', 'cursor-pointer');
+                        pendingCard.setAttribute('onclick', "switchView('approver')");
+                    }
+                    if(pendingArrow) pendingArrow.classList.remove('hidden');
+
+                    // 🆕 APPROVER: Disable Click & Hide Arrow on Unrealized Card
+                    if (unrealizedCard) {
+                        unrealizedCard.classList.remove('clickable-card', 'cursor-pointer');
+                        unrealizedCard.removeAttribute('onclick');
+                    }
+                    if (unrealizedArrow) unrealizedArrow.classList.add('hidden');
+
+                    if(['products', 'material_mappings', 'imports', 'exports', 'matching', 'reviewer'].includes(currentView)) {
+                        switchView('approver');
+                    }
+                }
             }
+
+
+
+
+
+            // --- ROLE MANAGEMENT & UI LOGIC (UPDATED) ---
+// --- SAFE FETCH ---
+        async function safeFetch(endpoint, options={}) {
             try {
-                // This builds the full URL: e.g. http://localhost:7011/drawback/api/stats
                 const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
                 const res = await fetch(url, options);
                 if (!res.ok) throw new Error("API Error");
@@ -1125,7 +1597,6 @@
                 return json;
             } catch (e) {
                 console.error("API Failed:", e);
-                updateServerStatus(false);
                 return { success: false, data: [] };
             }
         }
@@ -1134,21 +1605,15 @@
         function updateServerStatus(isOnline) {
             const statusEl = document.getElementById('server-status');
             const banner = document.getElementById('demo-banner');
-
-            // Check for file protocol first
-            if (window.location.protocol === 'file:') {
-                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> FILE MODE (No API)';
-                statusEl.className = 'flex items-center font-bold text-amber-600';
-                return;
-            }
-
             if(isOnline) {
                 statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> Connected (RDS)';
-                statusEl.className = 'flex items-center font-bold text-green-600';
-                if(banner) banner.classList.add('hidden'); // SAFE CHECK
+                statusEl.classList.remove('text-amber-600', 'text-red-600');
+                statusEl.classList.add('text-green-600');
+                banner.classList.add('hidden');
             } else {
                 statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Connection Lost';
-                statusEl.className = 'flex items-center font-bold text-red-600';
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.add('text-red-600');
             }
         }
 
@@ -1160,7 +1625,9 @@
 
             document.getElementById(`page-title`).innerText =
                 viewId === 'reviewer' ? 'Reviewer Console' :
+                viewId === 'approver' ? 'Approver Portal' :
                 viewId === 'history' ? 'Claims History' :
+                viewId === 'help' ? 'Help / User Guide' :
                 viewId.charAt(0).toUpperCase() + viewId.slice(1);
 
             if(viewId === 'dashboard') {
@@ -1174,9 +1641,17 @@
             } else if(viewId === 'reviewer') {
                 document.getElementById('view-reviewer').classList.remove('hidden');
                 loadWorkflowData('reviewer');
+            } else if(viewId === 'approver') {
+                document.getElementById('view-approver').classList.remove('hidden');
+                // Reset to summary view on tab switch
+                document.getElementById('approver-detail-view').classList.add('hidden');
+                document.getElementById('approver-summary-view').classList.remove('hidden');
+                loadApproverSummary();
             } else if(viewId === 'history') {
                 document.getElementById('view-history').classList.remove('hidden');
                 showHistorySummary();
+            } else if (viewId === 'help') {
+                document.getElementById('view-help').classList.remove('hidden');
             } else {
                 document.getElementById('view-management').classList.remove('hidden');
                 let title = viewId.charAt(0).toUpperCase() + viewId.slice(1);
@@ -1188,11 +1663,13 @@
             currentView = viewId;
         }
 
+
+
+
         // --- DASHBOARD (UPDATED FOR NEW DESIGN) ---
         async function loadStats() {
             toggleLoading(true, "Updating Dashboard...");
             try {
-                // CALLS BACKEND: /drawback/api/stats
                 const json = await safeFetch('/drawback/api/stats');
                 const potential = json?.data?.kpis?.potential_duty || 0;
                 const recovered = json?.data?.kpis?.recovered_duty || 0;
@@ -1225,16 +1702,27 @@
                 document.getElementById('stat-matches-success').innerText = matchSuccess;
                 document.getElementById('stat-matches-fail').innerText = matchFail;
 
-                document.getElementById('stat-import-quality').innerText = "0%";
-                document.getElementById('stat-export-quality').innerText = "0%";
-                document.getElementById('stat-matching-time').innerText = "0s";
+                // REMOVED: JS lines updating performance metrics to avoid null reference errors
+                // document.getElementById('stat-import-quality').innerText = "0%";
+                // document.getElementById('stat-export-quality').innerText = "0%";
+                // document.getElementById('stat-matching-time').innerText = "0s";
 
                 // FIX: Add Dynamic Headers to Inventory Table Here
                 renderDynamicHeaders('inventory-table', ['Material Number', 'Total Imported', 'Available', 'Utilization'], 0);
 
                 const invBody = document.getElementById('inventory-body');
+
+
                 if (json.data && json.data.inventory && json.data.inventory.length > 0) {
-                    invBody.innerHTML = json.data.inventory.map(item => {
+                    // 🆕 1. Sort by Utilization Descending (Highest % first)
+                    const sortedInventory = json.data.inventory.sort((a, b) => {
+                        const utilA = a.total_original > 0 ? (1 - (a.total_available / a.total_original)) : 0;
+                        const utilB = b.total_original > 0 ? (1 - (b.total_available / b.total_original)) : 0;
+                        return utilB - utilA;
+                    });
+
+                    // 🆕 2. Map the SORTED array
+                    invBody.innerHTML = sortedInventory.map(item => {
                         const utilization = item.total_original > 0 ? ((1 - (item.total_available / item.total_original)) * 100).toFixed(1) : 0;
                         let color = "bg-blue-600";
                         if (utilization > 80) color = "bg-emerald-500";
@@ -1257,7 +1745,8 @@
                 } else {
                     invBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">No inventory data found.</td></tr>`;
                 }
-            } catch (e) {
+
+} catch (e) {
                 console.error(e);
             } finally {
                 toggleLoading(false);
@@ -1300,7 +1789,6 @@
             tbody.innerHTML = "";
 
             try {
-                // CALLS BACKEND: /drawback/api/view/<target>
                 const data = await safeFetch(`/drawback/api/view/${target}`);
                 const rows = Array.isArray(data) ? data : [];
                 const config = TABLE_CONFIG[target];
@@ -1308,7 +1796,7 @@
 
                 // 🆕 Generate Headers dynamically
                 const labels = config.map(c => c.l);
-                renderDynamicHeaders('data-table', labels, 2); // 2 = Has Delete Action Column
+                renderDynamicHeaders('data-table', labels, 0); // 0 = No Action Column
 
                 if(rows.length === 0) {
                     // Issue 1: Hide Table Container completely if empty
@@ -1324,18 +1812,18 @@
 
                         bRows += `<tr class="${rowClass}">`;
 
-                        let deleteBtn = `<button onclick="deleteRow('${target}', '${row.id}')" class="text-slate-300 hover:text-red-600 transition p-2"><i class="fa-solid fa-trash"></i></button>`;
-                        if(['imports', 'exports', 'products'].includes(target)) {
-                             deleteBtn = `<span class="text-gray-300 cursor-not-allowed" title="Deletion Restricted"><i class="fa-solid fa-lock"></i></span>`;
-                        }
-                        bRows += `<td class="px-6 py-3 text-center">${deleteBtn}</td>`;
-
                         config.forEach(col => {
                             let val = row[col.k] || "";
                             if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
                                 val = formatMoney(val);
                             }
-                            bRows += `<td class="px-6 py-3 text-slate-600 whitespace-nowrap text-center">${val}</td>`;
+                            // NEW: Specific styling for Consumed Qty column
+                            let cellClasses = "px-6 py-3 text-slate-600 whitespace-nowrap text-center";
+                            if(col.k === 'qty_consumed') {
+                                cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";
+                            }
+
+                            bRows += `<td class="${cellClasses}">${val}</td>`;
                         });
                         bRows += `</tr>`;
                     });
@@ -1425,7 +1913,6 @@
             toggleLoading(true, "Grouping and Submitting...");
 
             try {
-                // CALLS BACKEND: /drawback/api/workflow/action
                 const res = await safeFetch('/drawback/api/workflow/action', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1449,10 +1936,110 @@
             }
         }
 
-        // --- 🆕 APPROVER CLAIM DROPDOWN LOGIC ---
-        // (Removed in this file as it is Reviewer Only)
+        // --- 🆕 APPROVER SUMMARY LOGIC (REPLACES DROPDOWN LOGIC) ---
+        async function loadApproverSummary() {
+            const tbody = document.getElementById('approver-summary-body');
+            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic"><div class="spinner mx-auto mb-2"></div>Fetching Pending Claims...</td></tr>`;
+
+            try {
+                const json = await safeFetch('/drawback/api/claims/list/REVIEWED');
+                if (json.data && json.data.length > 0) {
+                    tbody.innerHTML = json.data.map(c => `
+                        <tr class="hover:bg-emerald-50 transition border-b border-slate-50">
+                            <td class="px-6 py-4 font-bold text-slate-700 font-mono text-left">${c.claim_id}</td>
+
+                            <td class="px-6 py-4 text-center text-slate-600">${c.count} items</td>
+                            <td class="px-6 py-4 text-right font-bold text-emerald-600">${formatMoney(c.total_val)}</td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="openApproverClaim('${c.claim_id}')" class="bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white px-4 py-1.5 rounded-full text-xs font-bold transition shadow-sm">
+                                    Review <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No claims pending approval. Good job!</td></tr>`;
+                }
+            } catch(e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400 italic">Error loading claims list.</td></tr>`;
+            }
+        }
+
+
+
+
+
+
+        function openApproverClaim(claimId) {
+            document.getElementById('approver-summary-view').classList.add('hidden');
+            document.getElementById('approver-detail-view').classList.remove('hidden');
+            document.getElementById('approver-active-claim').innerText = claimId;
+            loadApproverQueue(claimId);
+        }
+
+        function backToApproverList() {
+            document.getElementById('approver-detail-view').classList.add('hidden');
+            document.getElementById('approver-summary-view').classList.remove('hidden');
+            loadApproverSummary(); // Refresh list to reflect changes
+        }
+
+        // Updated to accept ID directly
+
+        // Updated to accept ID directly
+        async function loadApproverQueue(claimId) {
+            if(!claimId) return;
+            toggleLoading(true, `Loading Claim ${claimId}...`);
+
+            try {
+                // Initialize Approver Table Headers dynamically if empty
+                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];
+                renderDynamicHeaders('approver-table', approverHeaders, 1);
+
+                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);
+                const data = json.data || [];
+
+                // 🚀 [PATCH] Auto-Redirect Logic: If queue is empty, go back to summary
+                if (data.length === 0) {
+                     renderApproverTable([]); // Clear visual table immediately
+                     showToast("Audit Complete. Returning to Summary...", "success");
+
+                     // Small delay to let the user see the "Success" message before switching views
+                     setTimeout(() => {
+                         backToApproverList();
+                     }, 1200);
+                     return;
+                }
+
+                renderApproverTable(data);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+
+<!--        async function loadApproverQueue(claimId) {-->
+<!--            if(!claimId) return;-->
+<!--            toggleLoading(true, `Loading Claim ${claimId}...`);-->
+
+<!--            try {-->
+<!--                // Initialize Approver Table Headers dynamically if empty-->
+<!--                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];-->
+<!--                renderDynamicHeaders('approver-table', approverHeaders, 1);-->
+
+<!--                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);-->
+<!--                const data = json.data || [];-->
+<!--                renderApproverTable(data);-->
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
 
         // --- 🚀 NEW HISTORY UI LOGIC ---
+        // ... (Next function: showHistorySummary) ...
+
+        // --- 🆕 APPROVER CLAIM DROPDOWN LOGIC ---
+// --- 🚀 NEW HISTORY UI LOGIC ---
         function showHistorySummary() {
             document.getElementById('history-summary-view').classList.remove('hidden');
             document.getElementById('history-detail-view').classList.add('hidden');
@@ -1469,7 +2056,8 @@
                 if (json.data && json.data.length > 0) {
 
                     // 🆕 Render Headers for History Summary
-                    const headers = ['Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date', 'Final Acceptance'];
+                    // REORDERED: Final Acceptance (0) -> Actions (1) -> Claim ID (2) ...
+                    const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
                     renderDynamicHeaders('history-summary-table', headers, 0);
 
                     // 🛠️ HELPER: Force DD/MM/YYYY formatting manually
@@ -1486,16 +2074,12 @@
                             displayId = 'X' + displayId;
                         }
 
-                        let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
-                        if (c.voided_entries > 0 && c.valid_entries == 0) {
-                            statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
-                        } else if (c.voided_entries > 0) {
-                            statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
-                        }
-
                         // 🔥 Final Acceptance Logic (Truncated Date: DD/MM/YYYY)
                         let acceptanceHtml = '';
+                        let isFinalized = false;
+
                         if (c.finalized_date) {
+                            isFinalized = true;
                             const simpleFinalDate = toDDMMYYYY(c.finalized_date);
 
                             acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">
@@ -1503,13 +2087,28 @@
                                 <div class="text-left leading-tight">
                                     <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
                                     <div class="text-xs font-mono">${simpleFinalDate}</div>
+                                    <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>
                                 </div>
                             </div>`;
                         } else if (c.valid_entries > 0) {
-                             // Reviewers cannot Mark Final. Just show status.
-                            acceptanceHtml = `<span class="text-xs text-gray-400 italic">Pending Acceptance</span>`;
+                            acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto">
+                                <i class="fa-regular fa-square group-hover:hidden text-lg"></i>
+                                <i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i>
+                                <span class="text-xs font-semibold">Mark Final</span>
+                            </button>`;
                         } else {
                             acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;
+                        }
+
+                        // STATUS BADGE LOGIC (UPDATED: Priority to COMPLETED)
+                        let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
+
+                        if (isFinalized) {
+                            statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;
+                        } else if (c.voided_entries > 0 && c.valid_entries == 0) {
+                            statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
+                        } else if (c.voided_entries > 0) {
+                            statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
                         }
 
                         // Approved Date (Truncated Date: DD/MM/YYYY)
@@ -1517,6 +2116,7 @@
 
                         return `
                         <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
+                             <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
                             <td class="px-6 py-4 text-center">
                                  <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">
                                     <i class="fa-solid fa-download text-lg"></i>
@@ -1533,7 +2133,6 @@
                             <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
                             <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
                             <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${simpleApprovedDate}</td>
-                            <td class="px-6 py-4 text-center">${acceptanceHtml}</td>
                         </tr>
                     `}).join('');
             } else {
@@ -1544,9 +2143,47 @@
             }
         }
 
-        // 🔥 New Function: Mark Claim as Final (Reviewers generally can't do this, but keeping function structure for safety if code reused)
-        async function markClaimFinal(claimId) {
-             showToast("Only Approvers can finalize claims.", "warning");
+        // 🔥 Updated: Open Modal for Final Acceptance
+        function markClaimFinal(claimId) {
+            document.getElementById('final-claim-id').value = claimId;
+            document.getElementById('final-broker-id').value = ''; // Reset input
+            document.getElementById('final-modal').classList.remove('hidden');
+        }
+
+        // 🔥 New Function: Submit Final Acceptance with Broker ID
+        async function confirmFinalization() {
+            const claimId = document.getElementById('final-claim-id').value;
+            const brokerId = document.getElementById('final-broker-id').value.trim();
+
+            if (!brokerId) {
+                alert("Please enter the Broker Claim ID to proceed.");
+                return;
+            }
+
+            document.getElementById('final-modal').classList.add('hidden');
+            toggleLoading(true, "Finalizing Claim...");
+
+            try {
+                const res = await safeFetch('/drawback/api/workflow/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: 'COMPLETE',
+                        claim_id: claimId,
+                        broker_claim_id: brokerId,
+                        user: currentUserRole
+                    })
+                });
+
+                if(res.success) {
+                    showToast(`Claim ${claimId} Finalized Successfully`, "success");
+                    loadHistorySummary(); // Refresh table
+                } else {
+                    showToast("Finalization Failed", "error");
+                }
+            } finally {
+                toggleLoading(false);
+            }
         }
 
         function viewClaimDetails(claimId) {
@@ -1606,7 +2243,6 @@
 
         // --- SHARED WORKFLOW LOADER ---
         async function loadWorkflowData(role, filterClaimId = null) {
-            // Safety check although 'approver' case removed from switchView
             if(role === 'approver') return;
 
             toggleLoading(true, `Loading ${role} queue...`);
@@ -1695,7 +2331,41 @@
                 </tr>`}).join('');
         }
 
-        // Render Approver Table Function REMOVED as not needed for Reviewer UI
+        function renderApproverTable(data) {
+            const tbody = document.getElementById('approver-body');
+            approverSelection.clear();
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-400 italic">No matches in this claim.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(m => `
+                <tr class="border-b border-slate-50 hover:bg-emerald-50 transition">
+                     <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')" class="accent-emerald-600 w-4 h-4"></td>
+                    <td>${m.import_entry_number}</td>
+                    <td>${m.import_dec_line}</td>
+                    <td>${m.import_material_number}</td>
+                    <td>${m.export_material_number || m.matched_material_number}</td>
+                    <td>${m.import_date}</td>
+                    <td>${m.export_desc}</td>
+                    <td>${formatMoney(calcExportDuty(m))}</td>
+                    <td>${m.import_hts}</td>
+                    <td>${m.qty_matched}</td>
+                    <td>${m.import_uom}</td>
+                    <td>${m.export_entry_number}</td>
+                    <td>${m.export_date}</td>
+                    <td>${m.export_country}</td>
+                    <td>HTS</td>
+                    <td>${m.import_hts}</td>
+                    <td>${m.import_duty_rate}</td>
+                    <td>${formatMoney(calcUnitValue(m))}</td>
+                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
+                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
+                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
+                    <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
+                    <td><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">REVIEWED</span></td>
+                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>`).join('');
+        }
 
         function renderHistoryTable(data) {
             const tbody = document.getElementById('history-body');
@@ -1791,9 +2461,74 @@
             });
         }
 
-        // Approver Selection Toggles REMOVED
+        function toggleSelection(id) {
+            if (approverSelection.has(id)) approverSelection.delete(id);
+            else approverSelection.add(id);
+        }
 
-        // Bulk Actions (Approver) REMOVED
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('#approver-body input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+                if(source.checked) approverSelection.add(cb.value);
+                else approverSelection.delete(cb.value);
+            });
+        }
+
+        async function processBulkAction(action) {
+            if (approverSelection.size === 0) { showToast("Select items first", "warning"); return; }
+            const ids = Array.from(approverSelection);
+
+            if (action === 'return') {
+                document.getElementById('reject-modal').classList.remove('hidden');
+                document.getElementById('reject-reason').value = '';
+                return;
+            }
+
+            const status = 'APPROVED';
+            toggleLoading(true, `Approving ${ids.length} items...`);
+            try {
+                const res = await safeFetch('/drawback/api/workflow/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: ids, status: status, user: currentUserRole })
+                });
+
+                if(res.success) {
+                    showToast("Approved Successfully", "success");
+                    // Reload current queue to clear approved items
+                    const currentClaimId = document.getElementById('approver-active-claim').innerText;
+                    loadApproverQueue(currentClaimId);
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        async function confirmRejection() {
+            const ids = Array.from(approverSelection);
+            const reason = document.getElementById('reject-reason').value;
+            if(!reason) { alert("Reason is required"); return; }
+
+            document.getElementById('reject-modal').classList.add('hidden');
+            toggleLoading(true, "Returning items to Reviewer...");
+
+            try {
+                const res = await safeFetch('/drawback/api/workflow/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: ids, status: 'DRAFT', rejection_reason: reason, user: currentUserRole })
+                });
+
+                if(res.success) {
+                    showToast("Items Returned to Reviewer", "success");
+                    const currentClaimId = document.getElementById('approver-active-claim').innerText;
+                    loadApproverQueue(currentClaimId);
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
 
         function openEditModal(match) {
             document.getElementById('edit-match-id').value = match.match_id || match.id;
@@ -1894,141 +2629,261 @@
             }
         }
 
+// --- 🎨 UPDATED RENDERER ---
         function renderPreview(data) {
             if(!data || data.length === 0) return;
+
+            // 1. Initial Validation Run to Sync State
+            data.forEach(row => {
+                // Store original backend errors for reference (e.g. Duplicates)
+                if (!row._backend_errors) row._backend_errors = row._errors || [];
+
+                const validation = validateRow(row);
+                row._errors = validation.messages;
+                row._error_fields = validation.fields;
+            });
+
+            // 2. Sort: Errors First
+            data.sort((a, b) => {
+                const aErr = a._errors.length > 0;
+                const bErr = b._errors.length > 0;
+                if (aErr && !bErr) return -1;
+                if (!aErr && bErr) return 1;
+                return 0;
+            });
+
             document.getElementById('staged-preview').classList.remove('hidden');
             document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
 
-            // Check for Smart Fill logic to toggle Legend (Strictly for Imports per user request)
+            // Smart Fill Legend Logic
             const hasSmartFill = data.some(r => r._smart_filled_fields && r._smart_filled_fields.length > 0);
             const legend = document.getElementById('smart-fill-legend');
             if(hasSmartFill && currentView === 'imports') legend.classList.remove('hidden');
             else legend.classList.add('hidden');
 
+            // Header Generation
             const header = document.getElementById('preview-header');
             const body = document.getElementById('preview-body');
 
-            const config = TABLE_CONFIG[currentView];
-            let keys = config ? config.map(c => c.k) : Object.keys(data[0]).filter(k => !['_warnings', '_errors', '_error_fields', '_smart_filled_fields'].includes(k));
+            const rawConfig = TABLE_CONFIG[currentView];
+            const config = rawConfig ? rawConfig.filter(c => c.k !== 'qty_consumed') : null;
+
+            // Filter out internal keys
+            let keys = config ? config.map(c => c.k) : Object.keys(data[0]).filter(k => !k.startsWith('_'));
             let labels = config ? config.map(c => c.l) : keys;
 
             header.innerHTML = `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">Status</th>` +
                                labels.map(l => `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">${l}</th>`).join('');
 
+            // Body Generation
             body.innerHTML = data.map((row, i) => {
                 let statusHtml = "";
                 let rowClass = "border-b border-slate-50";
 
-                // Correct Status Logic based on Backend response
+                // Determine Row Status
                 if (row._errors && row._errors.length > 0) {
                     rowClass = "error-row border-b border-red-200";
-                    let errorMsg = row._errors[0];
+                    // Join all errors for the tooltip
                     let tooltip = row._errors.join('\n');
-                    if (row._errors.length > 1) {
-                        errorMsg += ` (+${row._errors.length - 1} more)`;
-                    }
-                    statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" id="status-${i}" title="${tooltip}"><i class="fa-solid fa-circle-xmark mr-1"></i>${errorMsg}</span>`;
+                    let errorMsg = row._errors[0];
+                    if (row._errors.length > 1) errorMsg += ` (+${row._errors.length - 1})`;
+
+                    statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" id="status-${i}" title="${tooltip}">
+                                    <i class="fa-solid fa-circle-xmark mr-1"></i>${errorMsg}
+                                  </span>`;
                 } else {
-                    // Valid rows (even with warnings) show OK
-                    statusHtml = `<span class="text-green-600 font-bold text-xs" id="status-${i}"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
+                    statusHtml = `<span class="text-green-600 font-bold text-xs" id="status-${i}">
+                                    <i class="fa-solid fa-check mr-1"></i>OK
+                                  </span>`;
                 }
 
-                const getCellClass = (key, val) => {
-                    let classes = 'edit-input text-xs text-slate-600';
-                    if (row._error_fields && row._error_fields.includes(key)) return classes + ' invalid-cell';
-                    if (row._smart_filled_fields && row._smart_filled_fields.includes(key)) return classes + ' smart-filled-cell';
-                    return classes;
-                };
-
                 return `<tr class="${rowClass}" id="row-${i}">` +
-                    `<td class="p-2 text-center">${statusHtml}</td>` +
+                    `<td class="p-2 text-center align-middle">${statusHtml}</td>` +
                     keys.map(k => {
                         let cellVal = row[k] !== undefined ? row[k] : '';
-                        let cellClass = getCellClass(k, cellVal);
-                        return `<td class="p-2"><input type="text" value="${cellVal}" onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass}" id="cell-${i}-${k}"></td>`;
+
+                        // Determine Cell Styling
+                        let cellClass = 'edit-input text-xs text-slate-600';
+                        let cellTitle = "";
+                        let cellAction = "";
+
+                        // Is this specific field in error?
+                        if (row._error_fields && row._error_fields.includes(k)) {
+                            cellClass += ' invalid-cell';
+                            // Find specific error message for this field
+                            // Simple logic: if validateRow returns specific msg for this field, show it
+                            // Since we don't map msg->field 1:1 in the array, we guide user generally
+                            cellTitle = "Invalid Value. Click to see details.";
+                            cellAction = `onclick="showToast('Error in ${k}: Please fix format or value', 'error')"`;
+                        }
+
+                        // Is this smart-filled?
+                        if (row._smart_filled_fields && row._smart_filled_fields.includes(k)) {
+                            cellClass += ' smart-filled-cell';
+                            cellTitle = "Auto-filled by System";
+                        }
+
+                        return `<td class="p-2">
+                                    <input type="text"
+                                           value="${cellVal}"
+                                           title="${cellTitle}"
+                                           ${cellAction}
+                                           onchange="updateStagedValue(${i}, '${k}', this.value)"
+                                           class="${cellClass}"
+                                           id="cell-${i}-${k}">
+                                </td>`;
                     }).join('') +
                     `</tr>`;
             }).join('');
+
             recalcStatus();
         }
 
+// Updated Update Logic to Handle "Fixed" vs "OK" vs "Error" correctly
+
         // Updated Update Logic to Handle "Fixed" vs "OK" vs "Error" correctly
+
+
+
+
+
+
+
+
+
+
+
+// ==========================================
+        // 1. EXTRACTED VALIDATION FUNCTION (GLOBAL)
+        // ==========================================
+        const VALID_UOMS = ['KG', 'PCS', 'LBS', 'M', 'SQM', 'L', 'GR', 'SET', 'PAIR', 'DOZ', 'EA', 'GAL', 'CM'];
+
+        function validateRow(row) {
+            let messages = [];
+            let fields = [];
+
+            // 1. UOM Validation
+            if (['imports', 'exports', 'products'].includes(currentView)) {
+                const uom = (row.uom || '').toUpperCase();
+                if (!uom) {
+                    messages.push("Missing UOM");
+                    fields.push('uom');
+                } else if (!VALID_UOMS.includes(uom)) {
+                    messages.push(`Invalid UOM: ${uom}`);
+                    fields.push('uom');
+                }
+            }
+
+            // 2. Entry Number
+            if (row.entry_number !== undefined) {
+                const en = (row.entry_number || '').trim();
+                if (en.length < 3) {
+                    messages.push("Entry # too short");
+                    fields.push('entry_number');
+                } else if (/^[A-Z]+$/i.test(en)) {
+                    messages.push("Entry # must be alphanumeric");
+                    fields.push('entry_number');
+                }
+            }
+
+            // 3. Numerics
+            ['qty', 'duty_paid', 'duty_rate', 'conversion_factor', 'customs_value'].forEach(field => {
+                if (row[field] !== undefined) {
+                    const val = parseFloat(row[field]);
+                    if (isNaN(val) || val <= 0) {
+                        messages.push(`${field} must be > 0`);
+                        fields.push(field);
+                    }
+                }
+            });
+
+            // 4. Dates
+            ['import_date', 'export_date'].forEach(field => {
+                if (row[field] !== undefined) {
+                    if (!row[field]) {
+                        messages.push("Date Required");
+                        fields.push(field);
+                    } else {
+                        const d = new Date(row[field]);
+                        const now = new Date();
+                        if (isNaN(d.getTime())) {
+                            messages.push("Invalid Date Format");
+                            fields.push(field);
+                        } else if (d > now) {
+                            messages.push("Future Date Not Allowed");
+                            fields.push(field);
+                        }
+                    }
+                }
+            });
+
+            // 5. Material #
+            ['material_number', 'export_material_number', 'import_material_number'].forEach(field => {
+                if (row[field] !== undefined && !row[field]) {
+                    messages.push("Material # Required");
+                    fields.push(field);
+                }
+            });
+
+            // 6. Preservation of Backend-Only Errors
+            if (row._backend_errors && row._backend_errors.length > 0) {
+                row._backend_errors.forEach(err => {
+                    if (err.includes("Duplicate") || err.includes("Database")) {
+                        messages.push(err);
+                    }
+                });
+            }
+
+            return { messages, fields };
+        }
+
+        // ==========================================
+        // 2. UPDATED EDIT HANDLER
+        // ==========================================
         function updateStagedValue(index, key, value) {
+            // [PATCH] Auto-uppercase UOM
+            if (key === 'uom') value = value.toUpperCase();
+
+            // Update Data Model
             stagedData[index][key] = value.trim();
             const row = stagedData[index];
+
+            // Re-validate this specific row completely
+            const validation = validateRow(row);
+            row._errors = validation.messages;
+            row._error_fields = validation.fields;
+
+            // Update UI: Get Elements
             const rowEl = document.getElementById(`row-${index}`);
             const statusEl = document.getElementById(`status-${index}`);
             const cellEl = document.getElementById(`cell-${index}-${key}`);
 
-            // Reset strict highlighting for this cell
-            cellEl.classList.remove('invalid-cell');
-
-            let newErrors = [];
-
-            // 1. SPECIFIC VALIDATION: Material Mappings
-            if (currentView === 'material_mappings') {
-                if (['export_material_number', 'import_material_number'].includes(key)) {
-                     if (!value) {
-                         newErrors.push("Missing Material #");
-                         cellEl.classList.add('invalid-cell');
-                     }
-                }
-            }
-
-            // 2. GENERAL VALIDATION
-            // Dates
-            if (['import_date', 'export_date'].includes(key)) {
-                if (!value) { newErrors.push("Date Required"); cellEl.classList.add('invalid-cell'); }
-                else {
-                    const d = new Date(value);
-                    if (isNaN(d.getTime())) { newErrors.push("Invalid Date"); cellEl.classList.add('invalid-cell'); }
-                    else if (d > new Date()) { newErrors.push("Future Date"); cellEl.classList.add('invalid-cell'); }
-                }
-            }
-            // Numerics
-            if (['qty', 'duty_paid', 'duty_rate', 'conversion_factor'].includes(key)) {
-                if (!value || isNaN(parseFloat(value)) || parseFloat(value) <= 0) { newErrors.push("Must be > 0"); cellEl.classList.add('invalid-cell'); }
-            }
-            // Required Text (Generic)
-            if (['material_number', 'uom', 'hts_code', 'description'].includes(key)) {
-                if (!value) { newErrors.push("Required"); cellEl.classList.add('invalid-cell'); }
-            }
-            // HTS specific
-            if (key === 'hts_code' && value && !value.match(/^[\d\.]+$/)) {
-                 newErrors.push("Invalid HTS Format"); cellEl.classList.add('invalid-cell');
-            }
-
-            // Sync with row._error_fields
-            if (newErrors.length === 0) {
-                 if (row._error_fields) {
-                     const idx = row._error_fields.indexOf(key);
-                     if (idx > -1) row._error_fields.splice(idx, 1);
-                 }
+            // Update Cell Styling (Remove invalid class if fixed)
+            if (row._error_fields.includes(key)) {
+                cellEl.classList.add('invalid-cell');
             } else {
-                 if (!row._error_fields) row._error_fields = [];
-                 if (!row._error_fields.includes(key)) row._error_fields.push(key);
+                cellEl.classList.remove('invalid-cell');
             }
 
-            // Determine Overall Row Status
-            // Note: We don't have full backend validation here, so we rely on remaining _error_fields
-            const hasRemainingErrors = (row._error_fields && row._error_fields.length > 0);
-
-            if (hasRemainingErrors || newErrors.length > 0) {
+            // Update Row Status UI
+            if (row._errors.length > 0) {
+                // Still has errors
                 rowEl.className = "error-row border-b border-red-200 transition";
-                // Show the specific error found
-                const displayError = newErrors.length > 0 ? newErrors[0] : (row._errors && row._errors.length > 0 ? row._errors[0] : "Fix Errors");
+                const displayError = row._errors[0];
                 statusEl.innerHTML = `<span class="text-red-600 font-bold text-xs"><i class="fa-solid fa-circle-xmark mr-1"></i>${displayError}</span>`;
             } else {
-                // If valid, revert to OK (Green), NOT "Fixed" (Blue)
-                rowEl.className = "border-b border-slate-50 transition"; // Normal row
-                statusEl.innerHTML = `<span class="text-green-600 font-bold text-xs"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
-                row._errors = []; // Clear top-level errors
+                // All fixed
+                rowEl.className = "border-b border-slate-50 bg-blue-50 transition";
+                statusEl.innerHTML = `<span class="text-blue-600 font-bold text-xs"><i class="fa-solid fa-check-circle mr-1"></i>Fixed</span>`;
             }
 
             recalcStatus();
         }
 
-        function removeErrors() {
+
+
+
+function removeErrors() {
             const initialCount = stagedData.length;
             stagedData = stagedData.filter(row => (!row._error_fields || row._error_fields.length === 0) && (!row._errors || row._errors.length === 0));
             if(stagedData.length === 0) { resetUpload(); showToast(`Removed all invalid rows.`, "warning"); }
@@ -2183,6 +3038,7 @@
 
         // --- 🚀 INITIALIZATION: Force initial UI update for Reviewer default ---
         loadStats();
+        updateRoleUI();
     </script>
 </body>
 </html>
