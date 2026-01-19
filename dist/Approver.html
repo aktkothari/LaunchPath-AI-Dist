@@ -25,10 +25,25 @@
         .dash-card {
             transition: all 0.2s ease-in-out;
         }
-        .dash-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+
+
+<!--        .dash-card:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);-->
+<!--        }-->
+
+
+        .dash-card {
+            transition: all 0.2s ease-in-out;
         }
+
+        .clickable-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            border-color: #94a3b8;
+        }
+
         .clickable-card {
             cursor: pointer;
             position: relative;
@@ -602,12 +617,14 @@
 
     <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50/50">
 
+
+
         <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
             <div class="flex items-center gap-4">
                  <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
                  <div class="h-6 w-px bg-slate-200"></div>
                  <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
-                    <i class="fa-solid fa-user-tag mr-2"></i>Role: Approver
+                    <i class="fa-solid fa-user-tag mr-2"></i>Role: APPROVER
                  </div>
             </div>
 
@@ -636,6 +653,10 @@
 <!--                </button>-->
 <!--            </div>-->
 <!--        </header>-->
+
+
+
+
 
         <div class="flex-1 overflow-y-auto p-8" id="content-area">
 
@@ -1006,7 +1027,7 @@
                         </div>
                         <div class="flex gap-2 items-center">
                             <button onclick="processBulkAction('return')" class="text-sm bg-white border border-red-200 text-red-600 px-3 py-1 rounded hover:bg-red-50 font-medium">
-                                <i class="fa-solid fa-rotate-left mr-1"></i>Return Selected
+                                <i class="fa-solid fa-rotate-left mr-1"></i>Reject Selected
                             </button>
                             <button onclick="processBulkAction('approve')" class="text-sm bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 font-bold shadow-sm">
                                 <i class="fa-solid fa-check mr-1"></i>Approve Selected
@@ -1278,6 +1299,58 @@
         let currentView = 'dashboard';
         let stagedData = [];
 
+
+
+// 🆕 PATCH START: Global State & Parent Bridge
+        // Default to a fallback if not running in iframe or handshake fails
+        window.CURRENT_USER_EMAIL = "system_fallback@launchpath.ai";
+
+        // 1. Listen for Context from Parent
+        window.addEventListener('message', function(event) {
+            // OPTIONAL: Uncomment to restrict to specific Parent domain for security
+            // if (event.origin !== "http://your-parent-domain.com") return;
+
+
+            console.log("📥 [Child] Received Message:", event.data);
+
+
+            const data = event.data;
+
+            if (data && data.type === 'SET_USER_CONTEXT') {
+                if(data.user && data.user.email) {
+                    window.CURRENT_USER_EMAIL = data.user.email;
+
+                    // Visual Confirmation (Optional - Update UI to show logged in user)
+                    console.log("✅ [Child] Context Received. User:", window.CURRENT_USER_EMAIL);
+                    showToast(`Connected as ${window.CURRENT_USER_EMAIL}`, "success");
+
+                    // Update Role Switcher if Role is provided
+                    if(data.user.role) {
+                        const roleSelect = document.getElementById('role-switcher');
+                        if(roleSelect) {
+                            roleSelect.value = data.user.role;
+                            updateRoleUI(); // Re-trigger UI update
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Signal Readiness to Parent
+        // We wait a small moment to ensure Parent listeners are active
+        setTimeout(() => {
+            // Check if running inside an iframe
+            if (window.parent && window.parent !== window) {
+                console.log("🚀 [Child] Sending READY signal to Parent...");
+                window.parent.postMessage({ type: 'DRAWBACK_APP_READY' }, '*');
+            }
+        }, 500);
+        // 🆕 PATCH END
+
+
+
+
+
         // --- SELECTION SETS ---
         let approverSelection = new Set();
         let reviewerSelection = new Set();
@@ -1379,6 +1452,32 @@
             resizer.classList.add('resizing');
             document.addEventListener('mousemove', doResize);
             document.addEventListener('mouseup', stopResize);
+        }
+
+
+async function discardMatch(matchId) {
+            if (!confirm("⚠️ PERMANENT DELETE WARNING\n\nAre you sure you want to DISCARD this match?\n\n1. The match record will be permanently deleted.\n2. The inventory quantity will be RESTORED to the Import record.\n\nThis cannot be undone. Click OK to Discard.")) {
+                return;
+            }
+
+            toggleLoading(true, "Discarding Match & Restoring Inventory...");
+            try {
+                const res = await safeFetch('/drawback/api/workflow/discard', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id: matchId, user: currentUserRole })
+                });
+
+                if (res.success) {
+                    showToast("Match Discarded. Inventory Restored.", "success");
+                    loadWorkflowData('reviewer'); // Refresh table
+                    loadStats(); // Update dashboard inventory stats
+                } else {
+                    showToast(res.message || "Discard Failed", "error");
+                }
+            } finally {
+                toggleLoading(false);
+            }
         }
 
         function doResize(e) {
@@ -1534,6 +1633,7 @@
 
                     // 🆕 REVIEWER: Disable Click & Hide Arrow on Pending Card
                     if(pendingCard) {
+                        // PATCH: Ensure visual 'clickable-card' class is removed so it doesn't lift on hover
                         pendingCard.classList.remove('clickable-card', 'cursor-pointer');
                         pendingCard.removeAttribute('onclick');
                     }
@@ -1541,6 +1641,7 @@
 
                     // 🆕 REVIEWER: Enable Click & Show Arrow on Unrealized Card (Nav to Imports)
                     if (unrealizedCard) {
+                        // PATCH: Add visual 'clickable-card' class so it lifts on hover
                         unrealizedCard.classList.add('clickable-card', 'cursor-pointer');
                         unrealizedCard.setAttribute('onclick', "switchView('imports')");
                     }
@@ -1562,6 +1663,7 @@
 
                     // 🆕 APPROVER: Enable Click & Show Arrow on Pending Card
                     if(pendingCard) {
+                        // PATCH: Add visual 'clickable-card' class so it lifts on hover
                         pendingCard.classList.add('clickable-card', 'cursor-pointer');
                         pendingCard.setAttribute('onclick', "switchView('approver')");
                     }
@@ -1569,6 +1671,7 @@
 
                     // 🆕 APPROVER: Disable Click & Hide Arrow on Unrealized Card
                     if (unrealizedCard) {
+                        // PATCH: Ensure visual 'clickable-card' class is removed so it doesn't lift on hover
                         unrealizedCard.classList.remove('clickable-card', 'cursor-pointer');
                         unrealizedCard.removeAttribute('onclick');
                     }
@@ -1585,10 +1688,41 @@
 
 
             // --- ROLE MANAGEMENT & UI LOGIC (UPDATED) ---
-// --- SAFE FETCH ---
+            // --- SAFE FETCH ---
+
+
+
+
+// --- ROLE MANAGEMENT & UI LOGIC (UPDATED) ---
+            // --- SAFE FETCH ---
+        // --- SAFE FETCH (With Automatic Context Injection) ---
+// --- SAFE FETCH (With Automatic Context Injection) ---
         async function safeFetch(endpoint, options={}) {
             try {
                 const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+
+                // 🆕 INJECTION LOGIC: Attach the email we received from the parent
+                if (options.method === 'POST' || options.method === 'PUT') {
+                    let body = {};
+
+                    if (options.body) {
+                        if (typeof options.body === 'string') {
+                            try { body = JSON.parse(options.body); } catch(e) {}
+                        } else if (!(options.body instanceof FormData)) {
+                            body = options.body;
+                        }
+                    }
+
+                    if (!(options.body instanceof FormData)) {
+                        // THIS LINE IS CRITICAL: It uses the variable you just set up
+                        body.actor_email = window.CURRENT_USER_EMAIL;
+                        options.body = JSON.stringify(body);
+
+                        if (!options.headers) options.headers = {};
+                        options.headers['Content-Type'] = 'application/json';
+                    }
+                }
+
                 const res = await fetch(url, options);
                 if (!res.ok) throw new Error("API Error");
 
@@ -1600,6 +1734,28 @@
                 return { success: false, data: [] };
             }
         }
+
+
+
+
+<!--        async function safeFetch(endpoint, options={}) {-->
+<!--            try {-->
+<!--                const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;-->
+<!--                const res = await fetch(url, options);-->
+<!--                if (!res.ok) throw new Error("API Error");-->
+
+<!--                const json = await res.json();-->
+<!--                updateServerStatus(true);-->
+<!--                return json;-->
+<!--            } catch (e) {-->
+<!--                console.error("API Failed:", e);-->
+<!--                return { success: false, data: [] };-->
+<!--            }-->
+<!--        }-->
+
+
+
+
 
         // --- APP LOGIC ---
         function updateServerStatus(isOnline) {
@@ -1617,7 +1773,18 @@
             }
         }
 
-        function switchView(viewId) {
+
+function switchView(viewId) {
+            // 🛡️ NEW: Data Loss Prevention Check
+            // If there is data in the staging variable (stagedData), warn the user before switching.
+            if (stagedData && stagedData.length > 0) {
+                if (!confirm("⚠️ Unsaved Data Warning\n\nYou have uncommitted data in the staging area. Switching tabs will discard this data.\n\nClick OK to discard and switch.\nClick Cancel to stay and commit.")) {
+                    return; // Stop navigation immediately
+                }
+                resetUpload(); // Clean up dirty data if user chooses to proceed
+            }
+
+            // --- Existing Navigation Logic ---
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navEl = document.getElementById(`nav-${viewId}`);
             if(navEl) navEl.classList.add('active');
@@ -1635,8 +1802,10 @@
                 loadStats();
             } else if(viewId === 'matching') {
                 document.getElementById('view-matching').classList.remove('hidden');
-                // 🆕 Load empty table with headers if needed
-                const matchHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];
+
+                // 🆕 REORDERED HEADERS: [Status, Notes, View] moved to front.
+                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
                 renderDynamicHeaders('matches-table', matchHeaders, 0); // No checkboxes
             } else if(viewId === 'reviewer') {
                 document.getElementById('view-reviewer').classList.remove('hidden');
@@ -1662,6 +1831,67 @@
             }
             currentView = viewId;
         }
+
+
+
+<!--        function switchView(viewId) {-->
+<!--            // 🛡️ NEW: Data Loss Prevention Check-->
+<!--            // If there is data in the staging variable (stagedData), warn the user before switching.-->
+<!--            if (stagedData && stagedData.length > 0) {-->
+<!--                if (!confirm("⚠️ Unsaved Data Warning\n\nYou have uncommitted data in the staging area. Switching tabs will discard this data.\n\nClick OK to discard and switch.\nClick Cancel to stay and commit.")) {-->
+<!--                    return; // Stop navigation immediately-->
+<!--                }-->
+<!--                resetUpload(); // Clean up dirty data if user chooses to proceed-->
+<!--            }-->
+
+<!--            // -&#45;&#45; Existing Navigation Logic -&#45;&#45;-->
+<!--            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));-->
+<!--            const navEl = document.getElementById(`nav-${viewId}`);-->
+<!--            if(navEl) navEl.classList.add('active');-->
+<!--            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));-->
+
+<!--            document.getElementById(`page-title`).innerText =-->
+<!--                viewId === 'reviewer' ? 'Reviewer Console' :-->
+<!--                viewId === 'approver' ? 'Approver Portal' :-->
+<!--                viewId === 'history' ? 'Claims History' :-->
+<!--                viewId === 'help' ? 'Help / User Guide' :-->
+<!--                viewId.charAt(0).toUpperCase() + viewId.slice(1);-->
+
+<!--            if(viewId === 'dashboard') {-->
+<!--                document.getElementById('view-dashboard').classList.remove('hidden');-->
+<!--                loadStats();-->
+
+<!--            } else if(viewId === 'matching') {-->
+<!--                document.getElementById('view-matching').classList.remove('hidden');-->
+
+<!--                // 🆕 REORDERED HEADERS: Status, View moved to front. Refund remains at end.-->
+<!--                const matchHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
+
+<!--                renderDynamicHeaders('matches-table', matchHeaders, 0); // No checkboxes-->
+<!--            } else if(viewId === 'reviewer') {-->
+<!--                document.getElementById('view-reviewer').classList.remove('hidden');-->
+<!--                loadWorkflowData('reviewer');-->
+<!--            } else if(viewId === 'approver') {-->
+<!--                document.getElementById('view-approver').classList.remove('hidden');-->
+<!--                // Reset to summary view on tab switch-->
+<!--                document.getElementById('approver-detail-view').classList.add('hidden');-->
+<!--                document.getElementById('approver-summary-view').classList.remove('hidden');-->
+<!--                loadApproverSummary();-->
+<!--            } else if(viewId === 'history') {-->
+<!--                document.getElementById('view-history').classList.remove('hidden');-->
+<!--                showHistorySummary();-->
+<!--            } else if (viewId === 'help') {-->
+<!--                document.getElementById('view-help').classList.remove('hidden');-->
+<!--            } else {-->
+<!--                document.getElementById('view-management').classList.remove('hidden');-->
+<!--                let title = viewId.charAt(0).toUpperCase() + viewId.slice(1);-->
+<!--                if(viewId === 'material_mappings') title = 'Material Mappings';-->
+<!--                document.getElementById('mgmt-title').innerText = title;-->
+<!--                resetUpload();-->
+<!--                loadTableData(viewId);-->
+<!--            }-->
+<!--            currentView = viewId;-->
+<!--        }-->
 
 
 
@@ -1987,24 +2217,29 @@
         // Updated to accept ID directly
 
         // Updated to accept ID directly
-        async function loadApproverQueue(claimId) {
+
+
+
+
+
+
+
+     async function loadApproverQueue(claimId) {
             if(!claimId) return;
             toggleLoading(true, `Loading Claim ${claimId}...`);
 
             try {
-                // Initialize Approver Table Headers dynamically if empty
-                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];
+                // 🆕 REORDERED HEADERS: Status, View moved to front.
+                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
                 renderDynamicHeaders('approver-table', approverHeaders, 1);
 
                 const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);
                 const data = json.data || [];
 
-                // 🚀 [PATCH] Auto-Redirect Logic: If queue is empty, go back to summary
                 if (data.length === 0) {
-                     renderApproverTable([]); // Clear visual table immediately
+                     renderApproverTable([]);
                      showToast("Audit Complete. Returning to Summary...", "success");
-
-                     // Small delay to let the user see the "Success" message before switching views
                      setTimeout(() => {
                          backToApproverList();
                      }, 1200);
@@ -2016,6 +2251,43 @@
                 toggleLoading(false);
             }
         }
+
+
+
+<!--        async function loadApproverQueue(claimId) {-->
+<!--            if(!claimId) return;-->
+<!--            toggleLoading(true, `Loading Claim ${claimId}...`);-->
+
+<!--            try {-->
+<!--                // Initialize Approver Table Headers dynamically if empty-->
+<!--                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];-->
+<!--                renderDynamicHeaders('approver-table', approverHeaders, 1);-->
+
+<!--                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);-->
+<!--                const data = json.data || [];-->
+
+<!--                // 🚀 [PATCH] Auto-Redirect Logic: If queue is empty, go back to summary-->
+<!--                if (data.length === 0) {-->
+<!--                     renderApproverTable([]); // Clear visual table immediately-->
+<!--                     showToast("Audit Complete. Returning to Summary...", "success");-->
+
+<!--                     // Small delay to let the user see the "Success" message before switching views-->
+<!--                     setTimeout(() => {-->
+<!--                         backToApproverList();-->
+<!--                     }, 1200);-->
+<!--                     return;-->
+<!--                }-->
+
+<!--                renderApproverTable(data);-->
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
+
+
+
+
+
 
 
 <!--        async function loadApproverQueue(claimId) {-->
@@ -2194,6 +2466,11 @@
         }
 
         // --- CLIENT-SIDE CSV EXPORT FOR SINGLE CLAIM ---
+
+            // --- CLIENT-SIDE CSV EXPORT FOR SINGLE CLAIM (PATCHED) ---
+
+
+
         async function exportClaimLocal(claimId) {
              toggleLoading(true, `Generating Export for ${claimId}...`);
              try {
@@ -2212,21 +2489,75 @@
                     return;
                 }
 
-                const headers = ['claim_id', 'match_uuid', 'approved_at', 'approved_by', 'status', 'export_entry_number', 'export_material_number', 'qty_matched', 'refund_amount', 'import_entry_number', 'import_material_number', 'import_date'];
+                // 1. Define the Exact Headers required (22 Columns)
+                const headers = [
+                    'Imp Entry No','Entry Line No','Import Material Number','Export Material Number',
+                    'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ',
+                    'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate',
+                    'Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
+                ];
+
                 let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
 
+                // 2. Map & Calculate Data Rows
                 validData.forEach(row => {
-                    const vals = headers.map(h => {
-                        let val = row[h] || '';
-                        return `"${String(val).replace(/"/g, '""')}"`;
+                    // --- Calculations ---
+                    const qtyOrig = parseFloat(row.import_qty_original) || 0;
+                    const qtyMatch = parseFloat(row.qty_matched) || 0;
+                    const valCustoms = parseFloat(row.import_customs_val) || 0;
+                    const valDutyPaid = parseFloat(row.import_duty_paid) || 0;
+
+                    // A. Unit Value
+                    const unitVal = qtyOrig > 0 ? (valCustoms / qtyOrig) : 0;
+
+                    // B. Entered Value (Pro-rated Customs Value)
+                    const enteredVal = qtyOrig > 0 ? ((qtyMatch / qtyOrig) * valCustoms) : 0;
+
+                    // C. Export Duty (Pro-rated Duty Paid)
+                    const exportDuty = qtyOrig > 0 ? ((qtyMatch / qtyOrig) * valDutyPaid) : 0;
+
+                    // D. 99% Duty
+                    const duty99 = exportDuty * 0.99;
+
+                    // --- Build Row Array ---
+                    const rowData = [
+                        row.import_entry_number,
+                        row.import_dec_line,
+                        row.import_material_number,
+                        row.export_material_number || row.matched_material_number,
+                        row.import_date,
+                        row.export_desc,
+                        exportDuty.toFixed(2), // Line Duty
+                        row.import_hts,
+                        row.qty_matched,
+                        row.import_uom,
+                        row.export_entry_number, // Unique ID
+                        row.export_date,
+                        row.export_country,
+                        "HTS", // Tariff Type
+                        row.import_hts, // Tariff (Repeated)
+                        row.import_duty_rate,
+                        unitVal.toFixed(2),
+                        enteredVal.toFixed(2),
+                        exportDuty.toFixed(2),
+                        duty99.toFixed(2),
+                        row.refund_amount // Or duty99.toFixed(2) depending on preference
+                    ];
+
+                    // Escape CSV strings
+                    const csvRow = rowData.map(val => {
+                        const str = String(val !== undefined && val !== null ? val : '');
+                        return `"${str.replace(/"/g, '""')}"`;
                     });
-                    csvContent += vals.join(",") + "\n";
+
+                    csvContent += csvRow.join(",") + "\n";
                 });
 
+                // 3. Trigger Download
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `Claim_${claimId}_Export.csv`);
+                link.setAttribute("download", `Claim_${claimId}_Detail_Report.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -2240,6 +2571,56 @@
                  toggleLoading(false);
              }
         }
+
+<!--        async function exportClaimLocal(claimId) {-->
+<!--             toggleLoading(true, `Generating Export for ${claimId}...`);-->
+<!--             try {-->
+<!--                const url = `/drawback/api/workflow/queue/APPROVED?claim_id=${encodeURIComponent(claimId)}`;-->
+<!--                const json = await safeFetch(url);-->
+<!--                const data = json.data || [];-->
+
+<!--                if(data.length === 0) {-->
+<!--                    showToast("No data to export", "warning");-->
+<!--                    return;-->
+<!--                }-->
+
+<!--                const validData = data.filter(row => row.status !== 'VOIDED');-->
+<!--                if(validData.length === 0) {-->
+<!--                    showToast("All items in this claim are voided.", "warning");-->
+<!--                    return;-->
+<!--                }-->
+
+<!--                const headers = ['claim_id', 'match_uuid', 'approved_at', 'approved_by', 'status', 'export_entry_number', 'export_material_number', 'qty_matched', 'refund_amount', 'import_entry_number', 'import_material_number', 'import_date'];-->
+<!--                let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";-->
+
+<!--                validData.forEach(row => {-->
+<!--                    const vals = headers.map(h => {-->
+<!--                        let val = row[h] || '';-->
+<!--                        return `"${String(val).replace(/"/g, '""')}"`;-->
+<!--                    });-->
+<!--                    csvContent += vals.join(",") + "\n";-->
+<!--                });-->
+
+<!--                const encodedUri = encodeURI(csvContent);-->
+<!--                const link = document.createElement("a");-->
+<!--                link.setAttribute("href", encodedUri);-->
+<!--                link.setAttribute("download", `Claim_${claimId}_Export.csv`);-->
+<!--                document.body.appendChild(link);-->
+<!--                link.click();-->
+<!--                document.body.removeChild(link);-->
+
+<!--                showToast("Download Started", "success");-->
+
+<!--             } catch(e) {-->
+<!--                 console.error(e);-->
+<!--                 showToast("Export Failed", "error");-->
+<!--             } finally {-->
+<!--                 toggleLoading(false);-->
+<!--             }-->
+<!--        }-->
+
+
+
 
         // --- SHARED WORKFLOW LOADER ---
         async function loadWorkflowData(role, filterClaimId = null) {
@@ -2279,16 +2660,20 @@
 
         const calc99Duty = (m) => calcExportDuty(m) * 0.99;
 
-        function renderReviewerTable(data) {
+
+
+
+function renderReviewerTable(data) {
             const tbody = document.getElementById('reviewer-body');
             reviewerSelection.clear();
 
-            // 🆕 Render Headers for Reviewer Table (Updated with Export Material)
-            const headers = ['Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount', 'Notes', 'Status','View'];
-            renderDynamicHeaders('reviewer-table', headers, 1); // Has Checkbox
+            // 🆕 REORDERED HEADERS: Status, Notes, Actions moved to indices 1, 2, 3 (After Checkbox)
+            const headers = ['Status', 'Notes', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
+            renderDynamicHeaders('reviewer-table', headers, 1); // 1 = Has Checkbox at index 0
 
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;
                 return;
             }
             tbody.innerHTML = data.map(m => {
@@ -2301,6 +2686,17 @@
                 return `
                 <tr class="${rowClass}" id="reviewer-row-${m.match_id}">
                     <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>
+
+                    <td class="text-xs text-slate-500 font-bold">DRAFT</td>
+
+                    <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>
+
+                    <td class="text-center flex items-center justify-center gap-2 py-3">
+                        <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+
                     <td>${m.import_entry_number}</td>
                     <td>${m.import_dec_line}</td>
                     <td>${m.import_material_number}</td>
@@ -2322,16 +2718,65 @@
                     <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
                     <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
                     <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
-                    <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>
-                    <td class="text-xs text-slate-500 font-bold">DRAFT</td>
-                    <td class="text-center">
-                        <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-600 hover:text-blue-600 mr-2"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800 mr-3"><i class="fa-solid fa-pen-to-square"></i></button>
-                    </td>
                 </tr>`}).join('');
         }
 
-        function renderApproverTable(data) {
+<!--function renderReviewerTable(data) {-->
+<!--            const tbody = document.getElementById('reviewer-body');-->
+<!--            reviewerSelection.clear();-->
+
+<!--            // 🆕 Render Headers for Reviewer Table (Updated 'View' to 'Actions')-->
+<!--            const headers = ['Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount', 'Notes', 'Status','Actions'];-->
+<!--            renderDynamicHeaders('reviewer-table', headers, 1); // Has Checkbox-->
+
+<!--            if (data.length === 0) {-->
+<!--                tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;-->
+<!--                return;-->
+<!--            }-->
+<!--            tbody.innerHTML = data.map(m => {-->
+<!--                let noteHtml = m.notes || '-';-->
+<!--                let rowClass = "border-b border-slate-50 hover:bg-blue-50 transition";-->
+<!--                if(m.rejection_reason) {-->
+<!--                    rowClass = "border-l-4 border-red-500 bg-red-50 hover:bg-red-100 transition";-->
+<!--                    noteHtml = `<div class="text-red-600 font-bold text-xs mb-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Returned: ${m.rejection_reason}</div>` + noteHtml;-->
+<!--                }-->
+<!--                return `-->
+<!--                <tr class="${rowClass}" id="reviewer-row-${m.match_id}">-->
+<!--                    <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>-->
+<!--                    <td>${m.import_entry_number}</td>-->
+<!--                    <td>${m.import_dec_line}</td>-->
+<!--                    <td>${m.import_material_number}</td>-->
+<!--                    <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                    <td>${m.import_date}</td>-->
+<!--                    <td>${m.export_desc}</td>-->
+<!--                    <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                    <td>${m.import_hts}</td>-->
+<!--                    <td>${m.qty_matched}</td>-->
+<!--                    <td>${m.import_uom}</td>-->
+<!--                    <td>${m.export_entry_number}</td>-->
+<!--                    <td>${m.export_date}</td>-->
+<!--                    <td>${m.export_country}</td>-->
+<!--                    <td>HTS</td>-->
+<!--                    <td>${m.import_hts}</td>-->
+<!--                    <td>${m.import_duty_rate}</td>-->
+<!--                    <td>${formatMoney(calcUnitValue(m))}</td>-->
+<!--                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>-->
+<!--                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>-->
+<!--                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>-->
+<!--                    <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+<!--                    <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>-->
+<!--                    <td class="text-xs text-slate-500 font-bold">DRAFT</td>-->
+<!--                    <td class="text-center flex items-center justify-center gap-2 py-3">-->
+<!--                        <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button>-->
+<!--                        <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button>-->
+<!--                        <button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>-->
+<!--                    </td>-->
+<!--                </tr>`}).join('');-->
+<!--        }-->
+
+
+
+function renderApproverTable(data) {
             const tbody = document.getElementById('approver-body');
             approverSelection.clear();
             if (data.length === 0) {
@@ -2340,7 +2785,11 @@
             }
             tbody.innerHTML = data.map(m => `
                 <tr class="border-b border-slate-50 hover:bg-emerald-50 transition">
-                     <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')" class="accent-emerald-600 w-4 h-4"></td>
+                    <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')" class="accent-emerald-600 w-4 h-4"></td>
+
+                    <td><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">REVIEWED</span></td>
+                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>
+
                     <td>${m.import_entry_number}</td>
                     <td>${m.import_dec_line}</td>
                     <td>${m.import_material_number}</td>
@@ -2362,16 +2811,59 @@
                     <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
                     <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
                     <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
-                    <td><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">REVIEWED</span></td>
-                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>
                 </tr>`).join('');
         }
 
-        function renderHistoryTable(data) {
+
+
+<!--        function renderApproverTable(data) {-->
+<!--            const tbody = document.getElementById('approver-body');-->
+<!--            approverSelection.clear();-->
+<!--            if (data.length === 0) {-->
+<!--                tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-400 italic">No matches in this claim.</td></tr>`;-->
+<!--                return;-->
+<!--            }-->
+<!--            tbody.innerHTML = data.map(m => `-->
+<!--                <tr class="border-b border-slate-50 hover:bg-emerald-50 transition">-->
+<!--                     <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')" class="accent-emerald-600 w-4 h-4"></td>-->
+<!--                    <td>${m.import_entry_number}</td>-->
+<!--                    <td>${m.import_dec_line}</td>-->
+<!--                    <td>${m.import_material_number}</td>-->
+<!--                    <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                    <td>${m.import_date}</td>-->
+<!--                    <td>${m.export_desc}</td>-->
+<!--                    <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                    <td>${m.import_hts}</td>-->
+<!--                    <td>${m.qty_matched}</td>-->
+<!--                    <td>${m.import_uom}</td>-->
+<!--                    <td>${m.export_entry_number}</td>-->
+<!--                    <td>${m.export_date}</td>-->
+<!--                    <td>${m.export_country}</td>-->
+<!--                    <td>HTS</td>-->
+<!--                    <td>${m.import_hts}</td>-->
+<!--                    <td>${m.import_duty_rate}</td>-->
+<!--                    <td>${formatMoney(calcUnitValue(m))}</td>-->
+<!--                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>-->
+<!--                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>-->
+<!--                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>-->
+<!--                    <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+<!--                    <td><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">REVIEWED</span></td>-->
+<!--                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>-->
+<!--                </tr>`).join('');-->
+<!--        }-->
+
+
+
+
+
+
+
+function renderHistoryTable(data) {
             const tbody = document.getElementById('history-body');
 
-            // 🆕 Render Headers for History Detail (Updated with Export Material)
-            const headers = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','Approve Date','View','Actions'];
+            // 🆕 REORDERED HEADERS: Status, View, Actions at start. Approve Date at end.
+            const headers = ['Status', 'View', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'];
+
             renderDynamicHeaders('history-table', headers, 0);
 
             if (data.length === 0) {
@@ -2397,6 +2889,10 @@
 
                 return `
                 <tr class="${rowClass}">
+                    <td class="text-center">${statusBadge}</td>
+                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>
+                    <td class="text-center bg-red-50">${actionBtn}</td>
+
                     <td>${m.import_entry_number}</td>
                     <td>${m.import_dec_line}</td>
                     <td>${m.import_material_number}</td>
@@ -2418,19 +2914,92 @@
                     <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
                     <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
                     <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
-                    <td class="text-xs text-slate-500">
-                        <i class="fa-solid fa-user-check mr-1"></i>${m.approved_by || 'Admin'}<br>
-                        <span class="text-[9px] bg-gray-100 px-1 rounded">${noteDisplay}</span>
-                    </td>
-                    <td class="text-center">${statusBadge}</td>
+
                     <td class="bg-purple-50 border-l border-purple-100 text-center">
                         <span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>
                     </td>
-                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>
-                    <td class="text-center bg-red-50">${actionBtn}</td>
                 </tr>`
             }).join('');
         }
+
+
+
+<!--        function renderHistoryTable(data) {-->
+<!--            const tbody = document.getElementById('history-body');-->
+
+<!--            // 🆕 Render Headers for History Detail (Updated with Export Material)-->
+<!--            const headers = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','Approve Date','View','Actions'];-->
+<!--            renderDynamicHeaders('history-table', headers, 0);-->
+
+<!--            if (data.length === 0) {-->
+<!--                tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;-->
+<!--                return;-->
+<!--            }-->
+<!--            tbody.innerHTML = data.map(m => {-->
+<!--                const isVoided = m.status === 'VOIDED';-->
+<!--                let rowClass = isVoided ? "bg-gray-100 text-gray-400 border-b border-gray-200" : "border-b border-slate-50 hover:bg-purple-50 transition";-->
+<!--                let statusBadge = isVoided ? `<span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>` : `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;-->
+
+<!--                let actionBtn = '';-->
+<!--                if(!isVoided) {-->
+<!--                    actionBtn = `<button onclick='openVoidModal(${escapeJSON(m)})' class="text-red-400 hover:text-red-700 font-bold" title="Void & Reclaim"><i class="fa-solid fa-ban"></i></button>`;-->
+<!--                } else {-->
+<!--                    actionBtn = `<span class="text-xs text-gray-300">-</span>`;-->
+<!--                }-->
+
+<!--                let noteDisplay = m.claim_id || 'Legacy';-->
+<!--                if(isVoided && m.rejection_reason) {-->
+<!--                     noteDisplay += `<br><span class="text-[9px] text-red-400 italic">${m.rejection_reason}</span>`;-->
+<!--                }-->
+
+<!--                return `-->
+<!--                <tr class="${rowClass}">-->
+<!--                    <td>${m.import_entry_number}</td>-->
+<!--                    <td>${m.import_dec_line}</td>-->
+<!--                    <td>${m.import_material_number}</td>-->
+<!--                    <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                    <td>${m.import_date}</td>-->
+<!--                    <td>${m.export_desc}</td>-->
+<!--                    <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                    <td>${m.import_hts}</td>-->
+<!--                    <td>${m.qty_matched}</td>-->
+<!--                    <td>${m.import_uom}</td>-->
+<!--                    <td>${m.export_entry_number}</td>-->
+<!--                    <td>${m.export_date}</td>-->
+<!--                    <td>${m.export_country}</td>-->
+<!--                    <td>HTS</td>-->
+<!--                    <td>${m.import_hts}</td>-->
+<!--                    <td>${m.import_duty_rate}</td>-->
+<!--                    <td>${formatMoney(calcUnitValue(m))}</td>-->
+<!--                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>-->
+<!--                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>-->
+<!--                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>-->
+<!--                    <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+<!--                    <td class="text-xs text-slate-500">-->
+<!--                        <i class="fa-solid fa-user-check mr-1"></i>${m.approved_by || 'Admin'}<br>-->
+<!--                        <span class="text-[9px] bg-gray-100 px-1 rounded">${noteDisplay}</span>-->
+<!--                    </td>-->
+<!--                    <td class="text-center">${statusBadge}</td>-->
+<!--                    <td class="bg-purple-50 border-l border-purple-100 text-center">-->
+<!--                        <span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>-->
+<!--                    </td>-->
+<!--                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>-->
+<!--                    <td class="text-center bg-red-50">${actionBtn}</td>-->
+<!--                </tr>`-->
+<!--            }).join('');-->
+<!--        }-->
+
+
+
+
+
+
+
+
+
+
+
+
 
         // --- NEW REVIEWER BULK LOGIC ---
         function toggleReviewerSelection(id) {
@@ -2476,15 +3045,27 @@
         }
 
         async function processBulkAction(action) {
+            // 1. Basic Validation
             if (approverSelection.size === 0) { showToast("Select items first", "warning"); return; }
             const ids = Array.from(approverSelection);
 
+            // 2. Handle Rejection (Return to Reviewer) - No warning needed
             if (action === 'return') {
                 document.getElementById('reject-modal').classList.remove('hidden');
                 document.getElementById('reject-reason').value = '';
                 return;
             }
 
+            // 3. Handle Approval - ⚠️ NEW BILLABLE WARNING ADDED HERE
+            if (action === 'approve') {
+                const warningMsg = `⚠️ BILLABLE EVENT WARNING\n\nYou are about to Approve ${ids.length} claims.\n\nThis action will capture Audit Logs and is considered a billable event for application usage.\n\nClick OK to Confirm and Charge.\nClick Cancel to abort.`;
+
+                if (!confirm(warningMsg)) {
+                    return; // User cancelled, stop everything
+                }
+            }
+
+            // 4. Proceed with API Call
             const status = 'APPROVED';
             toggleLoading(true, `Approving ${ids.length} items...`);
             try {
@@ -2504,6 +3085,40 @@
                 toggleLoading(false);
             }
         }
+
+<!--        async function processBulkAction(action) {-->
+<!--            if (approverSelection.size === 0) { showToast("Select items first", "warning"); return; }-->
+<!--            const ids = Array.from(approverSelection);-->
+
+<!--            if (action === 'return') {-->
+<!--                document.getElementById('reject-modal').classList.remove('hidden');-->
+<!--                document.getElementById('reject-reason').value = '';-->
+<!--                return;-->
+<!--            }-->
+
+<!--            const status = 'APPROVED';-->
+<!--            toggleLoading(true, `Approving ${ids.length} items...`);-->
+<!--            try {-->
+<!--                const res = await safeFetch('/drawback/api/workflow/action', {-->
+<!--                    method: 'POST',-->
+<!--                    headers: { 'Content-Type': 'application/json' },-->
+<!--                    body: JSON.stringify({ ids: ids, status: status, user: currentUserRole })-->
+<!--                });-->
+
+<!--                if(res.success) {-->
+<!--                    showToast("Approved Successfully", "success");-->
+<!--                    // Reload current queue to clear approved items-->
+<!--                    const currentClaimId = document.getElementById('approver-active-claim').innerText;-->
+<!--                    loadApproverQueue(currentClaimId);-->
+<!--                }-->
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
+
+
+
+
 
         async function confirmRejection() {
             const ids = Array.from(approverSelection);
@@ -2723,21 +3338,53 @@
                             cellTitle = "Auto-filled by System";
                         }
 
-                        return `<td class="p-2">
-                                    <input type="text"
-                                           value="${cellVal}"
-                                           title="${cellTitle}"
-                                           ${cellAction}
-                                           onchange="updateStagedValue(${i}, '${k}', this.value)"
-                                           class="${cellClass}"
-                                           id="cell-${i}-${k}">
-                                </td>`;
+                        // 🆕 UOM DROPDOWN LOGIC (With Icon)
+                        if (k === 'uom') {
+                            const options = VALID_UOMS.map(u =>
+                                `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`
+                            ).join('');
+
+                            return `<td class="p-2">
+                                        <div class="relative w-full h-full group">
+                                            <select onchange="updateStagedValue(${i}, '${k}', this.value)"
+                                                    class="${cellClass} appearance-none cursor-pointer font-bold pr-6"
+                                                    id="cell-${i}-${k}"
+                                                    title="${cellTitle}"
+                                                    ${cellAction}
+                                                    style="text-align-last:center;">
+                                                <option value="" disabled ${!cellVal ? 'selected' : ''}>--</option>
+                                                ${options}
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-1 flex items-center px-1 text-slate-400 group-hover:text-blue-500">
+                                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                                            </div>
+                                        </div>
+                                    </td>`;
+                        }
+                        // STANDARD INPUT LOGIC
+                        else {
+                            return `<td class="p-2">
+                                        <input type="text"
+                                               value="${cellVal}"
+                                               title="${cellTitle}"
+                                               ${cellAction}
+                                               onchange="updateStagedValue(${i}, '${k}', this.value)"
+                                               class="${cellClass}"
+                                               id="cell-${i}-${k}">
+                                    </td>`;
+                        }
                     }).join('') +
                     `</tr>`;
             }).join('');
 
             recalcStatus();
         }
+
+
+
+
+
+
 
 // Updated Update Logic to Handle "Fixed" vs "OK" vs "Error" correctly
 
@@ -2757,6 +3404,11 @@
         // 1. EXTRACTED VALIDATION FUNCTION (GLOBAL)
         // ==========================================
         const VALID_UOMS = ['KG', 'PCS', 'LBS', 'M', 'SQM', 'L', 'GR', 'SET', 'PAIR', 'DOZ', 'EA', 'GAL', 'CM'];
+
+
+
+
+
 
         function validateRow(row) {
             let messages = [];
@@ -2786,12 +3438,19 @@
                 }
             }
 
-            // 3. Numerics
+            // 3. Numerics (PATCHED)
             ['qty', 'duty_paid', 'duty_rate', 'conversion_factor', 'customs_value'].forEach(field => {
                 if (row[field] !== undefined) {
                     const val = parseFloat(row[field]);
+
+                    // Generic Positive Check
                     if (isNaN(val) || val <= 0) {
                         messages.push(`${field} must be > 0`);
+                        fields.push(field);
+                    }
+                    // PATCH: Specific Check for Duty Rate (Must be <= 1.0)
+                    else if (field === 'duty_rate' && val > 1.0) {
+                        messages.push("Duty Rate must be <= 1.0");
                         fields.push(field);
                     }
                 }
@@ -2836,6 +3495,12 @@
 
             return { messages, fields };
         }
+
+
+
+
+
+
 
         // ==========================================
         // 2. UPDATED EDIT HANDLER
@@ -2952,7 +3617,9 @@ function removeErrors() {
 
         async function deleteRow(target, id) { if(!confirm("Delete this record?")) return; toggleLoading(true, "Deleting..."); await safeFetch(`/drawback/api/delete/${target}/${id}`, { method: 'DELETE' }); toggleLoading(false); loadTableData(target); }
 
-        async function runMatching() {
+
+
+async function runMatching() {
             toggleLoading(true, "Running Matching Algorithm...");
             const strategy = document.querySelector('input[name="algo"]:checked').value;
             const json = await safeFetch(`/drawback/api/match`, {
@@ -2963,14 +3630,12 @@ function removeErrors() {
             toggleLoading(false);
             const tbody = document.getElementById('matches-body');
 
-            // Issue 13: Accurate "No Matches Found" Popup
             const matchCount = json && json.data ? json.data.length : 0;
 
             if (matchCount === 0) {
-                 tbody.innerHTML = `<tr><td colspan="23" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;
                  showToast("Matching Complete: No successful matches found.", "warning");
             } else {
-                // ... (Existing Rendering Logic) ...
                 const calcUnitValue = (m) => {
                      if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
                      return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
@@ -2990,6 +3655,13 @@ function removeErrors() {
 
                 tbody.innerHTML = json.data.map(m => `
                     <tr class="border-b border-slate-50 hover:bg-blue-50 transition">
+
+                        <td class="text-center"><span class="status-badge status-draft">DRAFT</span></td>
+
+                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span></td>
+
+                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>
+
                         <td>${m.import_entry_number}</td>
                         <td>${m.import_dec_line}</td>
                         <td>${m.import_material_number}</td>
@@ -3018,15 +3690,171 @@ function removeErrors() {
                             ${formatMoney(calc99Duty(m))}
                         </td>
                         <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
-
-                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span> <span class="status-badge status-draft">DRAFT</span></td>
-                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>
                     </tr>`).join('');
 
                 showToast(`Success: ${matchCount} matches generated.`, "success");
             }
             loadStats();
         }
+
+
+
+<!--async function runMatching() {-->
+<!--            toggleLoading(true, "Running Matching Algorithm...");-->
+<!--            const strategy = document.querySelector('input[name="algo"]:checked').value;-->
+<!--            const json = await safeFetch(`/drawback/api/match`, {-->
+<!--                method: 'POST',-->
+<!--                headers: {'Content-Type': 'application/json'},-->
+<!--                body: JSON.stringify({ strategy: strategy })-->
+<!--            });-->
+<!--            toggleLoading(false);-->
+<!--            const tbody = document.getElementById('matches-body');-->
+
+<!--            const matchCount = json && json.data ? json.data.length : 0;-->
+
+<!--            if (matchCount === 0) {-->
+<!--                 tbody.innerHTML = `<tr><td colspan="23" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;-->
+<!--                 showToast("Matching Complete: No successful matches found.", "warning");-->
+<!--            } else {-->
+<!--                const calcUnitValue = (m) => {-->
+<!--                     if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                     return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);-->
+<!--                }-->
+<!--                const calcEnteredValue = (m) => {-->
+<!--                    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);-->
+<!--                };-->
+
+<!--                const calcExportDuty = (m) => {-->
+<!--                    return calcEnteredValue(m) * (parseFloat(m.import_duty_rate) || 0);-->
+<!--                }-->
+
+<!--                const calc99Duty = (m) => {-->
+<!--                    return calcExportDuty(m) * 0.99;-->
+<!--                }-->
+
+<!--                tbody.innerHTML = json.data.map(m => `-->
+<!--                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">-->
+<!--                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span> <span class="status-badge status-draft">DRAFT</span></td>-->
+<!--                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>-->
+
+<!--                        <td>${m.import_entry_number}</td>-->
+<!--                        <td>${m.import_dec_line}</td>-->
+<!--                        <td>${m.import_material_number}</td>-->
+<!--                        <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                        <td>${m.import_date}</td>-->
+<!--                        <td>${m.export_desc}</td>-->
+<!--                        <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.qty_matched}</td>-->
+<!--                        <td>${m.import_uom}</td>-->
+<!--                        <td>${m.export_entry_number}</td>-->
+<!--                        <td>${m.export_date}</td>-->
+<!--                        <td>${m.export_country}</td>-->
+<!--                        <td>HTS</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.import_duty_rate}</td>-->
+<!--                        <td>${formatMoney(calcUnitValue(m))}</td>-->
+
+<!--                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcEnteredValue(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcExportDuty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">-->
+<!--                            ${formatMoney(calc99Duty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+<!--                    </tr>`).join('');-->
+
+<!--                showToast(`Success: ${matchCount} matches generated.`, "success");-->
+<!--            }-->
+<!--            loadStats();-->
+<!--        }-->
+
+
+
+
+<!--        async function runMatching() {-->
+<!--            toggleLoading(true, "Running Matching Algorithm...");-->
+<!--            const strategy = document.querySelector('input[name="algo"]:checked').value;-->
+<!--            const json = await safeFetch(`/drawback/api/match`, {-->
+<!--                method: 'POST',-->
+<!--                headers: {'Content-Type': 'application/json'},-->
+<!--                body: JSON.stringify({ strategy: strategy })-->
+<!--            });-->
+<!--            toggleLoading(false);-->
+<!--            const tbody = document.getElementById('matches-body');-->
+
+<!--            // Issue 13: Accurate "No Matches Found" Popup-->
+<!--            const matchCount = json && json.data ? json.data.length : 0;-->
+
+<!--            if (matchCount === 0) {-->
+<!--                 tbody.innerHTML = `<tr><td colspan="23" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;-->
+<!--                 showToast("Matching Complete: No successful matches found.", "warning");-->
+<!--            } else {-->
+<!--                // ... (Existing Rendering Logic) ...-->
+<!--                const calcUnitValue = (m) => {-->
+<!--                     if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                     return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);-->
+<!--                }-->
+<!--                const calcEnteredValue = (m) => {-->
+<!--                    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);-->
+<!--                };-->
+
+<!--                const calcExportDuty = (m) => {-->
+<!--                    return calcEnteredValue(m) * (parseFloat(m.import_duty_rate) || 0);-->
+<!--                }-->
+
+<!--                const calc99Duty = (m) => {-->
+<!--                    return calcExportDuty(m) * 0.99;-->
+<!--                }-->
+
+<!--                tbody.innerHTML = json.data.map(m => `-->
+<!--                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">-->
+<!--                        <td>${m.import_entry_number}</td>-->
+<!--                        <td>${m.import_dec_line}</td>-->
+<!--                        <td>${m.import_material_number}</td>-->
+<!--                        <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                        <td>${m.import_date}</td>-->
+<!--                        <td>${m.export_desc}</td>-->
+<!--                        <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.qty_matched}</td>-->
+<!--                        <td>${m.import_uom}</td>-->
+<!--                        <td>${m.export_entry_number}</td>-->
+<!--                        <td>${m.export_date}</td>-->
+<!--                        <td>${m.export_country}</td>-->
+<!--                        <td>HTS</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.import_duty_rate}</td>-->
+<!--                        <td>${formatMoney(calcUnitValue(m))}</td>-->
+
+<!--                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcEnteredValue(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcExportDuty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">-->
+<!--                            ${formatMoney(calc99Duty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+
+<!--                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span> <span class="status-badge status-draft">DRAFT</span></td>-->
+<!--                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>-->
+<!--                    </tr>`).join('');-->
+
+<!--                showToast(`Success: ${matchCount} matches generated.`, "success");-->
+<!--            }-->
+<!--            loadStats();-->
+<!--        }-->
+
+
+
+
         async function resetSystem() { if(confirm("WARNING: Delete ALL data?")) { toggleLoading(true, "Cleaning System..."); await safeFetch(`/drawback/api/reset`, { method: 'POST' }); window.location.reload(); } }
 
 
