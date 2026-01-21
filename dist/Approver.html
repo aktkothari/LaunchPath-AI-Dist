@@ -636,27 +636,6 @@
 
 
 
-<!--        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">-->
-<!--            <div class="flex items-center gap-4">-->
-<!--                 <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>-->
-<!--                 <div class="h-6 w-px bg-slate-200"></div>-->
-<!--                 <select id="role-switcher" onchange="updateRoleUI()" class="text-xs bg-slate-100 border border-slate-200 rounded px-2 py-1 outline-none focus:border-blue-500 text-slate-600 font-semibold cursor-pointer">-->
-<!--                     <option value="REVIEWER" selected>Simulate: Reviewer</option>-->
-<!--                     <option value="APPROVER">Simulate: Approver</option>-->
-<!--                 </select>-->
-<!--            </div>-->
-
-<!--            <div class="flex gap-3">-->
-<!--                <button onclick="loadStats()" class="p-2 text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-rotate-right"></i></button>-->
-<!--                <button onclick="resetSystem()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 border border-red-200 transition">-->
-<!--                    <i class="fa-solid fa-database mr-2"></i> Truncate Database-->
-<!--                </button>-->
-<!--            </div>-->
-<!--        </header>-->
-
-
-
-
 
         <div class="flex-1 overflow-y-auto p-8" id="content-area">
 
@@ -1049,7 +1028,7 @@
                  <div id="history-summary-view" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                       <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
                         <div><h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims History</h3><p class="text-xs text-purple-600 mt-1">Select a Claim ID to view details or download specific reports.</p></div>
-                        <div class="flex gap-2"><button onclick="window.open(API_BASE + '/drawback/api/export_matches')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium"><i class="fa-solid fa-file-csv mr-1"></i> Export All</button></div>
+<!--                        <div class="flex gap-2"><button onclick="window.open(API_BASE + '/drawback/api/export_matches')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium"><i class="fa-solid fa-file-csv mr-1"></i> Export All</button></div>-->
                     </div>
                     <div class="overflow-x-auto"><table class="min-w-full text-sm text-left" id="history-summary-table"><thead class="bg-slate-50 text-slate-500 border-b"></thead><tbody class="divide-y divide-slate-50" id="history-summary-body"><tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Loading History...</td></tr></tbody></table></div>
                 </div>
@@ -1061,162 +1040,235 @@
                 </div>
             </div>
 
-            <div id="view-help" class="view-section hidden fade-in max-w-5xl mx-auto pb-20">
 
-                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-10 text-white mb-10 shadow-lg relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h1 class="text-4xl font-bold mb-4 tracking-tight">DrawbackFlow Enterprise Guide</h1>
-                        <p class="text-lg opacity-90 max-w-2xl">The complete manual for managing your Duty Drawback program. From data ingestion to financial recovery, master every step of the workflow.</p>
+
+
+
+<div id="view-help" class="view-section hidden fade-in max-w-7xl mx-auto pb-32">
+
+                <div class="relative bg-slate-900 rounded-3xl p-10 mb-12 shadow-2xl overflow-hidden group border border-slate-700/50">
+                    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
+
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                        <div class="max-w-4xl space-y-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[11px] font-bold uppercase tracking-widest">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> Documentation
+                            </div>
+                            <h1 class="text-4xl font-bold tracking-tight text-white">Custom Drawbacks Enterprise Guide</h1>
+                            <p class="text-base text-slate-300 leading-relaxed font-light max-w-2xl">
+                                This section outlines the end-to-end product workflow and explains key terminologies used within the application. For comprehensive, step-by-step instructions—including detailed screenshots—users may download the full User Guide here.
+                            </p>
+                        </div>
+
+                        <a href="#" onclick="alert('Downloading User_Guide_v1.0.pdf...')" class="group relative flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 backdrop-blur-md px-6 py-4 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 shrink-0">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-inner">
+                                <i class="fa-solid fa-file-pdf text-xl group-hover:scale-110 transition-transform duration-300"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-[10px] text-blue-200 uppercase tracking-wider font-bold">PDF Manual</span>
+                                <span class="block text-sm font-semibold text-white group-hover:text-blue-100 transition-colors">Download Full Guide</span>
+                            </div>
+                        </a>
                     </div>
-                    <i class="fa-solid fa-book-open absolute -bottom-6 -right-6 text-9xl opacity-10 text-white transform rotate-12"></i>
                 </div>
 
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span> The Core Workflow</h2>
-                    <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
-                         <div class="flex flex-col md:flex-row justify-between items-center text-center gap-6 relative">
-                            <div class="hidden md:block absolute top-1/3 left-0 w-full h-1 bg-slate-100 -z-0 transform -translate-y-1/2"></div>
+                <div class="mb-16">
+                    <div class="flex items-center gap-4 mb-8 pl-2">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white flex items-center justify-center text-lg font-bold shadow-lg shadow-blue-200">1</div>
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Custom Drawbacks Workflow</h2>
+                    </div>
 
-                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
-                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-10 shadow-xl relative overflow-hidden">
+                         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+
+                         <div class="relative z-10 flex flex-col md:flex-row justify-between items-start gap-6">
+                            <div class="hidden md:block absolute top-10 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 -z-0"></div>
+
+                            <div class="flex flex-col items-center gap-5 relative z-10 group w-full md:w-1/5">
+                                <div class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-3xl text-slate-400 group-hover:text-blue-600 group-hover:border-blue-500 group-hover:-translate-y-2 transition-all duration-300">
                                     <i class="fa-solid fa-cloud-upload"></i>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Data Upload/ Ingest</h4>
-                                    <p class="text-xs text-slate-400">Upload & Validate Data</p>
+                                <div class="text-center px-2">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-3 uppercase tracking-wide group-hover:text-blue-700 transition-colors">Data Upload & Validation</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
+                                        Users upload four data files. Product Master and Materials Mapping are one-time reference uploads, while Import and Export files are uploaded incrementally. All files are system-validated, and users must correct any errors before committing the data.
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
-                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-indigo-500 group-hover:text-indigo-600 transition-all duration-300">
+                            <div class="flex flex-col items-center gap-5 relative z-10 group w-full md:w-1/5">
+                                <div class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-3xl text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-500 group-hover:-translate-y-2 transition-all duration-300">
                                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Match</h4>
-                                    <p class="text-xs text-slate-400">Execute Import-Export Matching</p>
+                                <div class="text-center px-2">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-3 uppercase tracking-wide group-hover:text-indigo-700 transition-colors">Matching Engine</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
+                                        Users manually trigger the matching process and select a matching methodology, such as FIFO or Highest Duty Paid. The system then matches eligible import and export records.
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
-                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">
+                            <div class="flex flex-col items-center gap-5 relative z-10 group w-full md:w-1/5">
+                                <div class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-3xl text-slate-400 group-hover:text-cyan-600 group-hover:border-cyan-500 group-hover:-translate-y-2 transition-all duration-300">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Review</h4>
-                                    <p class="text-xs text-slate-400">Review The Matching & Create Claims</p>
+                                <div class="text-center px-2">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-3 uppercase tracking-wide group-hover:text-cyan-700 transition-colors">Review & Prep</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
+                                        Reviewers validate matched entries and group them into claims or batches for submission. Approvers are automatically notified via email when claims are ready for review.
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
-                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-emerald-500 group-hover:text-emerald-600 transition-all duration-300">
+                            <div class="flex flex-col items-center gap-5 relative z-10 group w-full md:w-1/5">
+                                <div class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-3xl text-slate-400 group-hover:text-emerald-600 group-hover:border-emerald-500 group-hover:-translate-y-2 transition-all duration-300">
                                     <i class="fa-solid fa-stamp"></i>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Approve</h4>
-                                    <p class="text-xs text-slate-400">Approve & Local Claims</p>
+                                <div class="text-center px-2">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-3 uppercase tracking-wide group-hover:text-emerald-700 transition-colors">Approval</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
+                                        Approvers may fully or partially approve claims or reject them with a mandatory reason. Rejected entries are routed back to the Reviewer for further action.
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">
-                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-purple-500 group-hover:text-purple-600 transition-all duration-300">
+                            <div class="flex flex-col items-center gap-5 relative z-10 group w-full md:w-1/5">
+                                <div class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-3xl text-slate-400 group-hover:text-purple-600 group-hover:border-purple-500 group-hover:-translate-y-2 transition-all duration-300">
                                     <i class="fa-solid fa-flag-checkered"></i>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Finalize</h4>
-                                    <p class="text-xs text-slate-400">Broker Handshake</p>
+                                <div class="text-center px-2">
+                                    <h4 class="font-bold text-slate-800 text-sm mb-3 uppercase tracking-wide group-hover:text-purple-700 transition-colors">Broker Submission</h4>
+                                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
+                                        Approved claims can be downloaded and submitted to the broker offline. Based on broker feedback, entries may be voided prior to final submission. A final Claims ID is then added by the reviewer, and completed claims remain accessible in the system for up to five years for audit and compliance purposes.
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">2</span> Data Management Rules</h2>
+                <div class="mb-16">
+                    <div class="flex items-center gap-4 mb-8 pl-2">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg font-bold shadow-lg shadow-blue-200">2</div>
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Data Management</h2>
+                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="guide-card">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                                <h3 class="font-bold text-lg text-slate-700">Strict Validation</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 border-l-[6px] border-l-red-500 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-shield-halved"></i></div>
+                                <h3 class="font-bold text-lg text-slate-800">Data Validation Rules</h3>
                             </div>
-                            <p class="text-sm text-slate-500 mb-4">The system rejects bad data *before* it enters the database. Common rejection reasons:</p>
-                            <ul class="space-y-3">
-                                <li class="flex items-start gap-3 text-sm text-slate-600">
-                                    <i class="fa-solid fa-calendar-xmark text-red-400 mt-1"></i>
-                                    <div><strong class="text-slate-800">Future Dates:</strong> Import/Export dates cannot be in the future.</div>
-                                </li>
-                                <li class="flex items-start gap-3 text-sm text-slate-600">
-                                    <i class="fa-solid fa-ruler-combined text-red-400 mt-1"></i>
-                                    <div><strong class="text-slate-800">Invalid UOM:</strong> Must match whitelist (KG, PCS, M, SQM, L, etc).</div>
-                                </li>
-                                <li class="flex items-start gap-3 text-sm text-slate-600">
-                                    <i class="fa-solid fa-hashtag text-red-400 mt-1"></i>
-                                    <div><strong class="text-slate-800">Entry Number Format:</strong> Must contain alphanumeric characters (not just text).</div>
-                                </li>
-                            </ul>
+                            <p class="text-sm text-slate-600 mb-6 leading-relaxed font-medium">
+                                The system applies strict pre-commit validations to all uploaded Import, Export, Product Master and Materials Mapping files. These validations apply to mandatory fields and are executed before data is committed to the database to ensure data quality and compliance.
+                            </p>
+                            <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-100">
+                                <div class="text-xs uppercase font-extrabold text-slate-400 mb-4 tracking-wider">Key Validation Checks</div>
+                                <ul class="space-y-3 text-xs font-medium text-slate-700">
+                                    <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-green-500"></i> <span><b>Date validations:</b> Import and Export dates must be valid and not in the future.</span></li>
+                                    <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-green-500"></i> <span><b>Material validations:</b> Material references must align with approved master and mapping data.</span></li>
+                                    <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-green-500"></i> <span><b>Quantity validations:</b> Quantities must be numeric, positive, and within allowable limits.</span></li>
+                                    <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-green-500"></i> <span><b>UOM validations:</b> UOMs must match an approved list and remain consistent across files.</span></li>
+                                    <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-green-500"></i> <span><b>Duty and financial:</b> Duty values must be numeric, non-negative, and properly formatted.</span></li>
+                                    <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-green-500"></i> <span><b>Identifier validations:</b> Mandatory identifiers must follow defined formats and must not be missing.</span></li>
+                                </ul>
+                            </div>
                         </div>
 
-                        <div class="guide-card">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                                <h3 class="font-bold text-lg text-slate-700">Smart Fill & Warnings</h3>
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 border-l-[6px] border-l-amber-400 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <h3 class="font-bold text-lg text-slate-800">Handling of Missing and Invalid Data</h3>
                             </div>
-                             <p class="text-sm text-slate-500 mb-4">Yellow cells indicate the system has auto-corrected or defaulted data.</p>
-                             <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
-                                 <span class="text-xs font-bold text-yellow-800 uppercase">Example:</span>
-                                 <p class="text-xs text-yellow-700 mt-1">If a UOM is missing in the upload, the system may default it to <b>'PCS'</b> based on the Product Master. Always review yellow cells.</p>
-                             </div>
-                             <div class="flex items-center gap-2">
-                                 <div class="h-6 w-20 bg-yellow-100 border border-yellow-300 rounded text-center text-xs flex items-center justify-center text-yellow-800 font-mono">PCS</div>
-                                 <span class="text-xs text-slate-400">← Staging Area Appearance</span>
+                             <p class="text-sm text-slate-600 mb-6 leading-relaxed font-medium">
+                                 To ensure data completeness and accuracy, the system applies controlled remediation and error-handling mechanisms during validation.
+                             </p>
+
+                             <div class="space-y-6">
+                                 <div class="group/box p-6 bg-amber-50 rounded-2xl border border-amber-200 hover:bg-amber-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                                     <div class="flex items-center gap-3 mb-3">
+                                         <i class="fa-solid fa-lightbulb text-amber-600 text-lg group-hover/box:scale-110 transition-transform"></i>
+                                         <strong class="text-xs text-amber-900 uppercase tracking-wide font-extrabold">System-Assisted Data Completion</strong>
+                                     </div>
+                                     <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                                         Where mandatory data is missing, the system attempts to populate the information using approved Materials Mapping and Product Master reference tables. Fields populated through this process are highlighted in <span class="bg-yellow-200 text-yellow-900 px-2 py-0.5 rounded font-bold border border-yellow-300 mx-1 shadow-sm">Yellow</span> to indicate system-derived values requiring user review.
+                                     </p>
+                                 </div>
+
+                                 <div class="group/box p-6 bg-red-50 rounded-2xl border border-red-200 hover:bg-red-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                                     <div class="flex items-center gap-3 mb-3">
+                                         <i class="fa-solid fa-ban text-red-600 text-lg group-hover/box:scale-110 transition-transform"></i>
+                                         <strong class="text-xs text-red-900 uppercase tracking-wide font-extrabold">Invalid Data Identification</strong>
+                                     </div>
+                                     <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                                         Records containing erroneous or invalid data are flagged and prevented from submission. Affected rows are highlighted in <span class="bg-red-200 text-red-900 px-2 py-0.5 rounded font-bold border border-red-300 mx-1 shadow-sm">Red</span> and accompanied by a brief error description indicating the issue. Users must review and resolve all highlighted items before proceeding.
+                                     </p>
+                                 </div>
                              </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span> The Matching Engine</h2>
-                    <div class="guide-card">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div class="col-span-1 border-r border-slate-100 pr-8">
-                                <h4 class="font-bold text-slate-700 mb-4">Strategy Selection</h4>
+                <div class="mb-16">
+                    <div class="flex items-center gap-4 mb-8 pl-2">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg font-bold shadow-lg shadow-blue-200">3</div>
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">The Matching Engine</h2>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-3xl p-10 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+
+                        <p class="text-sm text-slate-500 mb-8 italic border-b border-slate-100 pb-6">
+                            The matching engine applies rule-based logic to identify eligible import–export relationships while ensuring compliance and financial accuracy.
+                        </p>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                            <div class="lg:col-span-1 lg:border-r border-slate-100 lg:pr-10">
+                                <h4 class="font-bold text-slate-800 text-sm mb-5 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-chess text-indigo-500"></i> Strategy Selection
+                                </h4>
                                 <div class="space-y-4">
-                                    <div class="p-3 border rounded-lg bg-slate-50">
-                                        <div class="font-bold text-sm text-slate-800">FIFO (Default)</div>
-                                        <div class="text-xs text-slate-500 mt-1">First-In, First-Out. Consumes oldest inventory first. Best for compliance standard.</div>
+                                    <div class="p-5 border border-slate-200 rounded-2xl bg-slate-50 hover:bg-white hover:border-indigo-200 hover:shadow-md transition-all cursor-default group">
+                                        <div class="font-bold text-sm text-slate-800 group-hover:text-indigo-700">FIFO (Default)</div>
+                                        <div class="text-xs text-slate-600 mt-2 leading-relaxed font-medium">Consumes the oldest available import inventory first and aligns with standard compliance practices.</div>
                                     </div>
-                                    <div class="p-3 border rounded-lg bg-slate-50">
-                                        <div class="font-bold text-sm text-slate-800">Maximize Duty</div>
-                                        <div class="text-xs text-slate-500 mt-1">Prioritizes imports with highest duty paid. Best for financial optimization.</div>
+                                    <div class="p-5 border border-slate-200 rounded-2xl bg-slate-50 hover:bg-white hover:border-indigo-200 hover:shadow-md transition-all cursor-default group">
+                                        <div class="font-bold text-sm text-slate-800 group-hover:text-indigo-700">Maximize Duty</div>
+                                        <div class="text-xs text-slate-600 mt-2 leading-relaxed font-medium">Prioritizes imports with the highest duty paid to optimize financial recovery.</div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-span-2">
-                                <h4 class="font-bold text-slate-700 mb-4">Core Calculations</h4>
+
+                            <div class="lg:col-span-2">
+                                <h4 class="font-bold text-slate-800 text-sm mb-5 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-calculator text-blue-500"></i> Core Calculations
+                                </h4>
                                 <ul class="space-y-4">
-                                    <li class="flex gap-4">
-                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">1</div>
+                                    <li class="flex gap-5 p-5 rounded-2xl border border-transparent hover:bg-slate-50 transition-colors group">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">1</div>
                                         <div>
-                                            <h5 class="font-bold text-sm text-slate-800">Date Integrity Check</h5>
-                                            <p class="text-xs text-slate-500">The engine strictly compares <span class="font-mono bg-slate-100 px-1 rounded">Import Date <= Export Date</span>. Any import arriving after the export is skipped.</p>
+                                            <h5 class="font-bold text-sm text-slate-800 mb-1">Date Integrity Check</h5>
+                                            <p class="text-xs text-slate-600 font-medium">Imports are eligible only when <code class="bg-blue-50 px-2 py-1 rounded text-blue-700 font-mono border border-blue-100 font-bold mx-1">Import Date ≤ Export Date</code>; later imports are excluded.</p>
                                         </div>
                                     </li>
-                                    <li class="flex gap-4">
-                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">2</div>
+                                    <li class="flex gap-5 p-5 rounded-2xl border border-transparent hover:bg-slate-50 transition-colors group">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">2</div>
                                         <div>
-                                            <h5 class="font-bold text-sm text-slate-800">Unit Conversion</h5>
-                                            <p class="text-xs text-slate-500">
-                                                Uses Product Master to convert units. <br>
-                                                Formula: <span class="font-mono bg-slate-100 px-1 rounded">Export Qty * Conversion Factor = Required Import Qty</span>
+                                            <h5 class="font-bold text-sm text-slate-800 mb-1">Unit Conversion</h5>
+                                            <p class="text-xs text-slate-600 font-medium">
+                                                Quantities are converted using Product Master reference data.<br>
+                                                Formula: <code class="bg-blue-50 px-2 py-1 rounded text-blue-700 font-mono border border-blue-100 font-bold mt-2 inline-block">Export Qty * Conversion Factor = Required Import Qty</code>
                                             </p>
                                         </div>
                                     </li>
-                                     <li class="flex gap-4">
-                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">3</div>
+                                     <li class="flex gap-5 p-5 rounded-2xl border border-transparent hover:bg-slate-50 transition-colors group">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">3</div>
                                         <div>
-                                            <h5 class="font-bold text-sm text-slate-800">Financials</h5>
-                                            <p class="text-xs text-slate-500">
-                                                Refund is calculated as: <span class="font-mono bg-slate-100 px-1 rounded">(Matched Qty * Unit Duty) * 99%</span>. The 1% is retained by government statute.
+                                            <h5 class="font-bold text-sm text-slate-800 mb-1">Financial Calculation</h5>
+                                            <p class="text-xs text-slate-600 font-medium">
+                                                Refund is calculated as: <code class="bg-emerald-50 px-2 py-1 rounded text-emerald-700 font-mono border border-emerald-100 font-bold mt-2 inline-block">(Matched Qty * Unit Duty) * 0.99</code>
+                                                <span class="block mt-2 text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Note: 1% is retained by government statute.</span>
                                             </p>
                                         </div>
                                     </li>
@@ -1226,65 +1278,328 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                     <div class="guide-card">
-                        <h3 class="font-bold text-lg text-slate-700 mb-4">Roles & Responsibilities</h3>
-                        <div class="space-y-4">
-                            <div class="flex gap-3">
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded flex items-center justify-center"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+
+                     <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all h-full flex flex-col">
+                        <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl"><i class="fa-solid fa-users-gear"></i></div>
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-800">Roles & Responsibilities</h3>
+                                <p class="text-[11px] text-slate-500 font-medium">The application uses role-based controls to enforce segregation of duties and ensure audit-ready processing.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 flex-1">
+                            <div class="flex gap-5">
+                                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shrink-0 border border-blue-100"><i class="fa-solid fa-magnifying-glass"></i></div>
                                 <div>
-                                    <div class="font-bold text-sm text-slate-800">Reviewer</div>
-                                    <p class="text-xs text-slate-500">Audits Draft matches. Can edit refund amounts. Groups items into Claims.</p>
+                                    <div class="font-bold text-sm text-slate-800 mb-1">Reviewer (Data Steward)</div>
+                                    <p class="text-xs text-slate-500 mb-3 leading-snug font-medium">The Reviewer is responsible for preparing, validating, and submitting claims for approval. Key responsibilities include:</p>
+                                    <ul class="text-[11px] text-slate-600 list-disc list-inside space-y-1.5 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                                        <li>Uploading reference data, including Product Master and Materials Mapping files.</li>
+                                        <li>Uploading incremental Import and Export data files.</li>
+                                        <li>Executing the import–export matching engine using the selected strategy.</li>
+                                        <li>Reviewing and auditing system-generated matching results & grouping validated entries into Claims and submitting them for approval.</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div class="flex gap-3">
-                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded flex items-center justify-center"><i class="fa-solid fa-stamp"></i></div>
+                            <div class="flex gap-5">
+                                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl shrink-0 border border-emerald-100"><i class="fa-solid fa-stamp"></i></div>
                                 <div>
-                                    <div class="font-bold text-sm text-slate-800">Approver</div>
-                                    <p class="text-xs text-slate-500"> audits "Reviewed" claims. Can Approve (Lock) or Return (Reject) items.</p>
+                                    <div class="font-bold text-sm text-slate-800 mb-1">Approver (Authorizer)</div>
+                                    <p class="text-xs text-slate-500 mb-3 leading-snug font-medium">The Approver provides final authorization of reviewed claims. Key responsibilities include:</p>
+                                    <ul class="text-[11px] text-slate-600 list-disc list-inside space-y-1.5 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                                        <li>Reviewing claims submitted by the Reviewer.</li>
+                                        <li>Approving claims, which locks entries and prevents further modification.</li>
+                                        <li>Returning (rejecting) claims or individual items with a mandatory reason for rejection.</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="guide-card">
-                        <h3 class="font-bold text-lg text-slate-700 mb-4">Status Glossary</h3>
-                        <div class="space-y-2">
-                             <div class="flex justify-between items-center text-xs">
-                                <span class="status-badge status-draft">DRAFT</span>
-                                <span class="text-slate-500">Raw match. Visible to Reviewer.</span>
+                    <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all h-full flex flex-col">
+                        <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl"><i class="fa-solid fa-book-bookmark"></i></div>
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-800">Claims Status Glossary</h3>
+                                <p class="text-[11px] text-slate-500 font-medium">The following statuses indicate the lifecycle stage and processing state of a claim within the system:</p>
                             </div>
-                             <div class="flex justify-between items-center text-xs">
-                                <span class="status-badge status-reviewed">REVIEWED</span>
-                                <span class="text-slate-500">Grouped in Claim. Visible to Approver.</span>
+                        </div>
+
+                        <div class="space-y-3 flex-1 overflow-y-auto pr-2">
+                             <div class="grid grid-cols-[110px_1fr] gap-6 items-start p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+                                <span class="status-badge status-draft justify-self-start scale-110 origin-top-left shadow-sm mt-0.5">DRAFT</span>
+                                <span class="text-xs text-slate-600 text-left leading-relaxed font-medium group-hover:text-slate-800">System-generated matches that are pending review. Visible to the Reviewer for validation and preparation.</span>
                             </div>
-                             <div class="flex justify-between items-center text-xs">
-                                <span class="status-badge status-approved">APPROVED</span>
-                                <span class="text-slate-500">Internally accepted. Ready for Broker.</span>
+                             <div class="grid grid-cols-[110px_1fr] gap-6 items-start p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+                                <span class="status-badge status-reviewed justify-self-start scale-110 origin-top-left shadow-sm mt-0.5">REVIEWED</span>
+                                <span class="text-xs text-slate-600 text-left leading-relaxed font-medium group-hover:text-slate-800">Matches that have been grouped into a claim and submitted for approval. Visible to the Approver.</span>
                             </div>
-                            <div class="flex justify-between items-center text-xs">
-                                <span class="status-badge status-complete">COMPLETE</span>
-                                <span class="text-slate-500">Filed with Customs. Broker ID attached.</span>
+                             <div class="grid grid-cols-[110px_1fr] gap-6 items-start p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+                                <span class="status-badge status-approved justify-self-start scale-110 origin-top-left shadow-sm mt-0.5">APPROVED</span>
+                                <span class="text-xs text-slate-600 text-left leading-relaxed font-medium group-hover:text-slate-800">Claims that have been internally approved and are ready for submission to the broker.</span>
                             </div>
-                             <div class="flex justify-between items-center text-xs">
-                                <span class="status-badge status-void">VOIDED</span>
-                                <span class="text-slate-500">Cancelled. Inventory Restored.</span>
+                            <div class="grid grid-cols-[110px_1fr] gap-6 items-start p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+                                <span class="status-badge status-complete justify-self-start scale-110 origin-top-left shadow-sm mt-0.5">COMPLETE</span>
+                                <span class="text-xs text-slate-600 text-left leading-relaxed font-medium group-hover:text-slate-800">Claims that have been filed with Customs and have an associated Broker or Filing ID.</span>
+                            </div>
+                             <div class="grid grid-cols-[110px_1fr] gap-6 items-start p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+                                <span class="status-badge status-void justify-self-start scale-110 origin-top-left shadow-sm mt-0.5">VOIDED</span>
+                                <span class="text-xs text-slate-600 text-left leading-relaxed font-medium group-hover:text-slate-800">Claims that have been cancelled post-approval. Associated inventory quantities are restored and made available for future matching.</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start">
-                    <i class="fa-solid fa-circle-exclamation text-purple-600 text-xl mt-1"></i>
-                    <div>
-                        <h3 class="font-bold text-purple-800 text-sm">Critical: The Broker Handshake</h3>
-                        <p class="text-sm text-purple-700 mt-1 leading-relaxed">
-                            A claim is <b>not</b> considered finished until you locate it in the <b>History</b> tab and click <b>"Mark Final"</b>. You must enter the external Broker Claim ID (e.g., from ACE). This action stamps the final approval date and locks the record as "COMPLETE".
-                        </p>
+                <div class="bg-slate-900 rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden group border border-slate-700/50">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-[80px] transform translate-x-1/2 -translate-y-1/2 group-hover:bg-blue-600/20 transition-all duration-1000"></div>
+
+                    <div class="flex items-start gap-6 relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-800/50 flex items-center justify-center text-blue-400 text-3xl backdrop-blur-md border border-slate-700/50 shadow-inner">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-xl mb-2">Enterprise Support</h3>
+                            <p class="text-sm text-slate-400 max-w-xl leading-relaxed font-light">
+                                For any issues or assistance, please contact the MoonSlate Support team at <span class="text-blue-200 font-mono bg-blue-900/30 px-2 py-0.5 rounded border border-blue-500/20">support@moonslate.ai</span>. Include a brief description of the issue and any relevant reference details to help expedite resolution. Support requests are handled in line with established support procedures.
+                            </p>
+                        </div>
                     </div>
+                    <a href="mailto:support@moonslate.ai" class="relative z-10 bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-blue-900/50 hover:shadow-blue-600/50 hover:-translate-y-1 whitespace-nowrap flex items-center gap-3 group/btn">
+                        <i class="fa-solid fa-paper-plane group-hover/btn:translate-x-1 transition-transform"></i> Contact Support
+                    </a>
                 </div>
 
             </div>
+
+<!--            <div id="view-help" class="view-section hidden fade-in max-w-5xl mx-auto pb-20">-->
+
+<!--                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-10 text-white mb-10 shadow-lg relative overflow-hidden">-->
+<!--                    <div class="relative z-10">-->
+<!--                        <h1 class="text-4xl font-bold mb-4 tracking-tight">DrawbackFlow Enterprise Guide</h1>-->
+<!--                        <p class="text-lg opacity-90 max-w-2xl">The complete manual for managing your Duty Drawback program. From data ingestion to financial recovery, master every step of the workflow.</p>-->
+<!--                    </div>-->
+<!--                    <i class="fa-solid fa-book-open absolute -bottom-6 -right-6 text-9xl opacity-10 text-white transform rotate-12"></i>-->
+<!--                </div>-->
+
+<!--                <div class="mb-12">-->
+<!--                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span> The Core Workflow</h2>-->
+<!--                    <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">-->
+<!--                         <div class="flex flex-col md:flex-row justify-between items-center text-center gap-6 relative">-->
+<!--                            <div class="hidden md:block absolute top-1/3 left-0 w-full h-1 bg-slate-100 -z-0 transform -translate-y-1/2"></div>-->
+
+<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
+<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">-->
+<!--                                    <i class="fa-solid fa-cloud-upload"></i>-->
+<!--                                </div>-->
+<!--                                <div>-->
+<!--                                    <h4 class="font-bold text-slate-700">Data Upload/ Ingest</h4>-->
+<!--                                    <p class="text-xs text-slate-400">Upload & Validate Data</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
+<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-indigo-500 group-hover:text-indigo-600 transition-all duration-300">-->
+<!--                                    <i class="fa-solid fa-wand-magic-sparkles"></i>-->
+<!--                                </div>-->
+<!--                                <div>-->
+<!--                                    <h4 class="font-bold text-slate-700">Match</h4>-->
+<!--                                    <p class="text-xs text-slate-400">Execute Import-Export Matching</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
+<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">-->
+<!--                                    <i class="fa-solid fa-magnifying-glass"></i>-->
+<!--                                </div>-->
+<!--                                <div>-->
+<!--                                    <h4 class="font-bold text-slate-700">Review</h4>-->
+<!--                                    <p class="text-xs text-slate-400">Review The Matching & Create Claims</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
+<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-emerald-500 group-hover:text-emerald-600 transition-all duration-300">-->
+<!--                                    <i class="fa-solid fa-stamp"></i>-->
+<!--                                </div>-->
+<!--                                <div>-->
+<!--                                    <h4 class="font-bold text-slate-700">Approve</h4>-->
+<!--                                    <p class="text-xs text-slate-400">Approve & Local Claims</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
+<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-purple-500 group-hover:text-purple-600 transition-all duration-300">-->
+<!--                                    <i class="fa-solid fa-flag-checkered"></i>-->
+<!--                                </div>-->
+<!--                                <div>-->
+<!--                                    <h4 class="font-bold text-slate-700">Finalize</h4>-->
+<!--                                    <p class="text-xs text-slate-400">Broker Handshake</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="mb-12">-->
+<!--                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">2</span> Data Management Rules</h2>-->
+
+<!--                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">-->
+<!--                        <div class="guide-card">-->
+<!--                            <div class="flex items-center gap-3 mb-4">-->
+<!--                                <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>-->
+<!--                                <h3 class="font-bold text-lg text-slate-700">Strict Validation</h3>-->
+<!--                            </div>-->
+<!--                            <p class="text-sm text-slate-500 mb-4">The system rejects bad data *before* it enters the database. Common rejection reasons:</p>-->
+<!--                            <ul class="space-y-3">-->
+<!--                                <li class="flex items-start gap-3 text-sm text-slate-600">-->
+<!--                                    <i class="fa-solid fa-calendar-xmark text-red-400 mt-1"></i>-->
+<!--                                    <div><strong class="text-slate-800">Future Dates:</strong> Import/Export dates cannot be in the future.</div>-->
+<!--                                </li>-->
+<!--                                <li class="flex items-start gap-3 text-sm text-slate-600">-->
+<!--                                    <i class="fa-solid fa-ruler-combined text-red-400 mt-1"></i>-->
+<!--                                    <div><strong class="text-slate-800">Invalid UOM:</strong> Must match whitelist (KG, PCS, M, SQM, L, etc).</div>-->
+<!--                                </li>-->
+<!--                                <li class="flex items-start gap-3 text-sm text-slate-600">-->
+<!--                                    <i class="fa-solid fa-hashtag text-red-400 mt-1"></i>-->
+<!--                                    <div><strong class="text-slate-800">Entry Number Format:</strong> Must contain alphanumeric characters (not just text).</div>-->
+<!--                                </li>-->
+<!--                            </ul>-->
+<!--                        </div>-->
+
+<!--                        <div class="guide-card">-->
+<!--                            <div class="flex items-center gap-3 mb-4">-->
+<!--                                <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles"></i></div>-->
+<!--                                <h3 class="font-bold text-lg text-slate-700">Smart Fill & Warnings</h3>-->
+<!--                            </div>-->
+<!--                             <p class="text-sm text-slate-500 mb-4">Yellow cells indicate the system has auto-corrected or defaulted data.</p>-->
+<!--                             <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">-->
+<!--                                 <span class="text-xs font-bold text-yellow-800 uppercase">Example:</span>-->
+<!--                                 <p class="text-xs text-yellow-700 mt-1">If a UOM is missing in the upload, the system may default it to <b>'PCS'</b> based on the Product Master. Always review yellow cells.</p>-->
+<!--                             </div>-->
+<!--                             <div class="flex items-center gap-2">-->
+<!--                                 <div class="h-6 w-20 bg-yellow-100 border border-yellow-300 rounded text-center text-xs flex items-center justify-center text-yellow-800 font-mono">PCS</div>-->
+<!--                                 <span class="text-xs text-slate-400">← Staging Area Appearance</span>-->
+<!--                             </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="mb-12">-->
+<!--                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span> The Matching Engine</h2>-->
+<!--                    <div class="guide-card">-->
+<!--                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">-->
+<!--                            <div class="col-span-1 border-r border-slate-100 pr-8">-->
+<!--                                <h4 class="font-bold text-slate-700 mb-4">Strategy Selection</h4>-->
+<!--                                <div class="space-y-4">-->
+<!--                                    <div class="p-3 border rounded-lg bg-slate-50">-->
+<!--                                        <div class="font-bold text-sm text-slate-800">FIFO (Default)</div>-->
+<!--                                        <div class="text-xs text-slate-500 mt-1">First-In, First-Out. Consumes oldest inventory first. Best for compliance standard.</div>-->
+<!--                                    </div>-->
+<!--                                    <div class="p-3 border rounded-lg bg-slate-50">-->
+<!--                                        <div class="font-bold text-sm text-slate-800">Maximize Duty</div>-->
+<!--                                        <div class="text-xs text-slate-500 mt-1">Prioritizes imports with highest duty paid. Best for financial optimization.</div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-span-2">-->
+<!--                                <h4 class="font-bold text-slate-700 mb-4">Core Calculations</h4>-->
+<!--                                <ul class="space-y-4">-->
+<!--                                    <li class="flex gap-4">-->
+<!--                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">1</div>-->
+<!--                                        <div>-->
+<!--                                            <h5 class="font-bold text-sm text-slate-800">Date Integrity Check</h5>-->
+<!--                                            <p class="text-xs text-slate-500">The engine strictly compares <span class="font-mono bg-slate-100 px-1 rounded">Import Date <= Export Date</span>. Any import arriving after the export is skipped.</p>-->
+<!--                                        </div>-->
+<!--                                    </li>-->
+<!--                                    <li class="flex gap-4">-->
+<!--                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">2</div>-->
+<!--                                        <div>-->
+<!--                                            <h5 class="font-bold text-sm text-slate-800">Unit Conversion</h5>-->
+<!--                                            <p class="text-xs text-slate-500">-->
+<!--                                                Uses Product Master to convert units. <br>-->
+<!--                                                Formula: <span class="font-mono bg-slate-100 px-1 rounded">Export Qty * Conversion Factor = Required Import Qty</span>-->
+<!--                                            </p>-->
+<!--                                        </div>-->
+<!--                                    </li>-->
+<!--                                     <li class="flex gap-4">-->
+<!--                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">3</div>-->
+<!--                                        <div>-->
+<!--                                            <h5 class="font-bold text-sm text-slate-800">Financials</h5>-->
+<!--                                            <p class="text-xs text-slate-500">-->
+<!--                                                Refund is calculated as: <span class="font-mono bg-slate-100 px-1 rounded">(Matched Qty * Unit Duty) * 99%</span>. The 1% is retained by government statute.-->
+<!--                                            </p>-->
+<!--                                        </div>-->
+<!--                                    </li>-->
+<!--                                </ul>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">-->
+<!--                     <div class="guide-card">-->
+<!--                        <h3 class="font-bold text-lg text-slate-700 mb-4">Roles & Responsibilities</h3>-->
+<!--                        <div class="space-y-4">-->
+<!--                            <div class="flex gap-3">-->
+<!--                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded flex items-center justify-center"><i class="fa-solid fa-magnifying-glass"></i></div>-->
+<!--                                <div>-->
+<!--                                    <div class="font-bold text-sm text-slate-800">Reviewer</div>-->
+<!--                                    <p class="text-xs text-slate-500">Audits Draft matches. Can edit refund amounts. Groups items into Claims.</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="flex gap-3">-->
+<!--                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded flex items-center justify-center"><i class="fa-solid fa-stamp"></i></div>-->
+<!--                                <div>-->
+<!--                                    <div class="font-bold text-sm text-slate-800">Approver</div>-->
+<!--                                    <p class="text-xs text-slate-500"> audits "Reviewed" claims. Can Approve (Lock) or Return (Reject) items.</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    <div class="guide-card">-->
+<!--                        <h3 class="font-bold text-lg text-slate-700 mb-4">Status Glossary</h3>-->
+<!--                        <div class="space-y-2">-->
+<!--                             <div class="flex justify-between items-center text-xs">-->
+<!--                                <span class="status-badge status-draft">DRAFT</span>-->
+<!--                                <span class="text-slate-500">Raw match. Visible to Reviewer.</span>-->
+<!--                            </div>-->
+<!--                             <div class="flex justify-between items-center text-xs">-->
+<!--                                <span class="status-badge status-reviewed">REVIEWED</span>-->
+<!--                                <span class="text-slate-500">Grouped in Claim. Visible to Approver.</span>-->
+<!--                            </div>-->
+<!--                             <div class="flex justify-between items-center text-xs">-->
+<!--                                <span class="status-badge status-approved">APPROVED</span>-->
+<!--                                <span class="text-slate-500">Internally accepted. Ready for Broker.</span>-->
+<!--                            </div>-->
+<!--                            <div class="flex justify-between items-center text-xs">-->
+<!--                                <span class="status-badge status-complete">COMPLETE</span>-->
+<!--                                <span class="text-slate-500">Filed with Customs. Broker ID attached.</span>-->
+<!--                            </div>-->
+<!--                             <div class="flex justify-between items-center text-xs">-->
+<!--                                <span class="status-badge status-void">VOIDED</span>-->
+<!--                                <span class="text-slate-500">Cancelled. Inventory Restored.</span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start">-->
+<!--                    <i class="fa-solid fa-circle-exclamation text-purple-600 text-xl mt-1"></i>-->
+<!--                    <div>-->
+<!--                        <h3 class="font-bold text-purple-800 text-sm">Critical: The Broker Handshake</h3>-->
+<!--                        <p class="text-sm text-purple-700 mt-1 leading-relaxed">-->
+<!--                            A claim is <b>not</b> considered finished until you locate it in the <b>History</b> tab and click <b>"Mark Final"</b>. You must enter the external Broker Claim ID (e.g., from ACE). This action stamps the final approval date and locks the record as "COMPLETE".-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--            </div>-->
+
+
+
 
         </div>
     </main>
@@ -2128,12 +2443,40 @@ function switchView(viewId) {
         }
 
         // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC ---
-        function openClaimModal() {
-            if (reviewerSelection.size === 0) { showToast("Select matches first", "warning"); return; }
-            document.getElementById('claim-modal').classList.remove('hidden');
-            const suggestedId = `XCLM-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-            document.getElementById('claim-id-input').value = suggestedId;
+        // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC (PATCHED) ---
+async function openClaimModal() {
+    if (reviewerSelection.size === 0) {
+        showToast("Select matches first", "warning");
+        return;
+    }
+
+    document.getElementById('claim-modal').classList.remove('hidden');
+
+    // Set a temporary loading state in the input
+    const input = document.getElementById('claim-id-input');
+    input.value = "GENERATING...";
+    input.disabled = true;
+
+    try {
+        // Fetch strict sequential ID from backend
+        const res = await safeFetch('/drawback/api/next_claim_id');
+
+        if (res.success && res.data && res.data.next_id) {
+            input.value = res.data.next_id;
+        } else {
+            // Fallback only if API fails hard
+            const year = new Date().getFullYear();
+            input.value = `XCLM-${year}-0001`;
+            showToast("Could not fetch sequence, using default", "warning");
         }
+    } catch (e) {
+        console.error("ID Generation Error", e);
+        input.value = "";
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+}
 
         async function confirmClaimSubmission() {
             const claimId = document.getElementById('claim-id-input').value.trim().toUpperCase();
@@ -2390,9 +2733,9 @@ function switchView(viewId) {
                         <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
                              <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
                             <td class="px-6 py-4 text-center">
-                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">
-                                    <i class="fa-solid fa-download text-lg"></i>
-                                </button>
+<!--                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">-->
+<!--                                    <i class="fa-solid fa-download text-lg"></i>-->
+<!--                                </button>-->
                                 <button onclick="viewClaimDetails('${c.claim_id}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
                                     <i class="fa-solid fa-circle-info text-lg"></i>
                                 </button>
