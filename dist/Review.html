@@ -321,129 +321,145 @@
         </div>
     </div>
 
+
+
+
+
     <div id="details-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col animate-fadeIn overflow-hidden">
-            <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-slate-50">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-scale-balanced mr-2 text-blue-600"></i>Match Details</h3>
-                    <p class="text-xs text-slate-500 mt-1">Match UUID: <span id="det-uuid" class="font-mono text-slate-700 bg-slate-200 px-1 rounded">...</span></p>
-                </div>
-                <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col animate-fadeIn overflow-hidden">
+
+        <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-slate-50">
+            <div>
+                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-scale-balanced mr-2 text-blue-600"></i>Match Details</h3>
+                <p class="text-xs text-slate-500 mt-1">Match UUID: <span id="det-uuid" class="font-mono text-slate-700 bg-slate-200 px-1 rounded">...</span></p>
             </div>
+            <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+        </div>
 
-            <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
-                <div class="grid grid-cols-2 gap-6">
+        <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
+            <div class="grid grid-cols-2 gap-6">
 
-                    <div class="bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
-                        <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
-                            <span class="font-bold text-blue-800 text-sm uppercase"><i class="fa-solid fa-plane-departure mr-2"></i>Export Record (Claim Basis)</span>
-                            <span class="text-xs text-blue-600 bg-white px-2 py-1 rounded border border-blue-100 font-mono" id="det-exp-entry">...</span>
-                        </div>
-                        <div class="p-5 grid grid-cols-2 gap-y-5 gap-x-4 text-sm">
-                            <div class="col-span-2">
-                                <div class="detail-label">Material Number</div>
-                                <div id="det-exp-material" class="text-lg font-bold text-slate-800"></div>
-                            </div>
-
-                            <div><div class="detail-label">Quantity</div><div id="det-exp-qty" class="font-bold"></div></div>
-                            <div><div class="detail-label">UOM</div><div id="det-exp-uom"></div></div>
-
-                            <div><div class="detail-label">Export Date</div><div id="det-exp-date"></div></div>
-                            <div><div class="detail-label">Country</div><div id="det-exp-country"></div></div>
-
-                            <div class="col-span-2 border-t border-dashed border-slate-100"></div>
-
-                            <div><div class="detail-label">Invoice No</div><div id="det-exp-inv"></div></div>
-                            <div><div class="detail-label">Internal ID</div><div id="det-exp-id"></div></div>
-
-                            <div class="col-span-2">
-                                <div class="detail-label">Description</div>
-                                <div id="det-exp-desc" class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100"></div>
-                            </div>
-                        </div>
+                <div class="bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
+                    <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
+                        <span class="font-bold text-blue-800 text-sm uppercase"><i class="fa-solid fa-plane-departure mr-2"></i>Export Record (Claim Basis)</span>
+                        <span class="text-xs text-blue-600 bg-white px-2 py-1 rounded border border-blue-100 font-mono" id="det-exp-entry">...</span>
                     </div>
-
-                    <div class="bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
-                        <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100 flex justify-between items-center">
-                            <span class="font-bold text-emerald-800 text-sm uppercase"><i class="fa-solid fa-ship mr-2"></i>Matched Import (Source)</span>
-                            <span class="text-xs text-emerald-600 bg-white px-2 py-1 rounded border border-emerald-100 font-mono" id="det-imp-entry">...</span>
+                    <div class="p-5 grid grid-cols-2 gap-y-5 gap-x-4 text-sm">
+                        <div class="col-span-2">
+                            <div class="detail-label">Material Number</div>
+                            <div id="det-exp-material" class="text-lg font-bold text-slate-800"></div>
                         </div>
-                        <div class="p-5 grid grid-cols-3 gap-y-5 gap-x-4 text-sm">
-                            <div class="col-span-2">
-                                <div class="detail-label">Import Material</div>
-                                <div id="det-imp-material" class="text-lg font-bold text-slate-800"></div>
-                            </div>
-                            <div>
-                                <div class="detail-label">Import Date</div>
-                                <div id="det-imp-date"></div>
-                            </div>
-
-                            <div><div class="detail-label">Declaration #</div><div id="det-imp-dec"></div></div>
-                            <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
-                            <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
-
-                            <div class="col-span-3 border-t border-dashed border-slate-100"></div>
-
-                            <div><div class="detail-label">Original Qty</div><div id="det-imp-orig"></div></div>
-                            <div><div class="detail-label">Available Qty</div><div id="det-imp-avail"></div></div>
-                            <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
-
-                            <div class="col-span-3 border-t border-dashed border-slate-100"></div>
-
-                            <div><div class="detail-label">Customs Value (Total)</div><div id="det-imp-val"></div></div>
-                            <div><div class="detail-label">Duty Paid</div><div id="det-imp-paid"></div></div>
-                            <div><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
+                        <div><div class="detail-label">Quantity</div><div id="det-exp-qty" class="font-bold"></div></div>
+                        <div><div class="detail-label">UOM</div><div id="det-exp-uom"></div></div>
+                        <div><div class="detail-label">Export Date</div><div id="det-exp-date"></div></div>
+                        <div><div class="detail-label">Country</div><div id="det-exp-country"></div></div>
+                        <div class="col-span-2 border-t border-dashed border-slate-100"></div>
+                        <div><div class="detail-label">Invoice No</div><div id="det-exp-inv"></div></div>
+                        <div><div class="detail-label">Internal ID</div><div id="det-exp-id"></div></div>
+                        <div class="col-span-2">
+                            <div class="detail-label">Description</div>
+                            <div id="det-exp-desc" class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 bg-white rounded-lg shadow-sm border border-slate-200 p-5">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 border-b border-slate-100 pb-2">Match Logic & Calculation Breakdown</h4>
-                    <div class="grid grid-cols-7 gap-4 text-center">
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                            <div class="detail-label">Algorithm</div>
-                            <div id="det-algo" class="font-bold text-blue-600"></div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                            <div class="detail-label">Consumed Qty</div>
-                            <div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div>
-                        </div>
-
-                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
-                            <div class="detail-label">Entered Value</div>
-                            <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
-                        </div>
-
-                        <div class="bg-orange-50 p-3 rounded border border-orange-100">
-                            <div class="detail-label">Export Duty (100%)</div>
-                            <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
-                        </div>
-
-                        <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
-                            <div class="detail-label">99% Duty</div>
-                            <div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div>
-                        </div>
-
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                            <div class="detail-label">Total Refund</div>
-                            <div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                            <div class="detail-label">Status</div>
-                            <div id="det-status"></div>
-                        </div>
+                <div class="bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
+                    <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100 flex justify-between items-center">
+                        <span class="font-bold text-emerald-800 text-sm uppercase"><i class="fa-solid fa-ship mr-2"></i>Matched Import (Source)</span>
+                        <span class="text-xs text-emerald-600 bg-white px-2 py-1 rounded border border-emerald-100 font-mono" id="det-imp-entry">...</span>
                     </div>
-                    <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
-                        <i class="fa-solid fa-circle-info mr-1 text-yellow-600"></i> <span id="det-notes"></span>
+                    <div class="p-5 grid grid-cols-3 gap-y-5 gap-x-4 text-sm">
+                        <div class="col-span-2">
+                            <div class="detail-label">Import Material</div>
+                            <div id="det-imp-material" class="text-lg font-bold text-slate-800"></div>
+                        </div>
+                        <div>
+                            <div class="detail-label">Import Date</div>
+                            <div id="det-imp-date"></div>
+                        </div>
+                        <div><div class="detail-label">Declaration #</div><div id="det-imp-dec"></div></div>
+                        <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
+                        <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
+                        <div class="col-span-3 border-t border-dashed border-slate-100"></div>
+                        <div><div class="detail-label">Original Qty</div><div id="det-imp-orig"></div></div>
+                        <div><div class="detail-label">Available Qty</div><div id="det-imp-avail"></div></div>
+                        <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
+                        <div class="col-span-3 border-t border-dashed border-slate-100"></div>
+                        <div><div class="detail-label">Customs Value (Total)</div><div id="det-imp-val"></div></div>
+                        <div><div class="detail-label">Duty Paid</div><div id="det-imp-paid"></div></div>
+                        <div><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
                     </div>
                 </div>
             </div>
 
-            <div class="p-4 border-t border-gray-100 bg-white flex justify-end gap-3">
-                <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="px-6 py-2 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 font-medium transition">Close</button>
+            <div class="mt-6 bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 border-b border-slate-100 pb-2">Match Logic & Calculation Breakdown</h4>
+                <div class="grid grid-cols-7 gap-4 text-center">
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                        <div class="detail-label">Algorithm</div>
+                        <div id="det-algo" class="font-bold text-blue-600"></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                        <div class="detail-label">Consumed Qty</div>
+                        <div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div>
+                    </div>
+                    <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
+                        <div class="detail-label">Entered Value</div>
+                        <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
+                    </div>
+                    <div class="bg-orange-50 p-3 rounded border border-orange-100">
+                        <div class="detail-label">Export Duty (100%)</div>
+                        <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
+                        <div class="detail-label">99% Duty</div>
+                        <div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                        <div class="detail-label">Total Refund</div>
+                        <div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                        <div class="detail-label">Status</div>
+                        <div id="det-status"></div>
+                    </div>
+                </div>
+                <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
+                    <i class="fa-solid fa-circle-info mr-1 text-yellow-600"></i> <span id="det-notes"></span>
+                </div>
             </div>
+
+            <div class="mt-4 bg-slate-50 rounded-lg border border-slate-200 p-4">
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-2 border-b border-slate-200 pb-1">
+                    <i class="fa-solid fa-user-clock mr-1"></i> Workflow Audit Trail
+                </h4>
+                <div class="grid grid-cols-3 gap-4 text-xs">
+                    <div class="bg-white p-2 rounded border border-slate-100 shadow-sm">
+                        <div class="font-bold text-slate-400 text-[10px] uppercase">Reviewed By</div>
+                        <div id="det-reviewed-by" class="font-mono text-blue-600 font-bold truncate mt-1" title="Reviewer Email">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded border border-slate-100 shadow-sm">
+                        <div class="font-bold text-slate-400 text-[10px] uppercase">Approved By</div>
+                        <div id="det-approved-by" class="font-mono text-emerald-600 font-bold truncate mt-1" title="Approver Email">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded border border-slate-100 shadow-sm">
+                        <div class="font-bold text-slate-400 text-[10px] uppercase">Finalized By</div>
+                        <div id="det-finalized-by" class="font-mono text-purple-600 font-bold truncate mt-1" title="Finalizer Email">-</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        <div class="p-4 border-t border-gray-100 bg-white flex justify-end gap-3">
+            <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="px-6 py-2 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 font-medium transition">Close</button>
         </div>
     </div>
+</div>
+
+
+
+
+
 
     <div id="edit-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
@@ -554,7 +570,7 @@
     </div>
 
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg z-20">
-        <div class="h-4 flex items-center px-6 border-b border-gray-100">
+        <div class="h-4 flex items-center">
 <!--            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-3">-->
 <!--                <i class="fa-solid fa-layer-group"></i>-->
 <!--            </div>-->
@@ -619,7 +635,7 @@
 
 
 
-        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
+            <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
             <div class="flex items-center gap-4">
                  <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
                  <div class="h-6 w-px bg-slate-200"></div>
@@ -1352,6 +1368,18 @@
                     </div>
                 </div>
 
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start">
+                                <i class="fa-solid fa-circle-exclamation text-purple-600 text-xl mt-1"></i>
+                                <div>
+                                    <h3 class="font-bold text-purple-800 text-sm">Critical: The Broker Handshake</h3>
+                                    <p class="text-sm text-purple-700 mt-1 leading-relaxed">
+                                        A claim is <b>not</b> considered finished until you locate it in the <b>History</b> tab and click <b>"Mark Final"</b>. You must enter the external Broker Claim ID (e.g., from ACE). This action stamps the final approval date and locks the record as "COMPLETE".
+                                    </p>
+                                </div>
+                            </div>
+
+
+
                 <div class="bg-slate-900 rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden group border border-slate-700/50">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-[80px] transform translate-x-1/2 -translate-y-1/2 group-hover:bg-blue-600/20 transition-all duration-1000"></div>
 
@@ -1371,236 +1399,11 @@
                     </a>
                 </div>
 
-            </div>
-
-<!--            <div id="view-help" class="view-section hidden fade-in max-w-5xl mx-auto pb-20">-->
-
-<!--                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-10 text-white mb-10 shadow-lg relative overflow-hidden">-->
-<!--                    <div class="relative z-10">-->
-<!--                        <h1 class="text-4xl font-bold mb-4 tracking-tight">DrawbackFlow Enterprise Guide</h1>-->
-<!--                        <p class="text-lg opacity-90 max-w-2xl">The complete manual for managing your Duty Drawback program. From data ingestion to financial recovery, master every step of the workflow.</p>-->
-<!--                    </div>-->
-<!--                    <i class="fa-solid fa-book-open absolute -bottom-6 -right-6 text-9xl opacity-10 text-white transform rotate-12"></i>-->
-<!--                </div>-->
-
-<!--                <div class="mb-12">-->
-<!--                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span> The Core Workflow</h2>-->
-<!--                    <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">-->
-<!--                         <div class="flex flex-col md:flex-row justify-between items-center text-center gap-6 relative">-->
-<!--                            <div class="hidden md:block absolute top-1/3 left-0 w-full h-1 bg-slate-100 -z-0 transform -translate-y-1/2"></div>-->
-
-<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
-<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">-->
-<!--                                    <i class="fa-solid fa-cloud-upload"></i>-->
-<!--                                </div>-->
-<!--                                <div>-->
-<!--                                    <h4 class="font-bold text-slate-700">Data Upload/ Ingest</h4>-->
-<!--                                    <p class="text-xs text-slate-400">Upload & Validate Data</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-
-<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
-<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-indigo-500 group-hover:text-indigo-600 transition-all duration-300">-->
-<!--                                    <i class="fa-solid fa-wand-magic-sparkles"></i>-->
-<!--                                </div>-->
-<!--                                <div>-->
-<!--                                    <h4 class="font-bold text-slate-700">Match</h4>-->
-<!--                                    <p class="text-xs text-slate-400">Execute Import-Export Matching</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-
-<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
-<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-blue-500 group-hover:text-blue-600 transition-all duration-300">-->
-<!--                                    <i class="fa-solid fa-magnifying-glass"></i>-->
-<!--                                </div>-->
-<!--                                <div>-->
-<!--                                    <h4 class="font-bold text-slate-700">Review</h4>-->
-<!--                                    <p class="text-xs text-slate-400">Review The Matching & Create Claims</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-
-<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
-<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-emerald-500 group-hover:text-emerald-600 transition-all duration-300">-->
-<!--                                    <i class="fa-solid fa-stamp"></i>-->
-<!--                                </div>-->
-<!--                                <div>-->
-<!--                                    <h4 class="font-bold text-slate-700">Approve</h4>-->
-<!--                                    <p class="text-xs text-slate-400">Approve & Local Claims</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-
-<!--                            <div class="flex flex-col items-center gap-3 relative z-10 group w-full md:w-auto">-->
-<!--                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center text-2xl text-slate-400 group-hover:border-purple-500 group-hover:text-purple-600 transition-all duration-300">-->
-<!--                                    <i class="fa-solid fa-flag-checkered"></i>-->
-<!--                                </div>-->
-<!--                                <div>-->
-<!--                                    <h4 class="font-bold text-slate-700">Finalize</h4>-->
-<!--                                    <p class="text-xs text-slate-400">Broker Handshake</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                <div class="mb-12">-->
-<!--                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">2</span> Data Management Rules</h2>-->
-
-<!--                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">-->
-<!--                        <div class="guide-card">-->
-<!--                            <div class="flex items-center gap-3 mb-4">-->
-<!--                                <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>-->
-<!--                                <h3 class="font-bold text-lg text-slate-700">Strict Validation</h3>-->
-<!--                            </div>-->
-<!--                            <p class="text-sm text-slate-500 mb-4">The system rejects bad data *before* it enters the database. Common rejection reasons:</p>-->
-<!--                            <ul class="space-y-3">-->
-<!--                                <li class="flex items-start gap-3 text-sm text-slate-600">-->
-<!--                                    <i class="fa-solid fa-calendar-xmark text-red-400 mt-1"></i>-->
-<!--                                    <div><strong class="text-slate-800">Future Dates:</strong> Import/Export dates cannot be in the future.</div>-->
-<!--                                </li>-->
-<!--                                <li class="flex items-start gap-3 text-sm text-slate-600">-->
-<!--                                    <i class="fa-solid fa-ruler-combined text-red-400 mt-1"></i>-->
-<!--                                    <div><strong class="text-slate-800">Invalid UOM:</strong> Must match whitelist (KG, PCS, M, SQM, L, etc).</div>-->
-<!--                                </li>-->
-<!--                                <li class="flex items-start gap-3 text-sm text-slate-600">-->
-<!--                                    <i class="fa-solid fa-hashtag text-red-400 mt-1"></i>-->
-<!--                                    <div><strong class="text-slate-800">Entry Number Format:</strong> Must contain alphanumeric characters (not just text).</div>-->
-<!--                                </li>-->
-<!--                            </ul>-->
-<!--                        </div>-->
-
-<!--                        <div class="guide-card">-->
-<!--                            <div class="flex items-center gap-3 mb-4">-->
-<!--                                <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles"></i></div>-->
-<!--                                <h3 class="font-bold text-lg text-slate-700">Smart Fill & Warnings</h3>-->
-<!--                            </div>-->
-<!--                             <p class="text-sm text-slate-500 mb-4">Yellow cells indicate the system has auto-corrected or defaulted data.</p>-->
-<!--                             <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">-->
-<!--                                 <span class="text-xs font-bold text-yellow-800 uppercase">Example:</span>-->
-<!--                                 <p class="text-xs text-yellow-700 mt-1">If a UOM is missing in the upload, the system may default it to <b>'PCS'</b> based on the Product Master. Always review yellow cells.</p>-->
-<!--                             </div>-->
-<!--                             <div class="flex items-center gap-2">-->
-<!--                                 <div class="h-6 w-20 bg-yellow-100 border border-yellow-300 rounded text-center text-xs flex items-center justify-center text-yellow-800 font-mono">PCS</div>-->
-<!--                                 <span class="text-xs text-slate-400">← Staging Area Appearance</span>-->
-<!--                             </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                <div class="mb-12">-->
-<!--                    <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span> The Matching Engine</h2>-->
-<!--                    <div class="guide-card">-->
-<!--                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">-->
-<!--                            <div class="col-span-1 border-r border-slate-100 pr-8">-->
-<!--                                <h4 class="font-bold text-slate-700 mb-4">Strategy Selection</h4>-->
-<!--                                <div class="space-y-4">-->
-<!--                                    <div class="p-3 border rounded-lg bg-slate-50">-->
-<!--                                        <div class="font-bold text-sm text-slate-800">FIFO (Default)</div>-->
-<!--                                        <div class="text-xs text-slate-500 mt-1">First-In, First-Out. Consumes oldest inventory first. Best for compliance standard.</div>-->
-<!--                                    </div>-->
-<!--                                    <div class="p-3 border rounded-lg bg-slate-50">-->
-<!--                                        <div class="font-bold text-sm text-slate-800">Maximize Duty</div>-->
-<!--                                        <div class="text-xs text-slate-500 mt-1">Prioritizes imports with highest duty paid. Best for financial optimization.</div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                            <div class="col-span-2">-->
-<!--                                <h4 class="font-bold text-slate-700 mb-4">Core Calculations</h4>-->
-<!--                                <ul class="space-y-4">-->
-<!--                                    <li class="flex gap-4">-->
-<!--                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">1</div>-->
-<!--                                        <div>-->
-<!--                                            <h5 class="font-bold text-sm text-slate-800">Date Integrity Check</h5>-->
-<!--                                            <p class="text-xs text-slate-500">The engine strictly compares <span class="font-mono bg-slate-100 px-1 rounded">Import Date <= Export Date</span>. Any import arriving after the export is skipped.</p>-->
-<!--                                        </div>-->
-<!--                                    </li>-->
-<!--                                    <li class="flex gap-4">-->
-<!--                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">2</div>-->
-<!--                                        <div>-->
-<!--                                            <h5 class="font-bold text-sm text-slate-800">Unit Conversion</h5>-->
-<!--                                            <p class="text-xs text-slate-500">-->
-<!--                                                Uses Product Master to convert units. <br>-->
-<!--                                                Formula: <span class="font-mono bg-slate-100 px-1 rounded">Export Qty * Conversion Factor = Required Import Qty</span>-->
-<!--                                            </p>-->
-<!--                                        </div>-->
-<!--                                    </li>-->
-<!--                                     <li class="flex gap-4">-->
-<!--                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex-shrink-0 flex items-center justify-center font-bold text-xs">3</div>-->
-<!--                                        <div>-->
-<!--                                            <h5 class="font-bold text-sm text-slate-800">Financials</h5>-->
-<!--                                            <p class="text-xs text-slate-500">-->
-<!--                                                Refund is calculated as: <span class="font-mono bg-slate-100 px-1 rounded">(Matched Qty * Unit Duty) * 99%</span>. The 1% is retained by government statute.-->
-<!--                                            </p>-->
-<!--                                        </div>-->
-<!--                                    </li>-->
-<!--                                </ul>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">-->
-<!--                     <div class="guide-card">-->
-<!--                        <h3 class="font-bold text-lg text-slate-700 mb-4">Roles & Responsibilities</h3>-->
-<!--                        <div class="space-y-4">-->
-<!--                            <div class="flex gap-3">-->
-<!--                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded flex items-center justify-center"><i class="fa-solid fa-magnifying-glass"></i></div>-->
-<!--                                <div>-->
-<!--                                    <div class="font-bold text-sm text-slate-800">Reviewer</div>-->
-<!--                                    <p class="text-xs text-slate-500">Audits Draft matches. Can edit refund amounts. Groups items into Claims.</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                            <div class="flex gap-3">-->
-<!--                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded flex items-center justify-center"><i class="fa-solid fa-stamp"></i></div>-->
-<!--                                <div>-->
-<!--                                    <div class="font-bold text-sm text-slate-800">Approver</div>-->
-<!--                                    <p class="text-xs text-slate-500"> audits "Reviewed" claims. Can Approve (Lock) or Return (Reject) items.</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-
-<!--                    <div class="guide-card">-->
-<!--                        <h3 class="font-bold text-lg text-slate-700 mb-4">Status Glossary</h3>-->
-<!--                        <div class="space-y-2">-->
-<!--                             <div class="flex justify-between items-center text-xs">-->
-<!--                                <span class="status-badge status-draft">DRAFT</span>-->
-<!--                                <span class="text-slate-500">Raw match. Visible to Reviewer.</span>-->
-<!--                            </div>-->
-<!--                             <div class="flex justify-between items-center text-xs">-->
-<!--                                <span class="status-badge status-reviewed">REVIEWED</span>-->
-<!--                                <span class="text-slate-500">Grouped in Claim. Visible to Approver.</span>-->
-<!--                            </div>-->
-<!--                             <div class="flex justify-between items-center text-xs">-->
-<!--                                <span class="status-badge status-approved">APPROVED</span>-->
-<!--                                <span class="text-slate-500">Internally accepted. Ready for Broker.</span>-->
-<!--                            </div>-->
-<!--                            <div class="flex justify-between items-center text-xs">-->
-<!--                                <span class="status-badge status-complete">COMPLETE</span>-->
-<!--                                <span class="text-slate-500">Filed with Customs. Broker ID attached.</span>-->
-<!--                            </div>-->
-<!--                             <div class="flex justify-between items-center text-xs">-->
-<!--                                <span class="status-badge status-void">VOIDED</span>-->
-<!--                                <span class="text-slate-500">Cancelled. Inventory Restored.</span>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start">-->
-<!--                    <i class="fa-solid fa-circle-exclamation text-purple-600 text-xl mt-1"></i>-->
-<!--                    <div>-->
-<!--                        <h3 class="font-bold text-purple-800 text-sm">Critical: The Broker Handshake</h3>-->
-<!--                        <p class="text-sm text-purple-700 mt-1 leading-relaxed">-->
-<!--                            A claim is <b>not</b> considered finished until you locate it in the <b>History</b> tab and click <b>"Mark Final"</b>. You must enter the external Broker Claim ID (e.g., from ACE). This action stamps the final approval date and locks the record as "COMPLETE".-->
-<!--                        </p>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--            </div>-->
 
 
 
 
+          </div>
         </div>
     </main>
 
@@ -1619,25 +1422,34 @@
 // 🆕 PATCH START: Global State & Parent Bridge
         // Default to a fallback if not running in iframe or handshake fails
         window.CURRENT_USER_EMAIL = "system_fallback@launchpath.ai";
+        window.CURRENT_USER_FULL_NAME = "Unknown User"; // 🆕 NEW GLOBAL
 
         // 1. Listen for Context from Parent
         window.addEventListener('message', function(event) {
             // OPTIONAL: Uncomment to restrict to specific Parent domain for security
             // if (event.origin !== "http://your-parent-domain.com") return;
 
-
             console.log("📥 [Child] Received Message:", event.data);
-
 
             const data = event.data;
 
             if (data && data.type === 'SET_USER_CONTEXT') {
-                if(data.user && data.user.email) {
-                    window.CURRENT_USER_EMAIL = data.user.email;
+                if(data.user) {
+                    // Set Email
+                    if (data.user.email) {
+                        window.CURRENT_USER_EMAIL = data.user.email;
+                    }
 
-                    // Visual Confirmation (Optional - Update UI to show logged in user)
-                    console.log("✅ [Child] Context Received. User:", window.CURRENT_USER_EMAIL);
-                    showToast(`Connected as ${window.CURRENT_USER_EMAIL}`, "success");
+                    // 🆕 PATCH: Set Name
+                    if(data.user.first_name || data.user.last_name) {
+                        const first = data.user.first_name || '';
+                        const last = data.user.last_name || '';
+                        window.CURRENT_USER_FULL_NAME = `${first} ${last}`.trim();
+                    }
+
+                    // Visual Confirmation
+                    console.log("✅ [Child] Context Received:", window.CURRENT_USER_EMAIL, window.CURRENT_USER_FULL_NAME);
+                    showToast(`Connected as ${window.CURRENT_USER_FULL_NAME || window.CURRENT_USER_EMAIL}`, "success");
 
                     // Update Role Switcher if Role is provided
                     if(data.user.role) {
@@ -1652,9 +1464,7 @@
         });
 
         // 2. Signal Readiness to Parent
-        // We wait a small moment to ensure Parent listeners are active
         setTimeout(() => {
-            // Check if running inside an iframe
             if (window.parent && window.parent !== window) {
                 console.log("🚀 [Child] Sending READY signal to Parent...");
                 window.parent.postMessage({ type: 'DRAWBACK_APP_READY' }, '*');
@@ -2012,11 +1822,12 @@ async function discardMatch(matchId) {
             // --- SAFE FETCH ---
         // --- SAFE FETCH (With Automatic Context Injection) ---
 // --- SAFE FETCH (With Automatic Context Injection) ---
+// --- SAFE FETCH (With Automatic Context Injection) ---
         async function safeFetch(endpoint, options={}) {
             try {
                 const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
 
-                // 🆕 INJECTION LOGIC: Attach the email we received from the parent
+                // 🆕 INJECTION LOGIC: Attach the email AND NAME received from parent
                 if (options.method === 'POST' || options.method === 'PUT') {
                     let body = {};
 
@@ -2029,8 +1840,10 @@ async function discardMatch(matchId) {
                     }
 
                     if (!(options.body instanceof FormData)) {
-                        // THIS LINE IS CRITICAL: It uses the variable you just set up
+                        // Inject Identity
                         body.actor_email = window.CURRENT_USER_EMAIL;
+                        body.actor_name = window.CURRENT_USER_FULL_NAME; // 🆕 PATCH: Send Name
+
                         options.body = JSON.stringify(body);
 
                         if (!options.headers) options.headers = {};
@@ -2327,46 +2140,150 @@ function switchView(viewId) {
         }
 
         // --- TABLE DATA LOADER ---
+
+<!--        -->
+<!--        -->
+<!--        async function loadTableData(target) {-->
+<!--            toggleLoading(true, "Loading Data...");-->
+<!--            const tbody = document.querySelector('#data-table tbody');-->
+<!--            const tableContainer = document.getElementById('data-table-container'); // Issue 1: Get container-->
+<!--            tbody.innerHTML = "";-->
+
+<!--            try {-->
+<!--                const data = await safeFetch(`/drawback/api/view/${target}`);-->
+<!--                const rows = Array.isArray(data) ? data : [];-->
+<!--                const config = TABLE_CONFIG[target];-->
+<!--                if (!config) return;-->
+
+<!--                // 🆕 Generate Headers dynamically-->
+<!--                const labels = config.map(c => c.l);-->
+<!--                renderDynamicHeaders('data-table', labels, 0); // 0 = No Action Column-->
+
+<!--                if(rows.length === 0) {-->
+<!--                    // Issue 1: Hide Table Container completely if empty-->
+<!--                    tableContainer.classList.add('hidden');-->
+<!--                } else {-->
+<!--                    // Issue 1: Show Table Container if data exists-->
+<!--                    tableContainer.classList.remove('hidden');-->
+
+<!--                    let bRows = "";-->
+<!--                    rows.forEach(row => {-->
+<!--                        let rowClass = "hover:bg-slate-50 border-b border-slate-100 transition";-->
+<!--                        if (row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";-->
+
+<!--                        bRows += `<tr class="${rowClass}">`;-->
+
+<!--                        config.forEach(col => {-->
+<!--                            let val = row[col.k] || "";-->
+<!--                            if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {-->
+<!--                                val = formatMoney(val);-->
+<!--                            }-->
+<!--                            // NEW: Specific styling for Consumed Qty column-->
+<!--                            let cellClasses = "px-6 py-3 text-slate-600 whitespace-nowrap text-center";-->
+<!--                            if(col.k === 'qty_consumed') {-->
+<!--                                cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";-->
+<!--                            }-->
+
+<!--                            bRows += `<td class="${cellClasses}">${val}</td>`;-->
+<!--                        });-->
+<!--                        bRows += `</tr>`;-->
+<!--                    });-->
+<!--                    tbody.innerHTML = bRows;-->
+<!--                }-->
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
+
+
+
+// --- TABLE DATA LOADER (PATCHED FOR ARCHIVING) ---
+
+// --- TABLE DATA LOADER (PATCHED: Archiving & No-Restore Logic) ---
         async function loadTableData(target) {
             toggleLoading(true, "Loading Data...");
             const tbody = document.querySelector('#data-table tbody');
-            const tableContainer = document.getElementById('data-table-container'); // Issue 1: Get container
+            const tableContainer = document.getElementById('data-table-container');
             tbody.innerHTML = "";
 
             try {
                 const data = await safeFetch(`/drawback/api/view/${target}`);
-                const rows = Array.isArray(data) ? data : [];
+                let rows = Array.isArray(data) ? data : [];
                 const config = TABLE_CONFIG[target];
                 if (!config) return;
 
-                // 🆕 Generate Headers dynamically
+                // 1. Sort: Active (0) first, Archived (1) last
+                rows.sort((a, b) => {
+                    const arcA = a.is_archived || 0;
+                    const arcB = b.is_archived || 0;
+                    return arcA - arcB;
+                });
+
                 const labels = config.map(c => c.l);
-                renderDynamicHeaders('data-table', labels, 0); // 0 = No Action Column
+
+                // 2. Logic: Show Action Column for Products AND Material Mappings
+                // hasActionColumn = 2 tells the header renderer to add the "Action" column
+                const hasActionColumn = (target === 'products' || target === 'material_mappings') ? 2 : 0;
+
+                renderDynamicHeaders('data-table', labels, hasActionColumn);
 
                 if(rows.length === 0) {
-                    // Issue 1: Hide Table Container completely if empty
                     tableContainer.classList.add('hidden');
                 } else {
-                    // Issue 1: Show Table Container if data exists
                     tableContainer.classList.remove('hidden');
 
                     let bRows = "";
                     rows.forEach(row => {
-                        let rowClass = "hover:bg-slate-50 border-b border-slate-100 transition";
-                        if (row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";
+                        const isArchived = row.is_archived === 1;
+
+                        // Style: Grey out if archived
+                        let rowClass = isArchived
+                            ? "bg-gray-100 text-gray-400 border-b border-slate-100 italic"
+                            : "hover:bg-slate-50 border-b border-slate-100 transition";
+
+                        // Highlight smart-filled cells only if active
+                        if (!isArchived && row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";
 
                         bRows += `<tr class="${rowClass}">`;
 
+                        // 3. Render Action Button (With "No Un-archive" Logic)
+                        if (hasActionColumn === 2) {
+                            let actionHtml = '';
+
+                            if (isArchived) {
+                                // 🔒 LOCKED: Show static badge, no click action
+                                actionHtml = `
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-wider cursor-not-allowed" title="This item is archived and cannot be restored">
+                                        <i class="fa-solid fa-box-archive"></i> Archived
+                                    </span>
+                                `;
+                            } else {
+                                // 🔓 ACTIVE: Show Archive Button
+                                actionHtml = `
+                                    <button onclick="toggleArchive('${target}', '${row.id}')" class="text-slate-400 hover:text-red-600 transition" title="Archive this item">
+                                        <i class="fa-solid fa-box-archive"></i>
+                                    </button>
+                                `;
+                            }
+
+                            bRows += `<td class="px-6 py-3 text-center">${actionHtml}</td>`;
+                        }
+
+                        // Render Data Columns
                         config.forEach(col => {
                             let val = row[col.k] || "";
+
                             if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
                                 val = formatMoney(val);
                             }
-                            // NEW: Specific styling for Consumed Qty column
-                            let cellClasses = "px-6 py-3 text-slate-600 whitespace-nowrap text-center";
+
+                            let cellClasses = "px-6 py-3 whitespace-nowrap text-center";
                             if(col.k === 'qty_consumed') {
                                 cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";
                             }
+
+                            // Dim text content if archived
+                            if (isArchived) cellClasses += " opacity-60";
 
                             bRows += `<td class="${cellClasses}">${val}</td>`;
                         });
@@ -2378,6 +2295,130 @@ function switchView(viewId) {
                 toggleLoading(false);
             }
         }
+<!--        async function loadTableData(target) {-->
+<!--            toggleLoading(true, "Loading Data...");-->
+<!--            const tbody = document.querySelector('#data-table tbody');-->
+<!--            const tableContainer = document.getElementById('data-table-container');-->
+<!--            tbody.innerHTML = "";-->
+
+<!--            try {-->
+<!--                const data = await safeFetch(`/drawback/api/view/${target}`);-->
+<!--                let rows = Array.isArray(data) ? data : [];-->
+<!--                const config = TABLE_CONFIG[target];-->
+<!--                if (!config) return;-->
+
+<!--                // 🆕 PATCH: Sort Archived Items to the Bottom-->
+<!--                // 0 = Active, 1 = Archived. A-B puts 0 first.-->
+<!--                rows.sort((a, b) => {-->
+<!--                    const arcA = a.is_archived || 0;-->
+<!--                    const arcB = b.is_archived || 0;-->
+<!--                    return arcA - arcB;-->
+<!--                });-->
+
+<!--                const labels = config.map(c => c.l);-->
+
+<!--                // 🆕 PATCH: Add Action Column ONLY for Products & Mappings-->
+<!--                // hasCheckbox = 2 triggers the "Action" column in renderDynamicHeaders-->
+<!--                const hasActionColumn = (target === 'products' || target === 'material_mappings') ? 2 : 0;-->
+
+<!--                renderDynamicHeaders('data-table', labels, hasActionColumn);-->
+
+<!--                if(rows.length === 0) {-->
+<!--                    tableContainer.classList.add('hidden');-->
+<!--                } else {-->
+<!--                    tableContainer.classList.remove('hidden');-->
+
+<!--                    let bRows = "";-->
+<!--                    rows.forEach(row => {-->
+<!--                        const isArchived = row.is_archived === 1;-->
+
+<!--                        // 🆕 PATCH: Visual Styling for Archived Rows-->
+<!--                        let rowClass = isArchived-->
+<!--                            ? "bg-gray-100 text-gray-400 border-b border-slate-100 italic"-->
+<!--                            : "hover:bg-slate-50 border-b border-slate-100 transition";-->
+
+<!--                        // Keep smart fill highlight if active-->
+<!--                        if (!isArchived && row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";-->
+
+<!--                        bRows += `<tr class="${rowClass}">`;-->
+
+<!--                        // 🆕 PATCH: Render Archive/Restore Button-->
+<!--                        if (hasActionColumn === 2) {-->
+<!--                            const icon = isArchived ? "fa-box-open" : "fa-box-archive";-->
+<!--                            const btnColor = isArchived ? "text-blue-500 hover:text-blue-700" : "text-slate-400 hover:text-red-500";-->
+<!--                            const title = isArchived ? "Restore Item" : "Archive Item";-->
+
+<!--                            bRows += `-->
+<!--                                <td class="px-6 py-3 text-center">-->
+<!--                                    <button onclick="toggleArchive('${target}', '${row.id}')" class="${btnColor} transition" title="${title}">-->
+<!--                                        <i class="fa-solid ${icon}"></i>-->
+<!--                                    </button>-->
+<!--                                </td>-->
+<!--                            `;-->
+<!--                        }-->
+
+<!--                        config.forEach(col => {-->
+<!--                            let val = row[col.k] || "";-->
+
+<!--                            if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {-->
+<!--                                val = formatMoney(val);-->
+<!--                            }-->
+
+<!--                            let cellClasses = "px-6 py-3 whitespace-nowrap text-center";-->
+<!--                            if(col.k === 'qty_consumed') {-->
+<!--                                cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";-->
+<!--                            }-->
+
+<!--                            // Dim text content if archived-->
+<!--                            if (isArchived) cellClasses += " opacity-60";-->
+
+<!--                            bRows += `<td class="${cellClasses}">${val}</td>`;-->
+<!--                        });-->
+<!--                        bRows += `</tr>`;-->
+<!--                    });-->
+<!--                    tbody.innerHTML = bRows;-->
+<!--                }-->
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
+
+
+
+
+// 🆕 PATCH: Archive Logic Handler
+        async function toggleArchive(target, id) {
+            // Prevent accidental clicks
+            if(!confirm("Are you sure you want to change the Archive status of this record?\n\nArchived items are hidden from the matching engine.")) return;
+
+            toggleLoading(true, "Updating Status...");
+            try {
+                // The 'safeFetch' function automatically injects actor_email from window context
+                const res = await safeFetch('/drawback/api/archive', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        target: target,
+                        id: id,
+                        user: currentUserRole
+                    })
+                });
+
+                if(res.success) {
+                    showToast(res.message || "Status Updated", "success");
+                    loadTableData(target); // Refresh table to re-sort rows
+                } else {
+                    showToast(res.message || "Update Failed", "error");
+                }
+            } catch(e) {
+                console.error(e);
+                showToast("Network Error", "error");
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+
 
         // --- HELPER TO ESCAPE JSON FOR ONCLICK ---
         function escapeJSON(obj) {
@@ -2387,60 +2428,186 @@ function switchView(viewId) {
         }
 
         // --- NEW: SHOW MATCH DETAILS MODAL (SIDE BY SIDE) ---
-        function showMatchDetails(match) {
-            document.getElementById('det-uuid').innerText = match.match_uuid || match.id;
-
-            // Export Side
-            document.getElementById('det-exp-entry').innerText = match.export_entry_number || '-';
-            document.getElementById('det-exp-material').innerText = match.export_material_number || '-';
-            document.getElementById('det-exp-date').innerText = match.export_date || '-';
-            document.getElementById('det-exp-qty').innerText = match.export_qty_total || '-';
-            document.getElementById('det-exp-uom').innerText = match.export_uom || '-';
-            document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';
-            document.getElementById('det-exp-country').innerText = match.export_country || '-';
-            document.getElementById('det-exp-desc').innerText = match.export_desc || '-';
-            document.getElementById('det-exp-id').innerText = match.export_id || '-';
-
-            // Import Side
-            document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';
-            document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
-            document.getElementById('det-imp-date').innerText = match.import_date || '-';
-            document.getElementById('det-imp-dec').innerText = match.import_dec_number || '-';
-            document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';
-            document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';
-            document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';
-            document.getElementById('det-imp-uom').innerText = match.import_uom || '-';
-            document.getElementById('det-imp-hts').innerText = match.import_hts || '-';
-            document.getElementById('det-imp-rate').innerText = match.import_duty_rate || '-';
-            document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);
-            document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);
-
-            document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;
-
-            let enteredVal = 0;
-            if (parseFloat(match.import_qty_original) > 0) {
-                 enteredVal = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_customs_val);
-            }
-            document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);
-
-            // UPDATED: Calculate Export Duty based on ACTUAL IMPORT DUTY PAID, NOT RATE
-            let exportDuty = 0;
-            if(parseFloat(match.import_qty_original) > 0) {
-                exportDuty = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_duty_paid);
-            }
-            document.getElementById('det-export-duty').innerText = formatMoney(exportDuty);
-
-            let duty99 = exportDuty * 0.99;
-            document.getElementById('det-99-duty').innerText = formatMoney(duty99);
 
 
-            document.getElementById('det-total-refund').innerText = formatMoney(match.refund_amount);
-            document.getElementById('det-algo').innerText = match.algorithm_used || 'FIFO';
-            document.getElementById('det-status').innerText = match.status;
-            document.getElementById('det-notes').innerText = match.notes || 'No comments.';
 
-            document.getElementById('details-modal').classList.remove('hidden');
-        }
+
+        // --- NEW: SHOW MATCH DETAILS MODAL (SIDE BY SIDE) ---
+// --- SHOW MATCH DETAILS MODAL (SIDE BY SIDE) ---
+// --- SHOW MATCH DETAILS MODAL (SIDE BY SIDE - WITH NAME & EMAIL) ---
+
+// --- SHOW MATCH DETAILS MODAL (Premium UI + Full Email Visibility) ---
+function showMatchDetails(match) {
+    // 1. Header Information
+    document.getElementById('det-uuid').innerText = match.match_uuid || match.id;
+
+    // 2. Export Record Side
+    document.getElementById('det-exp-entry').innerText = match.export_entry_number || '-';
+    document.getElementById('det-exp-material').innerText = match.export_material_number || '-';
+    document.getElementById('det-exp-date').innerText = match.export_date || '-';
+    document.getElementById('det-exp-qty').innerText = match.export_qty_total || '-';
+    document.getElementById('det-exp-uom').innerText = match.export_uom || '-';
+    document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';
+    document.getElementById('det-exp-country').innerText = match.export_country || '-';
+    document.getElementById('det-exp-desc').innerText = match.export_desc || '-';
+    document.getElementById('det-exp-id').innerText = match.export_id || '-';
+
+    // 3. Import Record Side
+    document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';
+    document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
+    document.getElementById('det-imp-date').innerText = match.import_date || '-';
+    document.getElementById('det-imp-dec').innerText = match.import_dec_number || '-';
+    document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';
+    document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';
+    document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';
+    document.getElementById('det-imp-uom').innerText = match.import_uom || '-';
+    document.getElementById('det-imp-hts').innerText = match.import_hts || '-';
+    document.getElementById('det-imp-rate').innerText = match.import_duty_rate || '-';
+    document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);
+    document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);
+
+    // 4. Match Logic & Calculations
+    document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;
+
+    let enteredVal = 0;
+    if (parseFloat(match.import_qty_original) > 0) {
+        enteredVal = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_customs_val);
+    }
+    document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);
+
+    // Calculate Export Duty based on ACTUAL IMPORT DUTY PAID
+    let exportDuty = 0;
+    if (parseFloat(match.import_qty_original) > 0) {
+        exportDuty = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_duty_paid);
+    }
+    document.getElementById('det-export-duty').innerText = formatMoney(exportDuty);
+
+    let duty99 = exportDuty * 0.99;
+    document.getElementById('det-99-duty').innerText = formatMoney(duty99);
+
+    document.getElementById('det-total-refund').innerText = formatMoney(match.refund_amount);
+    document.getElementById('det-algo').innerText = match.algorithm_used || 'FIFO';
+    document.getElementById('det-status').innerText = match.status;
+    document.getElementById('det-notes').innerText = match.notes || 'No comments.';
+
+    // 5. 🆕 PREMIUM TRANSACTION LIFECYCLE
+    const auditContainer = document.getElementById('det-reviewed-by').closest('.mt-4'); // Targets the parent container
+
+    if (auditContainer) {
+        // Helpers for the timeline design
+        const renderStep = (label, name, email, color, icon, isCompleted) => {
+            const opacity = isCompleted ? 'opacity-100' : 'opacity-50 grayscale';
+            const border = isCompleted ? `border-${color}-200 bg-white` : 'border-slate-100 bg-slate-50';
+            const iconBg = isCompleted ? `bg-${color}-50 text-${color}-600` : 'bg-slate-100 text-slate-300';
+
+            // 🔧 FIX: Removed 'truncate' and added 'break-all' to ensure email wraps and shows fully
+            const displayEmail = email ? `<div class="text-[10px] text-slate-400 font-mono leading-tight break-all mt-0.5">${email}</div>` : '';
+            const displayName = name || '<span class="text-slate-300 italic">Pending</span>';
+
+            return `
+                <div class="flex-1 flex items-start gap-3 p-3 rounded-xl border ${border} shadow-sm ${opacity} transition-all duration-300 min-w-0">
+                    <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${iconBg} mt-1">
+                        <i class="fa-solid ${icon} text-xs"></i>
+                    </div>
+                    <div class="overflow-hidden w-full">
+                        <div class="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider mb-0.5">${label}</div>
+                        <div class="font-bold text-slate-700 text-xs break-words">${displayName}</div>
+                        ${displayEmail}
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderLine = (isActive, color) => {
+            const lineColor = isActive ? `bg-${color}-200` : 'bg-slate-100';
+            return `<div class="w-8 h-0.5 ${lineColor} hidden md:block self-center"></div>`;
+        };
+
+        // Determine States
+        const hasReview = !!(match.reviewed_by || match.reviewed_by_name);
+        const hasApproval = !!(match.approved_by || match.approved_by_name);
+        const hasFinal = !!(match.finalized_by || match.finalized_by_name);
+
+        // Inject HTML with new Title
+        auditContainer.innerHTML = `
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-timeline text-indigo-500"></i> Transaction Lifecycle
+                </h4>
+                <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-full font-mono font-bold border border-slate-200">
+                    ${match.status || 'DRAFT'}
+                </span>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 align-stretch">
+                ${renderStep('Reviewer', match.reviewed_by_name, match.reviewed_by, 'blue', 'fa-magnifying-glass', hasReview)}
+                ${renderLine(hasApproval, 'emerald')}
+                ${renderStep('Approver', match.approved_by_name, match.approved_by, 'emerald', 'fa-stamp', hasApproval)}
+                ${renderLine(hasFinal, 'purple')}
+                ${renderStep('Broker Filing', match.finalized_by_name, match.finalized_by, 'purple', 'fa-flag-checkered', hasFinal)}
+            </div>
+        `;
+    }
+
+    // 6. Show Modal
+    document.getElementById('details-modal').classList.remove('hidden');
+}
+
+
+<!--        function showMatchDetails(match) {-->
+<!--            document.getElementById('det-uuid').innerText = match.match_uuid || match.id;-->
+
+<!--            // Export Side-->
+<!--            document.getElementById('det-exp-entry').innerText = match.export_entry_number || '-';-->
+<!--            document.getElementById('det-exp-material').innerText = match.export_material_number || '-';-->
+<!--            document.getElementById('det-exp-date').innerText = match.export_date || '-';-->
+<!--            document.getElementById('det-exp-qty').innerText = match.export_qty_total || '-';-->
+<!--            document.getElementById('det-exp-uom').innerText = match.export_uom || '-';-->
+<!--            document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';-->
+<!--            document.getElementById('det-exp-country').innerText = match.export_country || '-';-->
+<!--            document.getElementById('det-exp-desc').innerText = match.export_desc || '-';-->
+<!--            document.getElementById('det-exp-id').innerText = match.export_id || '-';-->
+
+<!--            // Import Side-->
+<!--            document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';-->
+<!--            document.getElementById('det-imp-material').innerText = match.import_material_number || '-';-->
+<!--            document.getElementById('det-imp-date').innerText = match.import_date || '-';-->
+<!--            document.getElementById('det-imp-dec').innerText = match.import_dec_number || '-';-->
+<!--            document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';-->
+<!--            document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';-->
+<!--            document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';-->
+<!--            document.getElementById('det-imp-uom').innerText = match.import_uom || '-';-->
+<!--            document.getElementById('det-imp-hts').innerText = match.import_hts || '-';-->
+<!--            document.getElementById('det-imp-rate').innerText = match.import_duty_rate || '-';-->
+<!--            document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);-->
+<!--            document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);-->
+
+<!--            document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;-->
+
+<!--            let enteredVal = 0;-->
+<!--            if (parseFloat(match.import_qty_original) > 0) {-->
+<!--                 enteredVal = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_customs_val);-->
+<!--            }-->
+<!--            document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);-->
+
+<!--            // UPDATED: Calculate Export Duty based on ACTUAL IMPORT DUTY PAID, NOT RATE-->
+<!--            let exportDuty = 0;-->
+<!--            if(parseFloat(match.import_qty_original) > 0) {-->
+<!--                exportDuty = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_duty_paid);-->
+<!--            }-->
+<!--            document.getElementById('det-export-duty').innerText = formatMoney(exportDuty);-->
+
+<!--            let duty99 = exportDuty * 0.99;-->
+<!--            document.getElementById('det-99-duty').innerText = formatMoney(duty99);-->
+
+
+<!--            document.getElementById('det-total-refund').innerText = formatMoney(match.refund_amount);-->
+<!--            document.getElementById('det-algo').innerText = match.algorithm_used || 'FIFO';-->
+<!--            document.getElementById('det-status').innerText = match.status;-->
+<!--            document.getElementById('det-notes').innerText = match.notes || 'No comments.';-->
+
+<!--            document.getElementById('details-modal').classList.remove('hidden');-->
+<!--        }-->
 
         // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC ---
         // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC (PATCHED) ---
@@ -2733,9 +2900,9 @@ async function openClaimModal() {
                         <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
                              <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
                             <td class="px-6 py-4 text-center">
-                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">
-                                    <i class="fa-solid fa-download text-lg"></i>
-                                </button>
+<!--                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">-->
+<!--                                    <i class="fa-solid fa-download text-lg"></i>-->
+<!--                                </button>-->
                                 <button onclick="viewClaimDetails('${c.claim_id}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
                                     <i class="fa-solid fa-circle-info text-lg"></i>
                                 </button>
