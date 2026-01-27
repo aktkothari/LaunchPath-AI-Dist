@@ -429,7 +429,10 @@
                 </div>
             </div>
 
-            <div class="mt-4 bg-slate-50 rounded-lg border border-slate-200 p-4">
+
+
+
+            <div id="transaction-lifecycle-container" class="mt-4 bg-slate-50 rounded-lg border border-slate-200 p-4">
                 <h4 class="text-xs font-bold text-slate-400 uppercase mb-2 border-b border-slate-200 pb-1">
                     <i class="fa-solid fa-user-clock mr-1"></i> Workflow Audit Trail
                 </h4>
@@ -448,7 +451,13 @@
                     </div>
                 </div>
             </div>
+
+
+
             </div>
+
+
+
 
         <div class="p-4 border-t border-gray-100 bg-white flex justify-end gap-3">
             <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="px-6 py-2 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 font-medium transition">Close</button>
@@ -635,7 +644,8 @@
 
 
 
-            <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
+
+                <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
             <div class="flex items-center gap-4">
                  <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
                  <div class="h-6 w-px bg-slate-200"></div>
@@ -1368,7 +1378,7 @@
                     </div>
                 </div>
 
-                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start">
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 flex gap-4 items-start mb-16">
                                 <i class="fa-solid fa-circle-exclamation text-purple-600 text-xl mt-1"></i>
                                 <div>
                                     <h3 class="font-bold text-purple-800 text-sm">Critical: The Broker Handshake</h3>
@@ -1904,7 +1914,6 @@ async function discardMatch(matchId) {
 
 function switchView(viewId) {
             // 🛡️ NEW: Data Loss Prevention Check
-            // If there is data in the staging variable (stagedData), warn the user before switching.
             if (stagedData && stagedData.length > 0) {
                 if (!confirm("⚠️ Unsaved Data Warning\n\nYou have uncommitted data in the staging area. Switching tabs will discard this data.\n\nClick OK to discard and switch.\nClick Cancel to stay and commit.")) {
                     return; // Stop navigation immediately
@@ -1918,29 +1927,37 @@ function switchView(viewId) {
             if(navEl) navEl.classList.add('active');
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
 
-            document.getElementById(`page-title`).innerText =
-                viewId === 'reviewer' ? 'Reviewer Console' :
-                viewId === 'approver' ? 'Approver Portal' :
-                viewId === 'history' ? 'Claims History' :
-                viewId === 'help' ? 'Help / User Guide' :
-                viewId.charAt(0).toUpperCase() + viewId.slice(1);
+            // 🆕 PATCH: Centralized Friendly Names Map
+            const titleMap = {
+                'dashboard': 'Dashboard',
+                'products': 'Product Master',          // Fix: "Product Master" instead of Products
+                'material_mappings': 'Material Mappings', // Fix: Remove underscore
+                'imports': 'Imports',
+                'exports': 'Exports',
+                'matching': 'Matching Engine',
+                'reviewer': 'Reviewer Console',
+                'approver': 'Approver Portal',
+                'history': 'Claims History',
+                'help': 'Help / User Guide'
+            };
+
+            // Set Page Title (Top Left Header)
+            const displayTitle = titleMap[viewId] || (viewId.charAt(0).toUpperCase() + viewId.slice(1));
+            document.getElementById(`page-title`).innerText = displayTitle;
 
             if(viewId === 'dashboard') {
                 document.getElementById('view-dashboard').classList.remove('hidden');
                 loadStats();
             } else if(viewId === 'matching') {
                 document.getElementById('view-matching').classList.remove('hidden');
-
                 // 🆕 REORDERED HEADERS: [Status, Notes, View] moved to front.
                 const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
-
-                renderDynamicHeaders('matches-table', matchHeaders, 0); // No checkboxes
+                renderDynamicHeaders('matches-table', matchHeaders, 0);
             } else if(viewId === 'reviewer') {
                 document.getElementById('view-reviewer').classList.remove('hidden');
                 loadWorkflowData('reviewer');
             } else if(viewId === 'approver') {
                 document.getElementById('view-approver').classList.remove('hidden');
-                // Reset to summary view on tab switch
                 document.getElementById('approver-detail-view').classList.add('hidden');
                 document.getElementById('approver-summary-view').classList.remove('hidden');
                 loadApproverSummary();
@@ -1950,10 +1967,12 @@ function switchView(viewId) {
             } else if (viewId === 'help') {
                 document.getElementById('view-help').classList.remove('hidden');
             } else {
+                // Management Views (Imports, Exports, Products, Mappings)
                 document.getElementById('view-management').classList.remove('hidden');
-                let title = viewId.charAt(0).toUpperCase() + viewId.slice(1);
-                if(viewId === 'material_mappings') title = 'Material Mappings';
-                document.getElementById('mgmt-title').innerText = title;
+
+                // 🆕 PATCH: Use the same map for the inner header "Manage [Title]"
+                document.getElementById('mgmt-title').innerText = displayTitle;
+
                 resetUpload();
                 loadTableData(viewId);
             }
@@ -2433,8 +2452,11 @@ function switchView(viewId) {
 
 
         // --- NEW: SHOW MATCH DETAILS MODAL (SIDE BY SIDE) ---
-// --- SHOW MATCH DETAILS MODAL (SIDE BY SIDE) ---
-// --- SHOW MATCH DETAILS MODAL (SIDE BY SIDE - WITH NAME & EMAIL) ---
+
+
+
+
+
 
 // --- SHOW MATCH DETAILS MODAL (Premium UI + Full Email Visibility) ---
 function showMatchDetails(match) {
@@ -2490,8 +2512,9 @@ function showMatchDetails(match) {
     document.getElementById('det-status').innerText = match.status;
     document.getElementById('det-notes').innerText = match.notes || 'No comments.';
 
-    // 5. 🆕 PREMIUM TRANSACTION LIFECYCLE
-    const auditContainer = document.getElementById('det-reviewed-by').closest('.mt-4'); // Targets the parent container
+    // 5. 🆕 PREMIUM TRANSACTION LIFECYCLE (FIXED SELECTOR)
+    // 🚨 FIX: We now select by the persistent Container ID, not the child element that gets deleted.
+    const auditContainer = document.getElementById('transaction-lifecycle-container');
 
     if (auditContainer) {
         // Helpers for the timeline design
