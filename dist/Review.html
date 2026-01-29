@@ -524,6 +524,36 @@
         </div>
     </div>
 
+
+    <div id="billable-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-[500px] p-8 animate-fadeIn border border-slate-200">
+            <h3 class="text-xl font-bold text-slate-900 mb-6 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-circle-info text-blue-600"></i>
+                Billable Event Warning
+                <i class="fa-solid fa-circle-info text-blue-600"></i>
+            </h3>
+
+            <div class="bg-white p-2 mb-8">
+                <p class="text-base text-slate-900 font-bold text-center leading-relaxed">
+                    By approving the selected claims, you will be charged by MoonSlate as per your service agreement.
+                </p>
+                <p class="text-sm text-slate-500 text-center mt-4 font-medium">
+                    Please confirm to proceed.
+                </p>
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <button onclick="document.getElementById('billable-modal').classList.add('hidden')" class="px-8 py-2.5 text-sm bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl font-bold border border-slate-200 transition-all uppercase tracking-wide">
+                    Cancel
+                </button>
+                <button onclick="proceedWithBillableApproval()" class="px-8 py-2.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-xl font-bold shadow-md hover:shadow-lg transition-all uppercase tracking-wide">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <div id="claim-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
             <h3 class="text-lg font-bold text-blue-800 mb-2">Submit Claim Batch</h3>
@@ -644,13 +674,12 @@
 
 
 
-
-                <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
+<header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
             <div class="flex items-center gap-4">
                  <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
                  <div class="h-6 w-px bg-slate-200"></div>
                  <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
-                    <i class="fa-solid fa-user-tag mr-2"></i>Role: Reviewer
+                    <i class="fa-solid fa-user-tag mr-2"></i>Role: REVIEWER
                  </div>
             </div>
 
@@ -658,6 +687,26 @@
                 <button onclick="loadStats()" class="p-2 text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-rotate-right"></i></button>
             </div>
         </header>
+
+
+
+<!--        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">-->
+<!--            <div class="flex items-center gap-4">-->
+<!--                 <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>-->
+<!--                 <div class="h-6 w-px bg-slate-200"></div>-->
+<!--                 <select id="role-switcher" onchange="updateRoleUI()" class="text-xs bg-slate-100 border border-slate-200 rounded px-2 py-1 outline-none focus:border-blue-500 text-slate-600 font-semibold cursor-pointer">-->
+<!--                     <option value="REVIEWER" selected>Simulate: Reviewer</option>-->
+<!--                     <option value="APPROVER">Simulate: Approver</option>-->
+<!--                 </select>-->
+<!--            </div>-->
+
+<!--            <div class="flex gap-3">-->
+<!--                <button onclick="loadStats()" class="p-2 text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-rotate-right"></i></button>-->
+<!--                <button onclick="resetSystem()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 border border-red-200 transition">-->
+<!--                    <i class="fa-solid fa-database mr-2"></i> Truncate Database-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </header>-->
 
 
 
@@ -2851,7 +2900,107 @@ async function openClaimModal() {
             loadHistorySummary();
         }
 
-        async function loadHistorySummary() {
+
+
+
+<!--        async function loadHistorySummary() {-->
+<!--            toggleLoading(true, "Loading Claim History...");-->
+<!--            const tbody = document.getElementById('history-summary-body');-->
+<!--            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;-->
+
+<!--            try {-->
+<!--                const json = await safeFetch('/drawback/api/claims/list/HISTORY');-->
+<!--                if (json.data && json.data.length > 0) {-->
+
+<!--                    // 🆕 Render Headers for History Summary-->
+<!--                    // REORDERED: Final Acceptance (0) -> Actions (1) -> Claim ID (2) ...-->
+<!--                    const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];-->
+<!--                    renderDynamicHeaders('history-summary-table', headers, 0);-->
+
+<!--                    // 🛠️ HELPER: Force DD/MM/YYYY formatting manually-->
+<!--                    const toDDMMYYYY = (isoStr) => {-->
+<!--                        if(!isoStr) return '-';-->
+<!--                        const d = new Date(isoStr);-->
+<!--                        if(isNaN(d)) return isoStr.substring(0,10);-->
+<!--                        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;-->
+<!--                    };-->
+
+<!--                    tbody.innerHTML = json.data.map(c => {-->
+<!--                        let displayId = c.claim_id;-->
+<!--                        if (!displayId.startsWith('X')) {-->
+<!--                            displayId = 'X' + displayId;-->
+<!--                        }-->
+
+<!--                        // 🔥 Final Acceptance Logic (Truncated Date: DD/MM/YYYY)-->
+<!--                        let acceptanceHtml = '';-->
+<!--                        let isFinalized = false;-->
+
+<!--                        if (c.finalized_date) {-->
+<!--                            isFinalized = true;-->
+<!--                            const simpleFinalDate = toDDMMYYYY(c.finalized_date);-->
+
+<!--                            acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">-->
+<!--                                <i class="fa-solid fa-circle-check text-lg"></i>-->
+<!--                                <div class="text-left leading-tight">-->
+<!--                                    <div class="text-[10px] uppercase text-emerald-500">Accepted</div>-->
+<!--                                    <div class="text-xs font-mono">${simpleFinalDate}</div>-->
+<!--                                    <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>-->
+<!--                                </div>-->
+<!--                            </div>`;-->
+<!--                        } else if (c.valid_entries > 0) {-->
+<!--                            acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto">-->
+<!--                                <i class="fa-regular fa-square group-hover:hidden text-lg"></i>-->
+<!--                                <i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i>-->
+<!--                                <span class="text-xs font-semibold">Mark Final</span>-->
+<!--                            </button>`;-->
+<!--                        } else {-->
+<!--                            acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;-->
+<!--                        }-->
+
+<!--                        // STATUS BADGE LOGIC (UPDATED: Priority to COMPLETED)-->
+<!--                        let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;-->
+
+<!--                        if (isFinalized) {-->
+<!--                            statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;-->
+<!--                        } else if (c.voided_entries > 0 && c.valid_entries == 0) {-->
+<!--                            statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;-->
+<!--                        } else if (c.voided_entries > 0) {-->
+<!--                            statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;-->
+<!--                        }-->
+
+<!--                        // Approved Date (Truncated Date: DD/MM/YYYY)-->
+<!--                        const simpleApprovedDate = toDDMMYYYY(c.approved_date);-->
+
+<!--                        return `-->
+<!--                        <tr class="border-b border-slate-50 hover:bg-purple-50 transition">-->
+<!--                             <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>-->
+<!--                            <td class="px-6 py-4 text-center">-->
+<!--&lt;!&ndash;                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <i class="fa-solid fa-download text-lg"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                                </button>&ndash;&gt;-->
+<!--                                <button onclick="viewClaimDetails('${c.claim_id}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">-->
+<!--                                    <i class="fa-solid fa-circle-info text-lg"></i>-->
+<!--                                </button>-->
+<!--                            </td>-->
+
+<!--                            <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>-->
+<!--                            <td class="px-6 py-4 text-center">${statusBadge}</td>-->
+<!--                            <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>-->
+<!--                            <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>-->
+<!--                            <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>-->
+<!--                            <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>-->
+<!--                            <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${simpleApprovedDate}</td>-->
+<!--                        </tr>-->
+<!--                    `}).join('');-->
+<!--            } else {-->
+<!--                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;-->
+<!--                }-->
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
+
+async function loadHistorySummary() {
             toggleLoading(true, "Loading Claim History...");
             const tbody = document.getElementById('history-summary-body');
             tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;
@@ -2883,6 +3032,10 @@ async function openClaimModal() {
                         let acceptanceHtml = '';
                         let isFinalized = false;
 
+                        // 🚀 PATCH: Define safeBrokerId to fix Detail View merging issue
+                        // If broker_claim_id is missing/null, we pass 'PENDING' string to the view function
+                        let safeBrokerId = c.broker_claim_id || 'PENDING';
+
                         if (c.finalized_date) {
                             isFinalized = true;
                             const simpleFinalDate = toDDMMYYYY(c.finalized_date);
@@ -2905,7 +3058,7 @@ async function openClaimModal() {
                             acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;
                         }
 
-                        // STATUS BADGE LOGIC (UPDATED: Priority to COMPLETED)
+                        // STATUS BADGE LOGIC
                         let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
 
                         if (isFinalized) {
@@ -2916,17 +3069,13 @@ async function openClaimModal() {
                             statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
                         }
 
-                        // Approved Date (Truncated Date: DD/MM/YYYY)
                         const simpleApprovedDate = toDDMMYYYY(c.approved_date);
 
                         return `
                         <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
                              <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
                             <td class="px-6 py-4 text-center">
-<!--                                 <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download">-->
-<!--                                    <i class="fa-solid fa-download text-lg"></i>-->
-<!--                                </button>-->
-                                <button onclick="viewClaimDetails('${c.claim_id}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
+                                <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
                                     <i class="fa-solid fa-circle-info text-lg"></i>
                                 </button>
                             </td>
@@ -2947,6 +3096,8 @@ async function openClaimModal() {
                 toggleLoading(false);
             }
         }
+
+
 
         // 🔥 Updated: Open Modal for Final Acceptance
         function markClaimFinal(claimId) {
@@ -2991,11 +3142,58 @@ async function openClaimModal() {
             }
         }
 
-        function viewClaimDetails(claimId) {
+
+
+// 🚀 PATCH: Updated to accept brokerId from the UI call
+// 🚀 PATCH: Updated to STORE brokerId in the DOM for state persistence
+        function viewClaimDetails(claimId, brokerId) {
             document.getElementById('history-summary-view').classList.add('hidden');
             document.getElementById('history-detail-view').classList.remove('hidden');
-            document.getElementById('history-active-claim').innerText = claimId;
-            loadWorkflowData('history', claimId);
+
+            const titleEl = document.getElementById('history-active-claim');
+            titleEl.innerText = claimId;
+
+            // SAVE STATE: Store brokerId in a data attribute so confirmVoid() can read it later
+            titleEl.dataset.brokerId = (brokerId && brokerId !== 'null') ? brokerId : '';
+
+            // Pass the brokerId we received from the button click
+            loadWorkflowData('history', claimId, brokerId);
+        }
+
+        // 🚀 PATCH: Updated to accept filterBrokerId as the 3rd argument
+        async function loadWorkflowData(role, filterClaimId = null, filterBrokerId = null) {
+            if(role === 'approver') return;
+
+            toggleLoading(true, `Loading ${role} queue...`);
+
+            try {
+                const statusMap = { 'reviewer': 'DRAFT', 'history': 'APPROVED' };
+                const reqStatus = statusMap[role];
+
+                let url = `/drawback/api/workflow/queue/${reqStatus}`;
+
+                // Construct URL Params to include the new broker_id filter
+                const params = new URLSearchParams();
+                if (role === 'history' && filterClaimId) {
+                     params.append('claim_id', filterClaimId);
+
+                     // 🚀 PATCH: Append broker_id if it exists to split finalized vs pending views
+                     if(filterBrokerId) {
+                         params.append('broker_id', filterBrokerId);
+                     }
+                }
+
+                if(params.toString()) url += `?${params.toString()}`;
+
+                const json = await safeFetch(url);
+                const data = json.data || [];
+
+                if (role === 'reviewer') renderReviewerTable(data);
+                else if (role === 'history') renderHistoryTable(data);
+
+            } finally {
+                toggleLoading(false);
+            }
         }
 
         // --- CLIENT-SIDE CSV EXPORT FOR SINGLE CLAIM ---
@@ -3156,7 +3354,10 @@ async function openClaimModal() {
 
 
         // --- SHARED WORKFLOW LOADER ---
-        async function loadWorkflowData(role, filterClaimId = null) {
+
+        // --- SHARED WORKFLOW LOADER (FIXED) ---
+        // 🚀 FIX: Added filterBrokerId as 3rd argument to support Finalized Claims
+        async function loadWorkflowData(role, filterClaimId = null, filterBrokerId = null) {
             if(role === 'approver') return;
 
             toggleLoading(true, `Loading ${role} queue...`);
@@ -3166,9 +3367,22 @@ async function openClaimModal() {
                 const reqStatus = statusMap[role];
 
                 let url = `/drawback/api/workflow/queue/${reqStatus}`;
+
+                // Construct URL Params using URLSearchParams for safety
+                const params = new URLSearchParams();
+
                 if (role === 'history' && filterClaimId) {
-                     url += `?claim_id=${encodeURIComponent(filterClaimId)}`;
+                     params.append('claim_id', filterClaimId);
+
+                     // 🚀 CRITICAL FIX: Append broker_id if it exists
+                     // This ensures backend includes finalized rows in the result
+                     if(filterBrokerId && filterBrokerId !== 'null' && filterBrokerId !== 'undefined') {
+                         params.append('broker_id', filterBrokerId);
+                     }
                 }
+
+                // Append params to URL if they exist
+                if(params.toString()) url += `?${params.toString()}`;
 
                 const json = await safeFetch(url);
                 const data = json.data || [];
@@ -3176,10 +3390,43 @@ async function openClaimModal() {
                 if (role === 'reviewer') renderReviewerTable(data);
                 else if (role === 'history') renderHistoryTable(data);
 
+            } catch (e) {
+                console.error("Workflow Load Error:", e);
+                showToast("Failed to load data", "error");
             } finally {
                 toggleLoading(false);
             }
         }
+
+
+<!--        async function loadWorkflowData(role, filterClaimId = null) {-->
+<!--            if(role === 'approver') return;-->
+
+<!--            toggleLoading(true, `Loading ${role} queue...`);-->
+
+<!--            try {-->
+<!--                const statusMap = { 'reviewer': 'DRAFT', 'history': 'APPROVED' };-->
+<!--                const reqStatus = statusMap[role];-->
+
+<!--                let url = `/drawback/api/workflow/queue/${reqStatus}`;-->
+<!--                if (role === 'history' && filterClaimId) {-->
+<!--                     url += `?claim_id=${encodeURIComponent(filterClaimId)}`;-->
+<!--                }-->
+
+<!--                const json = await safeFetch(url);-->
+<!--                const data = json.data || [];-->
+
+<!--                if (role === 'reviewer') renderReviewerTable(data);-->
+<!--                else if (role === 'history') renderHistoryTable(data);-->
+
+<!--            } finally {-->
+<!--                toggleLoading(false);-->
+<!--            }-->
+<!--        }-->
+
+
+
+
 
         // --- RENDER FUNCTIONS (Separated for clarity) ---
         const calcUnitValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
@@ -3591,11 +3838,9 @@ function renderHistoryTable(data) {
 
             // 3. Handle Approval - ⚠️ NEW BILLABLE WARNING ADDED HERE
             if (action === 'approve') {
-                const warningMsg = `⚠️ BILLABLE EVENT WARNING\n\nYou are about to Approve ${ids.length} claims.\n\nThis action will capture Audit Logs and is considered a billable event for application usage.\n\nClick OK to Confirm and Charge.\nClick Cancel to abort.`;
-
-                if (!confirm(warningMsg)) {
-                    return; // User cancelled, stop everything
-                }
+                pendingApprovalIds = ids; // Store IDs for the next step
+                document.getElementById('billable-modal').classList.remove('hidden');
+                return; // Wait for user interaction
             }
 
             // 4. Proceed with API Call
@@ -3650,6 +3895,34 @@ function renderHistoryTable(data) {
 <!--        }-->
 
 
+
+
+// 🚀 NEW FUNCTION: Triggered by "Confirm" on Billable Modal
+// Triggered by the "Confirm" button on the Billable Modal
+        async function proceedWithBillableApproval() {
+            const ids = pendingApprovalIds;
+            const status = 'APPROVED';
+
+            document.getElementById('billable-modal').classList.add('hidden');
+            toggleLoading(true, "Processing approvals...");
+
+            try {
+                const res = await safeFetch('/drawback/api/workflow/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: ids, status: status, user: currentUserRole })
+                });
+
+                if(res.success) {
+                    showToast("Claims approved successfully", "success");
+                    const currentClaimId = document.getElementById('approver-active-claim').innerText;
+                    loadApproverQueue(currentClaimId);
+                }
+            } finally {
+                toggleLoading(false);
+                pendingApprovalIds = []; // Clear state
+            }
+        }
 
 
 
@@ -3721,7 +3994,9 @@ function renderHistoryTable(data) {
             document.getElementById('void-modal').classList.remove('hidden');
         }
 
-        async function confirmVoid() {
+
+
+async function confirmVoid() {
             const id = document.getElementById('void-match-id').value;
             const reason = document.getElementById('void-reason').value;
 
@@ -3738,11 +4013,23 @@ function renderHistoryTable(data) {
                 if(res.success) {
                     showToast("Claim Voided. Inventory Restored.", "success");
                     document.getElementById('void-modal').classList.add('hidden');
-                    loadWorkflowData('history');
+
+                    // 🚀 CRITICAL FIX: RETRIEVE CONTEXT BEFORE RELOADING
+                    const titleEl = document.getElementById('history-active-claim');
+                    const activeClaimId = titleEl.innerText;
+                    const activeBrokerId = titleEl.dataset.brokerId;
+
+                    // Reload ONLY the specific claim we are looking at
+                    loadWorkflowData('history', activeClaimId, activeBrokerId);
+
+                    // Refresh stats in background
                     loadStats();
                 } else {
                     showToast(res.message || "Void Failed", "error");
                 }
+            } catch (e) {
+                console.error(e);
+                showToast("Network Error during Void", "error");
             } finally {
                 toggleLoading(false);
             }
@@ -3942,92 +4229,98 @@ function renderHistoryTable(data) {
 
 
 
+function validateRow(row) {
+    let messages = [];
+    let fields = [];
 
-        function validateRow(row) {
-            let messages = [];
-            let fields = [];
+    // 1. UOM Validation
+    if (['imports', 'exports', 'products'].includes(currentView)) {
+        const uom = (row.uom || '').toUpperCase();
+        if (!uom) {
+            messages.push("Missing UOM");
+            fields.push('uom');
+        } else if (!VALID_UOMS.includes(uom)) {
+            messages.push(`Invalid UOM: ${uom}`);
+            fields.push('uom');
+        }
+    }
 
-            // 1. UOM Validation
-            if (['imports', 'exports', 'products'].includes(currentView)) {
-                const uom = (row.uom || '').toUpperCase();
-                if (!uom) {
-                    messages.push("Missing UOM");
-                    fields.push('uom');
-                } else if (!VALID_UOMS.includes(uom)) {
-                    messages.push(`Invalid UOM: ${uom}`);
-                    fields.push('uom');
-                }
+    // 2. Entry Number
+    if (row.entry_number !== undefined) {
+        const en = (row.entry_number || '').trim();
+        if (en.length < 3) {
+            messages.push("Entry # too short");
+            fields.push('entry_number');
+        } else if (/^[A-Z]+$/i.test(en)) {
+            messages.push("Entry # must be alphanumeric");
+            fields.push('entry_number');
+        }
+    }
+
+    // 3. Numerics (PATCHED)
+    ['qty', 'duty_paid', 'duty_rate', 'conversion_factor', 'customs_value'].forEach(field => {
+        if (row[field] !== undefined) {
+            const val = parseFloat(row[field]);
+
+            // Generic Positive Check
+            if (isNaN(val) || val <= 0) {
+                messages.push(`${field} must be > 0`);
+                fields.push(field);
             }
-
-            // 2. Entry Number
-            if (row.entry_number !== undefined) {
-                const en = (row.entry_number || '').trim();
-                if (en.length < 3) {
-                    messages.push("Entry # too short");
-                    fields.push('entry_number');
-                } else if (/^[A-Z]+$/i.test(en)) {
-                    messages.push("Entry # must be alphanumeric");
-                    fields.push('entry_number');
-                }
+            // PATCH: Specific Check for Duty Rate (Must be <= 1.0)
+            else if (field === 'duty_rate' && val > 1.0) {
+                messages.push("Duty Rate must be <= 1.0");
+                fields.push(field);
             }
+        }
+    });
 
-            // 3. Numerics (PATCHED)
-            ['qty', 'duty_paid', 'duty_rate', 'conversion_factor', 'customs_value'].forEach(field => {
-                if (row[field] !== undefined) {
-                    const val = parseFloat(row[field]);
+    // 4. Dates (STRICT PATCH)
+    // 🚀 Fix: Added regex check to ensure full MM/DD/YYYY or YYYY-MM-DD format
+    // This prevents strings like "2024" from passing as a valid date.
+    ['import_date', 'export_date'].forEach(field => {
+        if (row[field] !== undefined) {
+            const dateStr = String(row[field] || '').trim();
+            if (!dateStr) {
+                messages.push("Date Required");
+                fields.push(field);
+            } else {
+                // Strict regex: requires digits followed by / or - then digits then / or - then digits
+                // This forces the presence of month, day, and year.
+                const strictDateRegex = /^(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})$/;
+                const d = new Date(dateStr);
+                const now = new Date();
 
-                    // Generic Positive Check
-                    if (isNaN(val) || val <= 0) {
-                        messages.push(`${field} must be > 0`);
-                        fields.push(field);
-                    }
-                    // PATCH: Specific Check for Duty Rate (Must be <= 1.0)
-                    else if (field === 'duty_rate' && val > 1.0) {
-                        messages.push("Duty Rate must be <= 1.0");
-                        fields.push(field);
-                    }
-                }
-            });
-
-            // 4. Dates
-            ['import_date', 'export_date'].forEach(field => {
-                if (row[field] !== undefined) {
-                    if (!row[field]) {
-                        messages.push("Date Required");
-                        fields.push(field);
-                    } else {
-                        const d = new Date(row[field]);
-                        const now = new Date();
-                        if (isNaN(d.getTime())) {
-                            messages.push("Invalid Date Format");
-                            fields.push(field);
-                        } else if (d > now) {
-                            messages.push("Future Date Not Allowed");
-                            fields.push(field);
-                        }
-                    }
-                }
-            });
-
-            // 5. Material #
-            ['material_number', 'export_material_number', 'import_material_number'].forEach(field => {
-                if (row[field] !== undefined && !row[field]) {
-                    messages.push("Material # Required");
+                if (!strictDateRegex.test(dateStr) || isNaN(d.getTime())) {
+                    messages.push("Use MM/DD/YYYY format");
+                    fields.push(field);
+                } else if (d > now) {
+                    messages.push("Future Date Not Allowed");
                     fields.push(field);
                 }
-            });
-
-            // 6. Preservation of Backend-Only Errors
-            if (row._backend_errors && row._backend_errors.length > 0) {
-                row._backend_errors.forEach(err => {
-                    if (err.includes("Duplicate") || err.includes("Database")) {
-                        messages.push(err);
-                    }
-                });
             }
-
-            return { messages, fields };
         }
+    });
+
+    // 5. Material #
+    ['material_number', 'export_material_number', 'import_material_number'].forEach(field => {
+        if (row[field] !== undefined && !row[field]) {
+            messages.push("Material # Required");
+            fields.push(field);
+        }
+    });
+
+    // 6. Preservation of Backend-Only Errors
+    if (row._backend_errors && row._backend_errors.length > 0) {
+        row._backend_errors.forEach(err => {
+            if (err.includes("Duplicate") || err.includes("Database")) {
+                messages.push(err);
+            }
+        });
+    }
+
+    return { messages, fields };
+}
 
 
 
