@@ -621,7 +621,7 @@
 
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
             <div id="header-analytics" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 nav-header">Analytics</div>
-            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="event.preventDefault(); switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="font-medium">Dashboard</span>
             </a>
 
@@ -648,15 +648,15 @@
             <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="font-medium">Reviewer Console</span>
             </a>
-            <a href="#" onclick="switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="event.preventDefault(); switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-stamp w-5 mr-2"></i> <span class="font-medium">Approver Portal</span>
             </a>
-             <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+             <a href="#" onclick="event.preventDefault(); switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">Claims History</span>
             </a>
 
             <div class="mt-8 border-t border-slate-100 pt-2">
-                <a href="#" onclick="switchView('help')" id="nav-help" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
+                <a href="#" onclick="event.preventDefault(); switchView('help')" id="nav-help" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
                     <i class="fa-solid fa-circle-question w-5 mr-2"></i> <span class="font-medium">Help / User Guide</span>
                 </a>
             </div>
