@@ -621,42 +621,42 @@
 
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
             <div id="header-analytics" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 nav-header">Analytics</div>
-            <a href="#" onclick="event.preventDefault(); switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="font-medium">Dashboard</span>
             </a>
 
             <div id="header-data" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Data Management</div>
-            <a href="#" onclick="event.preventDefault(); switchView('products')" id="nav-products" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('products')" id="nav-products" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-box w-5 mr-2"></i> <span class="font-medium">Product Master</span>
             </a>
-            <a href="#" onclick="event.preventDefault(); switchView('material_mappings')" id="nav-material_mappings" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('material_mappings')" id="nav-material_mappings" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-link w-5 mr-2"></i> <span class="font-medium">Material Mappings</span>
             </a>
-            <a href="#" onclick="event.preventDefault(); switchView('imports')" id="nav-imports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('imports')" id="nav-imports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-ship w-5 mr-2"></i> <span class="font-medium">Imports</span>
             </a>
-            <a href="#" onclick="event.preventDefault(); switchView('exports')" id="nav-exports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('exports')" id="nav-exports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-plane-departure w-5 mr-2"></i> <span class="font-medium">Exports</span>
             </a>
 
             <div id="header-process" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Core Process</div>
-            <a href="#" onclick="event.preventDefault(); switchView('matching')" id="nav-matching" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('matching')" id="nav-matching" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-wand-magic-sparkles w-5 mr-2"></i> <span class="font-medium">Matching Engine</span>
             </a>
 
             <div id="header-workflow" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Workflow / Approval</div>
-            <a href="#" onclick="event.preventDefault(); switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="font-medium">Reviewer Console</span>
             </a>
-            <a href="#" onclick="event.preventDefault(); switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+            <a href="#" onclick="switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-stamp w-5 mr-2"></i> <span class="font-medium">Approver Portal</span>
             </a>
-             <a href="#" onclick="event.preventDefault(); switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+             <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
                 <i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">Claims History</span>
             </a>
 
             <div class="mt-8 border-t border-slate-100 pt-2">
-                <a href="#" onclick="event.preventDefault(); switchView('help')" id="nav-help" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
+                <a href="#" onclick="switchView('help')" id="nav-help" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
                     <i class="fa-solid fa-circle-question w-5 mr-2"></i> <span class="font-medium">Help / User Guide</span>
                 </a>
             </div>
@@ -1130,9 +1130,9 @@
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[11px] font-bold uppercase tracking-widest">
                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> Documentation
                             </div>
-                            <h1 class="text-4xl font-bold tracking-tight text-white">Custom Drawbacks Enterprise Guide</h1>
+                            <h1 class="text-4xl font-bold tracking-tight text-white">Customs Drawbacks Enterprise Guide</h1>
                             <p class="text-base text-slate-300 leading-relaxed font-light max-w-2xl">
-                                This section outlines the end-to-end product workflow and explains key terminologies used within the application. For comprehensive, step-by-step instructions—including detailed screenshots—users may download the full User Guide here.
+                                This section outlines the end-to-end product workflow and explains key terminology used within the application. For comprehensive, step-by-step instructions—including detailed screenshots—users may download the full User Guide here.
                             </p>
                         </div>
 
@@ -1151,7 +1151,7 @@
                 <div class="mb-16">
                     <div class="flex items-center gap-4 mb-8 pl-2">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white flex items-center justify-center text-lg font-bold shadow-lg shadow-blue-200">1</div>
-                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Custom Drawbacks Workflow</h2>
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Customs Drawbacks Workflow</h2>
                     </div>
 
                     <div class="bg-white border border-slate-200 rounded-3xl p-10 shadow-xl relative overflow-hidden">
@@ -1203,7 +1203,7 @@
                                 <div class="text-center px-2">
                                     <h4 class="font-bold text-slate-800 text-sm mb-3 uppercase tracking-wide group-hover:text-emerald-700 transition-colors">Approval</h4>
                                     <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                                        Approvers may fully or partially approve claims or reject them with a mandatory reason. Rejected entries are routed back to the Reviewer for further action.
+                                        Approvers can fully or partially approve claims, or reject them with a required reason. Rejected items are routed back to the Reviewer for follow-up.
                                     </p>
                                 </div>
                             </div>
@@ -4228,7 +4228,6 @@ async function confirmVoid() {
 
 
 
-
 function validateRow(row) {
     let messages = [];
     let fields = [];
@@ -4321,9 +4320,6 @@ function validateRow(row) {
 
     return { messages, fields };
 }
-
-
-
 
 
 
