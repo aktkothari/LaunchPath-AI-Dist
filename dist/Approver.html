@@ -10,7 +10,7 @@
 
     <style>
 
-            html {
+    html {
             font-size: 75%; /* This simulates exactly 80% zoom */
         }
 
@@ -1521,6 +1521,10 @@
                         window.CURRENT_USER_FULL_NAME = `${first} ${last}`.trim();
                     }
 
+                    if (data.projectLoginUrl) {
+                        window.PROJECT_LOGIN_URL = data.projectLoginUrl;
+                    }
+
                     // Visual Confirmation
                     console.log("✅ [Child] Context Received:", window.CURRENT_USER_EMAIL, window.CURRENT_USER_FULL_NAME);
                     showToast(`Connected as ${window.CURRENT_USER_FULL_NAME || window.CURRENT_USER_EMAIL}`, "success");
@@ -1897,11 +1901,15 @@ async function discardMatch(matchId) {
         // --- SAFE FETCH (With Automatic Context Injection) ---
 // --- SAFE FETCH (With Automatic Context Injection) ---
 // --- SAFE FETCH (With Automatic Context Injection) ---
-        async function safeFetch(endpoint, options={}) {
+
+
+
+
+async function safeFetch(endpoint, options={}) {
             try {
                 const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
 
-                // 🆕 INJECTION LOGIC: Attach the email AND NAME received from parent
+                // 🆕 INJECTION LOGIC: Attach the email, NAME, and URL received from parent
                 if (options.method === 'POST' || options.method === 'PUT') {
                     let body = {};
 
@@ -1916,7 +1924,10 @@ async function discardMatch(matchId) {
                     if (!(options.body instanceof FormData)) {
                         // Inject Identity
                         body.actor_email = window.CURRENT_USER_EMAIL;
-                        body.actor_name = window.CURRENT_USER_FULL_NAME; // 🆕 PATCH: Send Name
+                        body.actor_name = window.CURRENT_USER_FULL_NAME;
+
+                        // 🆕 PATCH: Inject Project URL
+                        body.project_login_url = window.PROJECT_LOGIN_URL;
 
                         options.body = JSON.stringify(body);
 
@@ -1936,6 +1947,47 @@ async function discardMatch(matchId) {
                 return { success: false, data: [] };
             }
         }
+
+<!--        -->
+<!--        async function safeFetch(endpoint, options={}) {-->
+<!--            try {-->
+<!--                const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;-->
+
+<!--                // 🆕 INJECTION LOGIC: Attach the email AND NAME received from parent-->
+<!--                if (options.method === 'POST' || options.method === 'PUT') {-->
+<!--                    let body = {};-->
+
+<!--                    if (options.body) {-->
+<!--                        if (typeof options.body === 'string') {-->
+<!--                            try { body = JSON.parse(options.body); } catch(e) {}-->
+<!--                        } else if (!(options.body instanceof FormData)) {-->
+<!--                            body = options.body;-->
+<!--                        }-->
+<!--                    }-->
+
+<!--                    if (!(options.body instanceof FormData)) {-->
+<!--                        // Inject Identity-->
+<!--                        body.actor_email = window.CURRENT_USER_EMAIL;-->
+<!--                        body.actor_name = window.CURRENT_USER_FULL_NAME; // 🆕 PATCH: Send Name-->
+
+<!--                        options.body = JSON.stringify(body);-->
+
+<!--                        if (!options.headers) options.headers = {};-->
+<!--                        options.headers['Content-Type'] = 'application/json';-->
+<!--                    }-->
+<!--                }-->
+
+<!--                const res = await fetch(url, options);-->
+<!--                if (!res.ok) throw new Error("API Error");-->
+
+<!--                const json = await res.json();-->
+<!--                updateServerStatus(true);-->
+<!--                return json;-->
+<!--            } catch (e) {-->
+<!--                console.error("API Failed:", e);-->
+<!--                return { success: false, data: [] };-->
+<!--            }-->
+<!--        }-->
 
 
 
