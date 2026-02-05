@@ -11,7 +11,7 @@
     <style>
 
     html {
-            font-size: 72%; /* This simulates exactly 80% zoom */
+            font-size: 73%; /* This simulates exactly 80% zoom */
         }
 
         /* Standard Full-Screen Layout */
@@ -322,6 +322,28 @@
             transition: all 0.2s;
         }
         .guide-card:hover { border-color: #CBD5E1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+
+
+
+    /* Update your <style> block */
+
+/* 1. Ensure the table container handles the scroll */
+.table-container-fixed {
+    height: calc(100vh - 240px); /* Adjust based on your header size */
+    overflow: auto; /* Handles both X and Y scroll */
+    position: relative;
+}
+
+/* 2. Force Sticky on the TH elements (Cells), NOT the THEAD */
+th {
+    position: sticky !important; /* Force override */
+    top: 0;
+    z-index: 50; /* Ensure it floats above data */
+    background-color: #F8FAFC; /* Slate-50: Must be opaque to hide scrolling data */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Optional: Adds a subtle border shadow */
+}
+
     </style>
 </head>
 <body class="text-slate-800 h-screen flex overflow-hidden">
@@ -1054,7 +1076,7 @@
                          <span class="font-bold text-slate-600 text-sm">Data Records</span>
                          <div class="text-xs text-slate-400 italic">Use column headers to filter & sort</div>
                     </div>
-                    <div class="overflow-x-auto max-h-[600px]">
+                    <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md">
                         <table class="min-w-full divide-y divide-slate-200 text-sm" id="data-table">
                             <thead class="bg-slate-50 sticky top-0 shadow-sm z-10"></thead>
                             <tbody class="divide-y divide-slate-100 bg-white"></tbody>
@@ -1081,7 +1103,7 @@
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold flex justify-between"><span>Transaction Results</span><span class="text-xs font-normal text-slate-500 self-center">Showing latest matches from DB</span></div>
-                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left" id="matches-table"><thead class="bg-white text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="matches-body"><tr><td colspan="23" class="p-8 text-center text-slate-400">No matches run yet.</td></tr></tbody></table></div>
+                    <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="matches-table"><thead class="bg-white text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="matches-body"><tr><td colspan="23" class="p-8 text-center text-slate-400">No matches run yet.</td></tr></tbody></table></div>
                 </div>
             </div>
 
@@ -1091,7 +1113,7 @@
                         <div><h3 class="font-bold text-blue-800"><i class="fa-solid fa-magnifying-glass mr-2"></i>Reviewer Console</h3><p class="text-xs text-blue-600 mt-1">Review matches before approval.</p></div>
                         <div class="flex items-center gap-3"><button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition"><i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim</button><button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div>
                     </div>
-                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left" id="reviewer-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="reviewer-body"><tr><td colspan="24" class="p-8 text-center text-slate-400">Loading Queue...</td></tr></tbody></table></div>
+                    <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="reviewer-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="reviewer-body"><tr><td colspan="24" class="p-8 text-center text-slate-400">Loading Queue...</td></tr></tbody></table></div>
                 </div>
             </div>
 
@@ -1144,7 +1166,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto max-h-[600px]">
+                    <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md">
                         <table class="min-w-full text-xs text-left" id="approver-table">
                             <thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead>
                             <tbody class="divide-y divide-slate-50 text-[11px]" id="approver-body">
@@ -1167,7 +1189,7 @@
                     <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
                         <div class="flex items-center gap-4"><button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back to List</button><div class="h-6 w-px bg-purple-200"></div><div><h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3></div></div>
                     </div>
-                    <div class="overflow-x-auto max-h-[600px]"><table class="min-w-full text-xs text-left" id="history-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="history-body"><tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Claim Data...</td></tr></tbody></table></div>
+                    <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="history-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="history-body"><tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Claim Data...</td></tr></tbody></table></div>
                 </div>
             </div>
 
@@ -1192,7 +1214,7 @@
                             </p>
                         </div>
 
-                        <a href="#" onclick="alert('Downloading User_Guide_v1.0.pdf...')" class="group relative flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 backdrop-blur-md px-6 py-4 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 shrink-0">
+                        <a href="/drawback/api/template/user_guide" class="group relative flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 backdrop-blur-md px-6 py-4 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 shrink-0">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-inner">
                                 <i class="fa-solid fa-file-pdf text-xl group-hover:scale-110 transition-transform duration-300"></i>
                             </div>
@@ -2333,7 +2355,9 @@ function switchView(viewId) {
             }
 
             labels.forEach((l, i) => {
-                html += `<th>${getHeaderHTML(l, tableId, i + offset)}</th>`;
+                // We add 'sticky', 'top-0', and 'z-50' classes directly to the TH
+                html += `<th class="sticky top-0 z-50 bg-slate-50 border-b border-slate-200">${getHeaderHTML(l, tableId, i + offset)}</th>`;
+<!--                html += `<th>${getHeaderHTML(l, tableId, i + offset)}</th>`;-->
             });
             html += '</tr>';
             thead.innerHTML = html;
