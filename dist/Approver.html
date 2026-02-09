@@ -903,28 +903,30 @@ th {
                     </div>
                 </section>
 
-                <section id="dashboard-matching-section">
-                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-indigo-500 pl-3">Matching Summary</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
 
 
+<section id="dashboard-matching-section">
+                    <div class="flex items-center mb-4 pl-3 border-l-4 border-indigo-500">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Matching Summary</h3>
+                        <button onclick="document.getElementById('match-info-msg').classList.toggle('hidden')"
+                                class="ml-2 text-slate-400 hover:text-indigo-600 transition cursor-pointer" title="Show Info">
+                            <i class="fa-solid fa-circle-info text-lg"></i>
+                        </button>
+                    </div>
 
-
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
-                            <div class="flex justify-between items-start w-full">
-                                <div class="text-left">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Products</p>
-                                    <h4 class="text-xl font-bold text-slate-700" id="stat-products-count">-</h4>
-                                </div>
-                                <div class="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-xl">
-                                    <i class="fa-solid fa-box"></i>
-                                </div>
-                            </div>
-                             <div class="w-full bg-blue-100 h-1.5 mt-4 rounded-full overflow-hidden">
-                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 100%"></div>
-                            </div>
+                    <div id="match-info-msg" class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-xs font-bold shadow-sm flex items-start gap-3 animate-fadeIn">
+                        <i class="fa-solid fa-triangle-exclamation text-base mt-0.5"></i>
+                        <div>
+                            <p class="uppercase text-[10px] text-red-400 font-extrabold tracking-wider mb-1">Important Notice</p>
+                            <p class="mb-1">The number of matches are likely to be greater than number of exports in the system due to below scenarios:</p>
+                            <ol class="list-decimal ml-4 space-y-0.5">
+                                <li>In case of components-to-finished goods matching (many-to-one matching between imports & exports)</li>
+                                <li>In case of partial matching an export entry with multiple imports</li>
+                            </ol>
                         </div>
+                    </div>
 
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
                          <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
                             <div class="flex justify-between items-start w-full">
@@ -940,6 +942,7 @@ th {
                                 <div class="bg-indigo-500 h-1.5 rounded-full" style="width: 100%"></div>
                             </div>
                         </div>
+
                          <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
                             <div class="flex justify-between items-start w-full">
                                 <div class="text-left">
@@ -954,6 +957,7 @@ th {
                                 <div class="bg-cyan-500 h-1.5 rounded-full" style="width: 100%"></div>
                             </div>
                         </div>
+
                          <div class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card flex flex-col justify-between min-h-[160px]">
                             <div class="flex justify-between items-start w-full">
                                 <div class="text-left">
@@ -968,8 +972,6 @@ th {
                                 <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
                             </div>
                         </div>
-
-
 
                         <div onclick="switchView('exports')" class="bg-white p-5 rounded-xl border border-slate-200 text-center dash-card clickable-card group hover:bg-red-50 flex flex-col justify-between min-h-[160px]">
                             <div class="flex justify-between items-start w-full">
@@ -991,8 +993,11 @@ th {
                             </div>
                         </div>
 
-</div>
+                    </div>
                 </section>
+
+
+
 
                 <div class="w-full">
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -1561,6 +1566,14 @@ th {
         window.CURRENT_USER_EMAIL = "system_fallback@launchpath.ai";
         window.CURRENT_USER_FULL_NAME = "Unknown User"; // 🆕 NEW GLOBAL
 
+
+
+        window.PROJECT_LOGIN_URL = "";
+        // 🆕 ADD THESE:
+        window.CURRENT_PROJECT_ID = "124";
+        window.CURRENT_WORKSPACE_ID = "124";
+
+
         // 1. Listen for Context from Parent
         window.addEventListener('message', function(event) {
             // OPTIONAL: Uncomment to restrict to specific Parent domain for security
@@ -1588,9 +1601,13 @@ th {
                         window.PROJECT_LOGIN_URL = data.user.projectLoginUrl;
                     }
 
+                    if (data.user.project_id) window.CURRENT_PROJECT_ID = data.user.project_id;
+                    if (data.user.workspace_id) window.CURRENT_WORKSPACE_ID = data.user.workspace_id;
+
                     // Visual Confirmation
                     console.log("✅ [Child] Context Received:", window.CURRENT_USER_EMAIL, window.CURRENT_USER_FULL_NAME, window.PROJECT_LOGIN_URL);
                     showToast(`Connected as ${window.CURRENT_USER_FULL_NAME || window.CURRENT_USER_EMAIL}`, "success");
+                    console.log("✅ IDs Captured:", window.CURRENT_PROJECT_ID, window.CURRENT_WORKSPACE_ID);
 
                     // Update Role Switcher if Role is provided
                     if(data.user.role) {
@@ -1634,6 +1651,7 @@ th {
                 { k: 'material_number', l: 'Material #' },
                 { k: 'qty', l: 'Qty' },
                 { k: 'qty_consumed', l: 'Consumed' }, // NEW
+                { k: 'pct_consumed', l: '% Used' }, // 🆕 NEW COLUMN
                 { k: 'uom', l: 'UOM' },
                 { k: 'import_date', l: 'Date' },
                 { k: 'duty_paid', l: 'Duty Paid' },
@@ -1649,6 +1667,7 @@ th {
                 { k: 'description', l: 'Description' },
                 { k: 'qty', l: 'Quantity' },
                 { k: 'qty_consumed', l: 'Consumed' }, // NEW
+                { k: 'pct_consumed', l: '% Used' }, // 🆕 NEW COLUMN
                 { k: 'uom', l: 'UOM' },
                 { k: 'country', l: 'Country' },
                 { k: 'invoice_no', l: 'Invoice No' },
@@ -1975,33 +1994,50 @@ function showErrorModal(message) {
 
 
 
+
+
 async function safeFetch(endpoint, options={}) {
             try {
                 const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
 
-                // Inject Identity
-                if (options.method === 'POST' || options.method === 'PUT') {
-                    let body = {};
-                    if (options.body) {
-                        if (typeof options.body === 'string') {
+                // 🆕 FIX: Ensure method exists
+                if (!options.method) options.method = 'GET';
+
+                // 1. Handle JSON Injection (POST/PUT/DELETE)
+                if (['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase())) {
+
+                    // A. Handle JSON Body
+                    if (!options.body || typeof options.body === 'string') {
+                        let body = {};
+                        if (options.body && typeof options.body === 'string') {
                             try { body = JSON.parse(options.body); } catch(e) {}
-                        } else if (!(options.body instanceof FormData)) {
-                            body = options.body;
                         }
-                    }
-                    if (!(options.body instanceof FormData)) {
+
+                        // Inject Context
                         body.actor_email = window.CURRENT_USER_EMAIL;
                         body.actor_name = window.CURRENT_USER_FULL_NAME;
                         body.project_login_url = window.PROJECT_LOGIN_URL;
+                        body.project_id = window.CURRENT_PROJECT_ID;
+                        body.workspace_id = window.CURRENT_WORKSPACE_ID;
+
                         options.body = JSON.stringify(body);
                         if (!options.headers) options.headers = {};
                         options.headers['Content-Type'] = 'application/json';
                     }
+                    // B. Handle FormData (Skip injection here, must be done manually in caller)
+                }
+                // 2. Handle GET Injection (Append to URL)
+                else if (options.method.toUpperCase() === 'GET') {
+                    const separator = url.includes('?') ? '&' : '?';
+                    const contextParams = `workspace_id=${window.CURRENT_WORKSPACE_ID}&project_id=${window.CURRENT_PROJECT_ID}`;
+                    // Only append if not already there to avoid duplication loops
+                    if (!url.includes('workspace_id=')) {
+                        // We can't easily modify 'url' const, so we rely on the fetch call using the modified string
+                        // For this implementation, we will assume caller handles GET params or we rely on the specific ID endpoints fixed below.
+                    }
                 }
 
                 const res = await fetch(url, options);
-
-                // 🟢 FIX START: Try to parse JSON first
                 let json;
                 try {
                     json = await res.json();
@@ -2009,25 +2045,22 @@ async function safeFetch(endpoint, options={}) {
                     throw new Error(`Server Error (${res.status}): Unable to parse response.`);
                 }
 
-                // 🟢 FIX: Check success AFTER parsing
                 if (!res.ok) {
                     console.warn("API Error Response:", json);
-                    return {
-                        success: false,
-                        message: json.message || `Server responded with ${res.status}`,
-                        data: []
-                    };
+                    return { success: false, message: json.message || `Server responded with ${res.status}`, data: [] };
                 }
 
                 updateServerStatus(true);
                 return json;
-                // 🟢 FIX END
 
             } catch (e) {
                 console.error("API Connection Failed:", e);
                 return { success: false, message: e.message || "Network Error", data: [] };
             }
         }
+
+
+
 
 
 
@@ -2099,7 +2132,7 @@ async function safeFetch(endpoint, options={}) {
 
 
         // --- APP LOGIC ---
-        function updateServerStatus(isOnline) {
+function updateServerStatus(isOnline) {
             const statusEl = document.getElementById('server-status');
             const banner = document.getElementById('demo-banner');
             if(isOnline) {
@@ -2247,10 +2280,13 @@ function switchView(viewId) {
 
 
         // --- DASHBOARD (UPDATED FOR NEW DESIGN) ---
-        async function loadStats() {
+
+async function loadStats() {
             toggleLoading(true, "Updating Dashboard...");
             try {
-                const json = await safeFetch('/drawback/api/stats');
+                // 🟢 FIX: Changed to POST to send workspace_id context
+                const json = await safeFetch('/drawback/api/stats', { method: 'POST' });
+
                 const potential = json?.data?.kpis?.potential_duty || 0;
                 const recovered = json?.data?.kpis?.recovered_duty || 0;
                 const realized = potential > 0 ? ((recovered / potential) * 100).toFixed(1) : 0;
@@ -2260,7 +2296,7 @@ function switchView(viewId) {
                 const pendingApproval = json?.data?.counts?.pending_approval || 0;
                 const pendingClaims = json?.data?.counts?.claims || 0;
 
-                const prodCount = json?.data?.counts?.products || 0;
+                // const prodCount = json?.data?.counts?.products || 0; // Removed from UI
                 const impCount = json?.data?.counts?.imports || 0;
                 const expCount = json?.data?.counts?.exports || 0;
                 const matchSuccess = json?.data?.counts?.matches_success || 0;
@@ -2276,32 +2312,23 @@ function switchView(viewId) {
                 document.getElementById('stat-pending-approval-count').innerText = pendingApproval;
                 document.getElementById('stat-pending-claims-count').innerText = pendingClaims;
 
-                document.getElementById('stat-products-count').innerText = prodCount;
+                // REMOVED: document.getElementById('stat-products-count').innerText = prodCount;
+
                 document.getElementById('count-imports').innerText = impCount;
                 document.getElementById('count-exports').innerText = expCount;
                 document.getElementById('stat-matches-success').innerText = matchSuccess;
                 document.getElementById('stat-matches-fail').innerText = matchFail;
 
-                // REMOVED: JS lines updating performance metrics to avoid null reference errors
-                // document.getElementById('stat-import-quality').innerText = "0%";
-                // document.getElementById('stat-export-quality').innerText = "0%";
-                // document.getElementById('stat-matching-time').innerText = "0s";
-
-                // FIX: Add Dynamic Headers to Inventory Table Here
                 renderDynamicHeaders('inventory-table', ['Material Number', 'Total Imported', 'Available', 'Utilization'], 0);
-
                 const invBody = document.getElementById('inventory-body');
 
-
                 if (json.data && json.data.inventory && json.data.inventory.length > 0) {
-                    // 🆕 1. Sort by Utilization Descending (Highest % first)
                     const sortedInventory = json.data.inventory.sort((a, b) => {
                         const utilA = a.total_original > 0 ? (1 - (a.total_available / a.total_original)) : 0;
                         const utilB = b.total_original > 0 ? (1 - (b.total_available / b.total_original)) : 0;
                         return utilB - utilA;
                     });
 
-                    // 🆕 2. Map the SORTED array
                     invBody.innerHTML = sortedInventory.map(item => {
                         const utilization = item.total_original > 0 ? ((1 - (item.total_available / item.total_original)) * 100).toFixed(1) : 0;
                         let color = "bg-blue-600";
@@ -2325,13 +2352,17 @@ function switchView(viewId) {
                 } else {
                     invBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">No inventory data found.</td></tr>`;
                 }
-
-} catch (e) {
+            } catch (e) {
                 console.error(e);
             } finally {
                 toggleLoading(false);
             }
         }
+
+
+
+
+
 
         // --- 🆕 TABLE HEADER GENERATOR (FIXED) ---
         function renderDynamicHeaders(tableId, labels, hasCheckbox = 0) {
@@ -2365,258 +2396,120 @@ function switchView(viewId) {
 
         // --- TABLE DATA LOADER ---
 
-<!--        -->
-<!--        -->
-<!--        async function loadTableData(target) {-->
-<!--            toggleLoading(true, "Loading Data...");-->
-<!--            const tbody = document.querySelector('#data-table tbody');-->
-<!--            const tableContainer = document.getElementById('data-table-container'); // Issue 1: Get container-->
-<!--            tbody.innerHTML = "";-->
-
-<!--            try {-->
-<!--                const data = await safeFetch(`/drawback/api/view/${target}`);-->
-<!--                const rows = Array.isArray(data) ? data : [];-->
-<!--                const config = TABLE_CONFIG[target];-->
-<!--                if (!config) return;-->
-
-<!--                // 🆕 Generate Headers dynamically-->
-<!--                const labels = config.map(c => c.l);-->
-<!--                renderDynamicHeaders('data-table', labels, 0); // 0 = No Action Column-->
-
-<!--                if(rows.length === 0) {-->
-<!--                    // Issue 1: Hide Table Container completely if empty-->
-<!--                    tableContainer.classList.add('hidden');-->
-<!--                } else {-->
-<!--                    // Issue 1: Show Table Container if data exists-->
-<!--                    tableContainer.classList.remove('hidden');-->
-
-<!--                    let bRows = "";-->
-<!--                    rows.forEach(row => {-->
-<!--                        let rowClass = "hover:bg-slate-50 border-b border-slate-100 transition";-->
-<!--                        if (row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";-->
-
-<!--                        bRows += `<tr class="${rowClass}">`;-->
-
-<!--                        config.forEach(col => {-->
-<!--                            let val = row[col.k] || "";-->
-<!--                            if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {-->
-<!--                                val = formatMoney(val);-->
-<!--                            }-->
-<!--                            // NEW: Specific styling for Consumed Qty column-->
-<!--                            let cellClasses = "px-6 py-3 text-slate-600 whitespace-nowrap text-center";-->
-<!--                            if(col.k === 'qty_consumed') {-->
-<!--                                cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";-->
-<!--                            }-->
-
-<!--                            bRows += `<td class="${cellClasses}">${val}</td>`;-->
-<!--                        });-->
-<!--                        bRows += `</tr>`;-->
-<!--                    });-->
-<!--                    tbody.innerHTML = bRows;-->
-<!--                }-->
-<!--            } finally {-->
-<!--                toggleLoading(false);-->
-<!--            }-->
-<!--        }-->
-
 
 
 // --- TABLE DATA LOADER (PATCHED FOR ARCHIVING) ---
 
 // --- TABLE DATA LOADER (PATCHED: Archiving & No-Restore Logic) ---
-        async function loadTableData(target) {
-            toggleLoading(true, "Loading Data...");
-            const tbody = document.querySelector('#data-table tbody');
-            const tableContainer = document.getElementById('data-table-container');
-            tbody.innerHTML = "";
 
-            try {
-                const data = await safeFetch(`/drawback/api/view/${target}`);
-                let rows = Array.isArray(data) ? data : [];
-                const config = TABLE_CONFIG[target];
-                if (!config) return;
 
-                // 1. Sort: Active (0) first, Archived (1) last
-                rows.sort((a, b) => {
-                    // Primary: Archive Status
-                    const arcA = a.is_archived || 0;
-                    const arcB = b.is_archived || 0;
-                    if (arcA !== arcB) return arcA - arcB;
+async function loadTableData(target) {
+    toggleLoading(true, "Loading Data...");
+    const tbody = document.querySelector('#data-table tbody');
+    const tableContainer = document.getElementById('data-table-container');
+    tbody.innerHTML = "";
 
-                    // Secondary: Specific Logic for Transaction Tables
-                    if (target === 'exports' || target === 'imports') {
-                        const consA = parseFloat(a.qty_consumed) || 0;
-                        const consB = parseFloat(b.qty_consumed) || 0;
-                        return consA - consB; // Ascending: 0 consumed (fresh) -> Fully consumed
+    try {
+        const response = await safeFetch(`/drawback/api/view/${target}`, { method: 'POST' });
+        let rows = Array.isArray(response) ? response : (response.data || []);
+
+        const config = TABLE_CONFIG[target];
+        if (!config) return;
+
+        // 1. CALCULATE PERCENTAGE (Virtual Column)
+        if (target === 'imports' || target === 'exports') {
+            rows.forEach(row => {
+                const consumed = parseFloat(row.qty_consumed) || 0;
+                // Imports use 'qty_original', Exports use 'qty'
+                const total = parseFloat(target === 'imports' ? row.qty_original : row.qty) || 0;
+
+                if (total > 0) {
+                    row.pct_consumed = Math.round((consumed / total) * 100);
+                } else {
+                    row.pct_consumed = 0;
+                }
+            });
+        }
+
+        // 2. SORT LOGIC (Ascending: 0% -> 100%)
+        rows.sort((a, b) => {
+            const arcA = a.is_archived || 0;
+            const arcB = b.is_archived || 0;
+            if (arcA !== arcB) return arcA - arcB; // Archived last
+
+            if (target === 'exports' || target === 'imports') {
+                 const pctA = a.pct_consumed || 0;
+                 const pctB = b.pct_consumed || 0;
+                 if (pctA !== pctB) return pctA - pctB; // Ascending
+            }
+            return (b.id || 0) - (a.id || 0);
+        });
+
+        // 3. RENDER
+        const labels = config.map(c => c.l);
+        const hasActionColumn = (target === 'products' || target === 'material_mappings') ? 2 : 0;
+        renderDynamicHeaders('data-table', labels, hasActionColumn);
+
+        if(rows.length === 0) {
+            tableContainer.classList.add('hidden');
+        } else {
+            tableContainer.classList.remove('hidden');
+            let bRows = "";
+            rows.forEach(row => {
+                const isArchived = row.is_archived === 1;
+                let rowClass = isArchived ? "bg-gray-100 text-gray-400 border-b border-slate-100 italic" : "hover:bg-slate-50 border-b border-slate-100 transition";
+
+                bRows += `<tr class="${rowClass}">`;
+
+                if (hasActionColumn === 2) {
+                    const icon = isArchived ? "fa-box-open" : "fa-box-archive";
+                    const btnColor = isArchived ? "text-blue-500 hover:text-blue-700" : "text-slate-400 hover:text-red-500";
+                    const title = isArchived ? "Restore Item" : "Archive Item";
+                    bRows += `<td class="px-6 py-3 text-center"><button onclick="toggleArchive('${target}', '${row.id}')" class="${btnColor} transition" title="${title}"><i class="fa-solid ${icon}"></i></button></td>`;
+                }
+
+                // DETERMINE ROW COLOR LOGIC
+                const pct = row.pct_consumed || 0;
+
+                // Default: 0% -> Light Red Highlight
+                let usageStyle = "text-red-500 font-bold bg-red-50";
+
+                // > 0% -> Green Highlight
+                if(pct > 0) {
+                    usageStyle = "text-emerald-600 font-bold bg-emerald-50";
+                }
+
+                config.forEach(col => {
+                    let val = row[col.k] !== undefined && row[col.k] !== null ? row[col.k] : "";
+
+                    // Money Formatting
+                    if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
+                        val = formatMoney(val);
                     }
 
-                    // Default: Newest ID first
-                    return (b.id || 0) - (a.id || 0);
+                    let cellClasses = "px-6 py-3 whitespace-nowrap text-center";
+
+                    // === UNIFIED STYLING LOGIC ===
+                    // Applies styling to BOTH 'Consumed' and '% Used' columns
+                    if (col.k === 'qty_consumed') {
+                        cellClasses = `px-6 py-3 ${usageStyle} text-center font-mono border-l border-slate-100`;
+                    }
+                    else if (col.k === 'pct_consumed') {
+                         cellClasses = `px-6 py-3 ${usageStyle} text-center border-r border-slate-100`;
+                         val = val + "%";
+                    }
+
+                    if (isArchived) cellClasses += " opacity-60";
+                    bRows += `<td class="${cellClasses}">${val}</td>`;
                 });
-
-                const labels = config.map(c => c.l);
-
-                // 2. Logic: Show Action Column for Products AND Material Mappings
-                // hasActionColumn = 2 tells the header renderer to add the "Action" column
-                const hasActionColumn = (target === 'products' || target === 'material_mappings') ? 2 : 0;
-
-                renderDynamicHeaders('data-table', labels, hasActionColumn);
-
-                if(rows.length === 0) {
-                    tableContainer.classList.add('hidden');
-                } else {
-                    tableContainer.classList.remove('hidden');
-
-                    let bRows = "";
-                    rows.forEach(row => {
-                        const isArchived = row.is_archived === 1;
-
-                        // Style: Grey out if archived
-                        let rowClass = isArchived
-                            ? "bg-gray-100 text-gray-400 border-b border-slate-100 italic"
-                            : "hover:bg-slate-50 border-b border-slate-100 transition";
-
-                        // Highlight smart-filled cells only if active
-                        if (!isArchived && row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";
-
-                        bRows += `<tr class="${rowClass}">`;
-
-                        // 3. Render Action Button (With "No Un-archive" Logic)
-                        if (hasActionColumn === 2) {
-                            let actionHtml = '';
-
-                            if (isArchived) {
-                                // 🔒 LOCKED: Show static badge, no click action
-                                actionHtml = `
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-wider cursor-not-allowed" title="This item is archived and cannot be restored">
-                                        <i class="fa-solid fa-box-archive"></i> Archived
-                                    </span>
-                                `;
-                            } else {
-                                // 🔓 ACTIVE: Show Archive Button
-                                actionHtml = `
-                                    <button onclick="toggleArchive('${target}', '${row.id}')" class="text-slate-400 hover:text-red-600 transition" title="Archive this item">
-                                        <i class="fa-solid fa-box-archive"></i>
-                                    </button>
-                                `;
-                            }
-
-                            bRows += `<td class="px-6 py-3 text-center">${actionHtml}</td>`;
-                        }
-
-                        // Render Data Columns
-                        config.forEach(col => {
-                            let val = row[col.k] || "";
-
-                            if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
-                                val = formatMoney(val);
-                            }
-
-                            let cellClasses = "px-6 py-3 whitespace-nowrap text-center";
-                            if(col.k === 'qty_consumed') {
-                                cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";
-                            }
-
-                            // Dim text content if archived
-                            if (isArchived) cellClasses += " opacity-60";
-
-                            bRows += `<td class="${cellClasses}">${val}</td>`;
-                        });
-                        bRows += `</tr>`;
-                    });
-                    tbody.innerHTML = bRows;
-                }
-            } finally {
-                toggleLoading(false);
-            }
+                bRows += `</tr>`;
+            });
+            tbody.innerHTML = bRows;
         }
-<!--        async function loadTableData(target) {-->
-<!--            toggleLoading(true, "Loading Data...");-->
-<!--            const tbody = document.querySelector('#data-table tbody');-->
-<!--            const tableContainer = document.getElementById('data-table-container');-->
-<!--            tbody.innerHTML = "";-->
-
-<!--            try {-->
-<!--                const data = await safeFetch(`/drawback/api/view/${target}`);-->
-<!--                let rows = Array.isArray(data) ? data : [];-->
-<!--                const config = TABLE_CONFIG[target];-->
-<!--                if (!config) return;-->
-
-<!--                // 🆕 PATCH: Sort Archived Items to the Bottom-->
-<!--                // 0 = Active, 1 = Archived. A-B puts 0 first.-->
-<!--                rows.sort((a, b) => {-->
-<!--                    const arcA = a.is_archived || 0;-->
-<!--                    const arcB = b.is_archived || 0;-->
-<!--                    return arcA - arcB;-->
-<!--                });-->
-
-<!--                const labels = config.map(c => c.l);-->
-
-<!--                // 🆕 PATCH: Add Action Column ONLY for Products & Mappings-->
-<!--                // hasCheckbox = 2 triggers the "Action" column in renderDynamicHeaders-->
-<!--                const hasActionColumn = (target === 'products' || target === 'material_mappings') ? 2 : 0;-->
-
-<!--                renderDynamicHeaders('data-table', labels, hasActionColumn);-->
-
-<!--                if(rows.length === 0) {-->
-<!--                    tableContainer.classList.add('hidden');-->
-<!--                } else {-->
-<!--                    tableContainer.classList.remove('hidden');-->
-
-<!--                    let bRows = "";-->
-<!--                    rows.forEach(row => {-->
-<!--                        const isArchived = row.is_archived === 1;-->
-
-<!--                        // 🆕 PATCH: Visual Styling for Archived Rows-->
-<!--                        let rowClass = isArchived-->
-<!--                            ? "bg-gray-100 text-gray-400 border-b border-slate-100 italic"-->
-<!--                            : "hover:bg-slate-50 border-b border-slate-100 transition";-->
-
-<!--                        // Keep smart fill highlight if active-->
-<!--                        if (!isArchived && row.smart_notes) rowClass = "bg-yellow-50 hover:bg-yellow-100 border-b border-slate-100 transition";-->
-
-<!--                        bRows += `<tr class="${rowClass}">`;-->
-
-<!--                        // 🆕 PATCH: Render Archive/Restore Button-->
-<!--                        if (hasActionColumn === 2) {-->
-<!--                            const icon = isArchived ? "fa-box-open" : "fa-box-archive";-->
-<!--                            const btnColor = isArchived ? "text-blue-500 hover:text-blue-700" : "text-slate-400 hover:text-red-500";-->
-<!--                            const title = isArchived ? "Restore Item" : "Archive Item";-->
-
-<!--                            bRows += `-->
-<!--                                <td class="px-6 py-3 text-center">-->
-<!--                                    <button onclick="toggleArchive('${target}', '${row.id}')" class="${btnColor} transition" title="${title}">-->
-<!--                                        <i class="fa-solid ${icon}"></i>-->
-<!--                                    </button>-->
-<!--                                </td>-->
-<!--                            `;-->
-<!--                        }-->
-
-<!--                        config.forEach(col => {-->
-<!--                            let val = row[col.k] || "";-->
-
-<!--                            if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {-->
-<!--                                val = formatMoney(val);-->
-<!--                            }-->
-
-<!--                            let cellClasses = "px-6 py-3 whitespace-nowrap text-center";-->
-<!--                            if(col.k === 'qty_consumed') {-->
-<!--                                cellClasses = "px-6 py-3 text-green-600 font-bold bg-green-50 border-l border-green-100 whitespace-nowrap text-center";-->
-<!--                            }-->
-
-<!--                            // Dim text content if archived-->
-<!--                            if (isArchived) cellClasses += " opacity-60";-->
-
-<!--                            bRows += `<td class="${cellClasses}">${val}</td>`;-->
-<!--                        });-->
-<!--                        bRows += `</tr>`;-->
-<!--                    });-->
-<!--                    tbody.innerHTML = bRows;-->
-<!--                }-->
-<!--            } finally {-->
-<!--                toggleLoading(false);-->
-<!--            }-->
-<!--        }-->
+    } finally {
+        toggleLoading(false);
+    }
+}
 
 
 
@@ -2850,39 +2743,54 @@ function showMatchDetails(match) {
 
         // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC ---
         // --- 🆕 REVIEWER CLAIM SUBMISSION LOGIC (PATCHED) ---
-async function openClaimModal() {
-    if (reviewerSelection.size === 0) {
-        showToast("Select matches first", "warning");
-        return;
-    }
 
-    document.getElementById('claim-modal').classList.remove('hidden');
 
-    // Set a temporary loading state in the input
-    const input = document.getElementById('claim-id-input');
-    input.value = "GENERATING...";
-    input.disabled = true;
 
-    try {
-        // Fetch strict sequential ID from backend
-        const res = await safeFetch('/drawback/api/next_claim_id');
 
-        if (res.success && res.data && res.data.next_id) {
-            input.value = res.data.next_id;
-        } else {
-            // Fallback only if API fails hard
-            const year = new Date().getFullYear();
-            input.value = `XCLM-${year}-0001`;
-            showToast("Could not fetch sequence, using default", "warning");
+
+        async function openClaimModal() {
+            if (reviewerSelection.size === 0) {
+                showToast("Select matches first", "warning");
+                return;
+            }
+
+            document.getElementById('claim-modal').classList.remove('hidden');
+
+            // Set a temporary loading state in the input
+            const input = document.getElementById('claim-id-input');
+            input.value = "GENERATING...";
+            input.disabled = true;
+
+            try {
+                // 🟢 FIX: Explicitly append Context IDs to the URL for the GET request
+                // The backend requires these to generate the correct scoped sequence number
+                const params = new URLSearchParams({
+                    workspace_id: window.CURRENT_WORKSPACE_ID,
+                    project_id: window.CURRENT_PROJECT_ID
+                });
+
+                const res = await safeFetch(`/drawback/api/next_claim_id?${params.toString()}`);
+
+                if (res.success && res.data && res.data.next_id) {
+                    input.value = res.data.next_id;
+                } else {
+                    // Fallback only if API fails hard
+                    const year = new Date().getFullYear();
+                    input.value = `XCLM-${year}-0001`;
+                    showToast("Could not fetch sequence, using default", "warning");
+                }
+            } catch (e) {
+                console.error("ID Generation Error", e);
+                input.value = "";
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
         }
-    } catch (e) {
-        console.error("ID Generation Error", e);
-        input.value = "";
-    } finally {
-        input.disabled = false;
-        input.focus();
-    }
-}
+
+
+
+
 
         async function confirmClaimSubmission() {
             const claimId = document.getElementById('claim-id-input').value.trim().toUpperCase();
@@ -2916,17 +2824,20 @@ async function openClaimModal() {
         }
 
         // --- 🆕 APPROVER SUMMARY LOGIC (REPLACES DROPDOWN LOGIC) ---
+
+
         async function loadApproverSummary() {
             const tbody = document.getElementById('approver-summary-body');
             tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic"><div class="spinner mx-auto mb-2"></div>Fetching Pending Claims...</td></tr>`;
 
             try {
-                const json = await safeFetch('/drawback/api/claims/list/REVIEWED');
+                // 🟢 FIX: Changed to POST
+                const json = await safeFetch('/drawback/api/claims/list/REVIEWED', { method: 'POST' });
+
                 if (json.data && json.data.length > 0) {
                     tbody.innerHTML = json.data.map(c => `
                         <tr class="hover:bg-emerald-50 transition border-b border-slate-50">
                             <td class="px-6 py-4 font-bold text-slate-700 font-mono text-left">${c.claim_id}</td>
-
                             <td class="px-6 py-4 text-center text-slate-600">${c.count} items</td>
                             <td class="px-6 py-4 text-right font-bold text-emerald-600">${formatMoney(c.total_val)}</td>
                             <td class="px-6 py-4 text-center">
@@ -2944,8 +2855,6 @@ async function openClaimModal() {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400 italic">Error loading claims list.</td></tr>`;
             }
         }
-
-
 
 
 
@@ -2971,9 +2880,7 @@ async function openClaimModal() {
 
 
 
-
-
-     async function loadApproverQueue(claimId) {
+async function loadApproverQueue(claimId) {
             if(!claimId) return;
             toggleLoading(true, `Loading Claim ${claimId}...`);
 
@@ -2983,15 +2890,18 @@ async function openClaimModal() {
 
                 renderDynamicHeaders('approver-table', approverHeaders, 1);
 
-                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);
+                // 🟢 FIX: Changed to POST with JSON body
+                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED`, {
+                    method: 'POST',
+                    body: JSON.stringify({ claim_id: claimId })
+                });
+
                 const data = json.data || [];
 
                 if (data.length === 0) {
                      renderApproverTable([]);
                      showToast("Audit Complete. Returning to Summary...", "success");
-                     setTimeout(() => {
-                         backToApproverList();
-                     }, 1200);
+                     setTimeout(() => { backToApproverList(); }, 1200);
                      return;
                 }
 
@@ -3000,7 +2910,6 @@ async function openClaimModal() {
                 toggleLoading(false);
             }
         }
-
 
 
 <!--        async function loadApproverQueue(claimId) {-->
@@ -3167,21 +3076,21 @@ async function openClaimModal() {
 <!--            }-->
 <!--        }-->
 
+
+
 async function loadHistorySummary() {
             toggleLoading(true, "Loading Claim History...");
             const tbody = document.getElementById('history-summary-body');
             tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;
 
             try {
-                const json = await safeFetch('/drawback/api/claims/list/HISTORY');
-                if (json.data && json.data.length > 0) {
+                // 🟢 FIX: Changed to POST
+                const json = await safeFetch('/drawback/api/claims/list/HISTORY', { method: 'POST' });
 
-                    // 🆕 Render Headers for History Summary
-                    // REORDERED: Final Acceptance (0) -> Actions (1) -> Claim ID (2) ...
+                if (json.data && json.data.length > 0) {
                     const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
                     renderDynamicHeaders('history-summary-table', headers, 0);
 
-                    // 🛠️ HELPER: Force DD/MM/YYYY formatting manually
                     const toDDMMYYYY = (isoStr) => {
                         if(!isoStr) return '-';
                         const d = new Date(isoStr);
@@ -3191,78 +3100,60 @@ async function loadHistorySummary() {
 
                     tbody.innerHTML = json.data.map(c => {
                         let displayId = c.claim_id;
-                        if (!displayId.startsWith('X')) {
-                            displayId = 'X' + displayId;
-                        }
-
-                        // 🔥 Final Acceptance Logic (Truncated Date: DD/MM/YYYY)
-                        let acceptanceHtml = '';
-                        let isFinalized = false;
-
-                        // 🚀 PATCH: Define safeBrokerId to fix Detail View merging issue
-                        // If broker_claim_id is missing/null, we pass 'PENDING' string to the view function
+                        if (!displayId.startsWith('X')) displayId = 'X' + displayId;
                         let safeBrokerId = c.broker_claim_id || 'PENDING';
 
-                        if (c.finalized_date) {
-                            isFinalized = true;
-                            const simpleFinalDate = toDDMMYYYY(c.finalized_date);
+                        let acceptanceHtml = '';
+                        let isFinalized = !!c.finalized_date;
 
+                        if (c.finalized_date) {
                             acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">
                                 <i class="fa-solid fa-circle-check text-lg"></i>
                                 <div class="text-left leading-tight">
                                     <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
-                                    <div class="text-xs font-mono">${simpleFinalDate}</div>
+                                    <div class="text-xs font-mono">${toDDMMYYYY(c.finalized_date)}</div>
                                     <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>
                                 </div>
                             </div>`;
                         } else if (c.valid_entries > 0) {
-                            acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto">
-                                <i class="fa-regular fa-square group-hover:hidden text-lg"></i>
-                                <i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i>
-                                <span class="text-xs font-semibold">Mark Final</span>
-                            </button>`;
+                            acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto"><i class="fa-regular fa-square group-hover:hidden text-lg"></i><i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i><span class="text-xs font-semibold">Mark Final</span></button>`;
                         } else {
                             acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;
                         }
 
-                        // STATUS BADGE LOGIC
                         let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
-
-                        if (isFinalized) {
-                            statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;
-                        } else if (c.voided_entries > 0 && c.valid_entries == 0) {
-                            statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
-                        } else if (c.voided_entries > 0) {
-                            statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
-                        }
-
-                        const simpleApprovedDate = toDDMMYYYY(c.approved_date);
+                        if (isFinalized) statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;
+                        else if (c.voided_entries > 0 && c.valid_entries == 0) statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
+                        else if (c.voided_entries > 0) statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
 
                         return `
                         <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
                              <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
                             <td class="px-6 py-4 text-center">
-                                <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
-                                    <i class="fa-solid fa-circle-info text-lg"></i>
-                                </button>
+                                <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details"><i class="fa-solid fa-circle-info text-lg"></i></button>
                             </td>
-
                             <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>
                             <td class="px-6 py-4 text-center">${statusBadge}</td>
                             <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>
                             <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>
                             <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
                             <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
-                            <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${simpleApprovedDate}</td>
+                            <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toDDMMYYYY(c.approved_date)}</td>
                         </tr>
                     `}).join('');
-            } else {
+                } else {
                     tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;
                 }
             } finally {
                 toggleLoading(false);
             }
         }
+
+
+
+
+
+
 
 
 
@@ -3328,6 +3219,8 @@ async function loadHistorySummary() {
         }
 
         // 🚀 PATCH: Updated to accept filterBrokerId as the 3rd argument
+
+// --- SHARED WORKFLOW LOADER (FIXED: GET Method + Explicit Context IDs) ---
         async function loadWorkflowData(role, filterClaimId = null, filterBrokerId = null) {
             if(role === 'approver') return;
 
@@ -3337,31 +3230,46 @@ async function loadHistorySummary() {
                 const statusMap = { 'reviewer': 'DRAFT', 'history': 'APPROVED' };
                 const reqStatus = statusMap[role];
 
+                // 1. Base URL
                 let url = `/drawback/api/workflow/queue/${reqStatus}`;
 
-                // Construct URL Params to include the new broker_id filter
+                // 2. Construct Query Params
                 const params = new URLSearchParams();
+
+                // 🚀 CRITICAL FIX: Explicitly add Context IDs to the URL
+                // This ensures the Backend (GET request) sees the correct Workspace/Project
+                // and DOES NOT fall back to the default/wrong ID.
+                params.append('workspace_id', window.CURRENT_WORKSPACE_ID);
+                params.append('project_id', window.CURRENT_PROJECT_ID);
+
+                // 3. Add Optional Filters (for History View)
                 if (role === 'history' && filterClaimId) {
                      params.append('claim_id', filterClaimId);
-
-                     // 🚀 PATCH: Append broker_id if it exists to split finalized vs pending views
-                     if(filterBrokerId) {
+                     // Fix: Ensure we don't send 'null' or 'undefined' string literals
+                     if(filterBrokerId && filterBrokerId !== 'null' && filterBrokerId !== 'undefined') {
                          params.append('broker_id', filterBrokerId);
                      }
                 }
 
-                if(params.toString()) url += `?${params.toString()}`;
+                // 4. Append params to URL
+                url += `?${params.toString()}`;
 
-                const json = await safeFetch(url);
+                // 5. Send Request (Explicitly GET)
+                const json = await safeFetch(url, { method: 'GET' });
                 const data = json.data || [];
 
                 if (role === 'reviewer') renderReviewerTable(data);
                 else if (role === 'history') renderHistoryTable(data);
 
+            } catch (e) {
+                console.error("Workflow Load Error:", e);
+                showToast("Failed to load data", "error");
             } finally {
                 toggleLoading(false);
             }
         }
+
+
 
         // --- CLIENT-SIDE CSV EXPORT FOR SINGLE CLAIM ---
 
@@ -3372,8 +3280,12 @@ async function loadHistorySummary() {
         async function exportClaimLocal(claimId) {
              toggleLoading(true, `Generating Export for ${claimId}...`);
              try {
-                const url = `/drawback/api/workflow/queue/APPROVED?claim_id=${encodeURIComponent(claimId)}`;
-                const json = await safeFetch(url);
+                // 🟢 FIX: Changed from GET URL params to POST Body
+                const json = await safeFetch(`/drawback/api/workflow/queue/APPROVED`, {
+                    method: 'POST',
+                    body: JSON.stringify({ claim_id: claimId })
+                });
+
                 const data = json.data || [];
 
                 if(data.length === 0) {
@@ -3405,16 +3317,9 @@ async function loadHistorySummary() {
                     const valCustoms = parseFloat(row.import_customs_val) || 0;
                     const valDutyPaid = parseFloat(row.import_duty_paid) || 0;
 
-                    // A. Unit Value
                     const unitVal = qtyOrig > 0 ? (valCustoms / qtyOrig) : 0;
-
-                    // B. Entered Value (Pro-rated Customs Value)
                     const enteredVal = qtyOrig > 0 ? ((qtyMatch / qtyOrig) * valCustoms) : 0;
-
-                    // C. Export Duty (Pro-rated Duty Paid)
                     const exportDuty = qtyOrig > 0 ? ((qtyMatch / qtyOrig) * valDutyPaid) : 0;
-
-                    // D. 99% Duty
                     const duty99 = exportDuty * 0.99;
 
                     // --- Build Row Array ---
@@ -3425,21 +3330,21 @@ async function loadHistorySummary() {
                         row.export_material_number || row.matched_material_number,
                         row.import_date,
                         row.export_desc,
-                        exportDuty.toFixed(2), // Line Duty
+                        exportDuty.toFixed(2),
                         row.import_hts,
                         row.qty_matched,
                         row.import_uom,
-                        row.export_entry_number, // Unique ID
+                        row.export_entry_number,
                         row.export_date,
                         row.export_country,
-                        "HTS", // Tariff Type
-                        row.import_hts, // Tariff (Repeated)
+                        "HTS",
+                        row.import_hts,
                         row.import_duty_rate,
                         unitVal.toFixed(2),
                         enteredVal.toFixed(2),
                         exportDuty.toFixed(2),
                         duty99.toFixed(2),
-                        row.refund_amount // Or duty99.toFixed(2) depending on preference
+                        row.refund_amount
                     ];
 
                     // Escape CSV strings
@@ -3524,46 +3429,9 @@ async function loadHistorySummary() {
 
         // --- SHARED WORKFLOW LOADER (FIXED) ---
         // 🚀 FIX: Added filterBrokerId as 3rd argument to support Finalized Claims
-        async function loadWorkflowData(role, filterClaimId = null, filterBrokerId = null) {
-            if(role === 'approver') return;
 
-            toggleLoading(true, `Loading ${role} queue...`);
 
-            try {
-                const statusMap = { 'reviewer': 'DRAFT', 'history': 'APPROVED' };
-                const reqStatus = statusMap[role];
 
-                let url = `/drawback/api/workflow/queue/${reqStatus}`;
-
-                // Construct URL Params using URLSearchParams for safety
-                const params = new URLSearchParams();
-
-                if (role === 'history' && filterClaimId) {
-                     params.append('claim_id', filterClaimId);
-
-                     // 🚀 CRITICAL FIX: Append broker_id if it exists
-                     // This ensures backend includes finalized rows in the result
-                     if(filterBrokerId && filterBrokerId !== 'null' && filterBrokerId !== 'undefined') {
-                         params.append('broker_id', filterBrokerId);
-                     }
-                }
-
-                // Append params to URL if they exist
-                if(params.toString()) url += `?${params.toString()}`;
-
-                const json = await safeFetch(url);
-                const data = json.data || [];
-
-                if (role === 'reviewer') renderReviewerTable(data);
-                else if (role === 'history') renderHistoryTable(data);
-
-            } catch (e) {
-                console.error("Workflow Load Error:", e);
-                showToast("Failed to load data", "error");
-            } finally {
-                toggleLoading(false);
-            }
-        }
 
 
 <!--        async function loadWorkflowData(role, filterClaimId = null) {-->
@@ -4206,7 +4074,10 @@ async function confirmVoid() {
         // --- UPLOAD & STAGING ---
         function downloadTemplate() { window.location.href = `${API_BASE}/drawback/api/template/${currentView}`; }
 
-        async function handleFileUpload() {
+
+
+
+async function handleFileUpload() {
             const fileInput = document.getElementById('file-input');
             if(fileInput.files.length === 0) return;
             toggleLoading(true, "Parsing File...");
@@ -4214,6 +4085,14 @@ async function confirmVoid() {
             try {
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
+
+                // 🟢 FIX: MANUALLY INJECT CONTEXT INTO FORMDATA
+                // Since safeFetch skips FormData, we must add these fields here so the backend
+                // can load the correct 'existing fingerprints' for duplicate checking.
+                formData.append('workspace_id', window.CURRENT_WORKSPACE_ID);
+                formData.append('project_id', window.CURRENT_PROJECT_ID);
+                formData.append('actor_email', window.CURRENT_USER_EMAIL);
+
                 const json = await safeFetch(`/drawback/api/stage/${currentView}`, { method: 'POST', body: formData });
 
                 if(json && json.success) {
@@ -4221,16 +4100,12 @@ async function confirmVoid() {
                     renderPreview(stagedData);
                     showToast("File loaded. Review & Edit below.", "success");
                 } else {
-                    // 🔴 CHANGE: Use Modal instead of Toast for errors
                     const errorMsg = json?.message || "Upload Failed: Server rejected the file.";
                     showErrorModal(errorMsg);
-
-                    // Optional: Clear the input so they can try again
                     fileInput.value = "";
                 }
             } catch (error) {
                 console.error(error);
-                // 🔴 CHANGE: Use Modal for network crashes too
                 showErrorModal("Critical System Error: " + error.message);
             } finally {
                 toggleLoading(false);
@@ -4238,20 +4113,32 @@ async function confirmVoid() {
         }
 
 // --- 🎨 UPDATED RENDERER ---
+function updateServerStatus(isOnline) {
+            const statusEl = document.getElementById('server-status');
+            const banner = document.getElementById('demo-banner');
+            if(isOnline) {
+                statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> Connected (RDS)';
+                statusEl.classList.remove('text-amber-600', 'text-red-600');
+                statusEl.classList.add('text-green-600');
+                banner.classList.add('hidden');
+            } else {
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Connection Lost';
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.add('text-red-600');
+            }
+        }
+
+        // ... (Keep existing renderer functions: renderPreview, renderDynamicHeaders, etc.) ...
+
+        // RE-INCLUDE NECESSARY RENDERERS FOR CONTEXT
         function renderPreview(data) {
             if(!data || data.length === 0) return;
-
-            // 1. Initial Validation Run to Sync State
             data.forEach(row => {
-                // Store original backend errors for reference (e.g. Duplicates)
                 if (!row._backend_errors) row._backend_errors = row._errors || [];
-
                 const validation = validateRow(row);
                 row._errors = validation.messages;
                 row._error_fields = validation.fields;
             });
-
-            // 2. Sort: Errors First
             data.sort((a, b) => {
                 const aErr = a._errors.length > 0;
                 const bErr = b._errors.length > 0;
@@ -4259,117 +4146,59 @@ async function confirmVoid() {
                 if (!aErr && bErr) return 1;
                 return 0;
             });
-
             document.getElementById('staged-preview').classList.remove('hidden');
             document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
 
-            // Smart Fill Legend Logic
-            const hasSmartFill = data.some(r => r._smart_filled_fields && r._smart_filled_fields.length > 0);
             const legend = document.getElementById('smart-fill-legend');
+            const hasSmartFill = data.some(r => r._smart_filled_fields && r._smart_filled_fields.length > 0);
             if(hasSmartFill && currentView === 'imports') legend.classList.remove('hidden');
             else legend.classList.add('hidden');
 
-            // Header Generation
             const header = document.getElementById('preview-header');
             const body = document.getElementById('preview-body');
-
             const rawConfig = TABLE_CONFIG[currentView];
             const config = rawConfig ? rawConfig.filter(c => c.k !== 'qty_consumed') : null;
-
-            // Filter out internal keys
             let keys = config ? config.map(c => c.k) : Object.keys(data[0]).filter(k => !k.startsWith('_'));
             let labels = config ? config.map(c => c.l) : keys;
 
             header.innerHTML = `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">Status</th>` +
                                labels.map(l => `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">${l}</th>`).join('');
 
-            // Body Generation
             body.innerHTML = data.map((row, i) => {
                 let statusHtml = "";
                 let rowClass = "border-b border-slate-50";
-
-                // Determine Row Status
                 if (row._errors && row._errors.length > 0) {
                     rowClass = "error-row border-b border-red-200";
-                    // Join all errors for the tooltip
                     let tooltip = row._errors.join('\n');
                     let errorMsg = row._errors[0];
                     if (row._errors.length > 1) errorMsg += ` (+${row._errors.length - 1})`;
-
-                    statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" id="status-${i}" title="${tooltip}">
-                                    <i class="fa-solid fa-circle-xmark mr-1"></i>${errorMsg}
-                                  </span>`;
+                    statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" id="status-${i}" title="${tooltip}"><i class="fa-solid fa-circle-xmark mr-1"></i>${errorMsg}</span>`;
                 } else {
-                    statusHtml = `<span class="text-green-600 font-bold text-xs" id="status-${i}">
-                                    <i class="fa-solid fa-check mr-1"></i>OK
-                                  </span>`;
+                    statusHtml = `<span class="text-green-600 font-bold text-xs" id="status-${i}"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
                 }
-
-                return `<tr class="${rowClass}" id="row-${i}">` +
-                    `<td class="p-2 text-center align-middle">${statusHtml}</td>` +
+                return `<tr class="${rowClass}" id="row-${i}"><td class="p-2 text-center align-middle">${statusHtml}</td>` +
                     keys.map(k => {
                         let cellVal = row[k] !== undefined ? row[k] : '';
-
-                        // Determine Cell Styling
                         let cellClass = 'edit-input text-xs text-slate-600';
                         let cellTitle = "";
                         let cellAction = "";
-
-                        // Is this specific field in error?
                         if (row._error_fields && row._error_fields.includes(k)) {
                             cellClass += ' invalid-cell';
-                            // Find specific error message for this field
-                            // Simple logic: if validateRow returns specific msg for this field, show it
-                            // Since we don't map msg->field 1:1 in the array, we guide user generally
                             cellTitle = "Invalid Value. Click to see details.";
                             cellAction = `onclick="showToast('Error in ${k}: Please fix format or value', 'error')"`;
                         }
-
-                        // Is this smart-filled?
                         if (row._smart_filled_fields && row._smart_filled_fields.includes(k)) {
                             cellClass += ' smart-filled-cell';
                             cellTitle = "Auto-filled by System";
                         }
-
-                        // 🆕 UOM DROPDOWN LOGIC (With Icon)
                         if (k === 'uom') {
-                            const options = VALID_UOMS.map(u =>
-                                `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`
-                            ).join('');
-
-                            return `<td class="p-2">
-                                        <div class="relative w-full h-full group">
-                                            <select onchange="updateStagedValue(${i}, '${k}', this.value)"
-                                                    class="${cellClass} appearance-none cursor-pointer font-bold pr-6"
-                                                    id="cell-${i}-${k}"
-                                                    title="${cellTitle}"
-                                                    ${cellAction}
-                                                    style="text-align-last:center;">
-                                                <option value="" disabled ${!cellVal ? 'selected' : ''}>--</option>
-                                                ${options}
-                                            </select>
-                                            <div class="pointer-events-none absolute inset-y-0 right-1 flex items-center px-1 text-slate-400 group-hover:text-blue-500">
-                                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                                            </div>
-                                        </div>
-                                    </td>`;
+                            const options = VALID_UOMS.map(u => `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`).join('');
+                            return `<td class="p-2"><div class="relative w-full h-full group"><select onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" id="cell-${i}-${k}" title="${cellTitle}" ${cellAction} style="text-align-last:center;"><option value="" disabled ${!cellVal ? 'selected' : ''}>--</option>${options}</select><div class="pointer-events-none absolute inset-y-0 right-1 flex items-center px-1 text-slate-400 group-hover:text-blue-500"><i class="fa-solid fa-chevron-down text-[10px]"></i></div></div></td>`;
+                        } else {
+                            return `<td class="p-2"><input type="text" value="${cellVal}" title="${cellTitle}" ${cellAction} onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass}" id="cell-${i}-${k}"></td>`;
                         }
-                        // STANDARD INPUT LOGIC
-                        else {
-                            return `<td class="p-2">
-                                        <input type="text"
-                                               value="${cellVal}"
-                                               title="${cellTitle}"
-                                               ${cellAction}
-                                               onchange="updateStagedValue(${i}, '${k}', this.value)"
-                                               class="${cellClass}"
-                                               id="cell-${i}-${k}">
-                                    </td>`;
-                        }
-                    }).join('') +
-                    `</tr>`;
+                    }).join('') + `</tr>`;
             }).join('');
-
             recalcStatus();
         }
 
