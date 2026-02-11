@@ -1,25 +1,3 @@
-Conversation opened. 1 unread message.
-
-Skip to content
-Using Gmail with screen readers
-in:spam 
-1 of 18
-HTML
-Spam
-Vandana Sahu
-<vandana@moonslateconsulting.com>
-Attachments
-16:33 (0 minutes ago)
-to me
-
-This message might be dangerous
-Messages like this one were used to steal personal information. Don't click links, download attachments or reply with personal information.
-
-Looks safe
-
- 2 attachment
-  •  Scanned by Gmail
-Downloading these attachments is disabled. This email has been identified as phishing. If you want to download these and you trust this message, click 'Not spam' in the banner above.
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4650,6 +4628,163 @@ async function runMatching() {
 <!--            } else {-->
 <!--                const calcUnitValue = (m) => {-->
 <!--                     if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
-<!--                     retu
-Approver.html
-Displaying Approver.html.
+<!--                     return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);-->
+<!--                }-->
+<!--                const calcEnteredValue = (m) => {-->
+<!--                    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);-->
+<!--                };-->
+
+<!--                const calcExportDuty = (m) => {-->
+<!--                    return calcEnteredValue(m) * (parseFloat(m.import_duty_rate) || 0);-->
+<!--                }-->
+
+<!--                const calc99Duty = (m) => {-->
+<!--                    return calcExportDuty(m) * 0.99;-->
+<!--                }-->
+
+<!--                tbody.innerHTML = json.data.map(m => `-->
+<!--                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">-->
+<!--                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span> <span class="status-badge status-draft">DRAFT</span></td>-->
+<!--                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>-->
+
+<!--                        <td>${m.import_entry_number}</td>-->
+<!--                        <td>${m.import_dec_line}</td>-->
+<!--                        <td>${m.import_material_number}</td>-->
+<!--                        <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                        <td>${m.import_date}</td>-->
+<!--                        <td>${m.export_desc}</td>-->
+<!--                        <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.qty_matched}</td>-->
+<!--                        <td>${m.import_uom}</td>-->
+<!--                        <td>${m.export_entry_number}</td>-->
+<!--                        <td>${m.export_date}</td>-->
+<!--                        <td>${m.export_country}</td>-->
+<!--                        <td>HTS</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.import_duty_rate}</td>-->
+<!--                        <td>${formatMoney(calcUnitValue(m))}</td>-->
+
+<!--                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcEnteredValue(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcExportDuty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">-->
+<!--                            ${formatMoney(calc99Duty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+<!--                    </tr>`).join('');-->
+
+<!--                showToast(`Success: ${matchCount} matches generated.`, "success");-->
+<!--            }-->
+<!--            loadStats();-->
+<!--        }-->
+
+
+
+
+<!--        async function runMatching() {-->
+<!--            toggleLoading(true, "Running Matching Algorithm...");-->
+<!--            const strategy = document.querySelector('input[name="algo"]:checked').value;-->
+<!--            const json = await safeFetch(`/drawback/api/match`, {-->
+<!--                method: 'POST',-->
+<!--                headers: {'Content-Type': 'application/json'},-->
+<!--                body: JSON.stringify({ strategy: strategy })-->
+<!--            });-->
+<!--            toggleLoading(false);-->
+<!--            const tbody = document.getElementById('matches-body');-->
+
+<!--            // Issue 13: Accurate "No Matches Found" Popup-->
+<!--            const matchCount = json && json.data ? json.data.length : 0;-->
+
+<!--            if (matchCount === 0) {-->
+<!--                 tbody.innerHTML = `<tr><td colspan="23" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;-->
+<!--                 showToast("Matching Complete: No successful matches found.", "warning");-->
+<!--            } else {-->
+<!--                // ... (Existing Rendering Logic) ...-->
+<!--                const calcUnitValue = (m) => {-->
+<!--                     if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                     return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);-->
+<!--                }-->
+<!--                const calcEnteredValue = (m) => {-->
+<!--                    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;-->
+<!--                    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);-->
+<!--                };-->
+
+<!--                const calcExportDuty = (m) => {-->
+<!--                    return calcEnteredValue(m) * (parseFloat(m.import_duty_rate) || 0);-->
+<!--                }-->
+
+<!--                const calc99Duty = (m) => {-->
+<!--                    return calcExportDuty(m) * 0.99;-->
+<!--                }-->
+
+<!--                tbody.innerHTML = json.data.map(m => `-->
+<!--                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">-->
+<!--                        <td>${m.import_entry_number}</td>-->
+<!--                        <td>${m.import_dec_line}</td>-->
+<!--                        <td>${m.import_material_number}</td>-->
+<!--                        <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                        <td>${m.import_date}</td>-->
+<!--                        <td>${m.export_desc}</td>-->
+<!--                        <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.qty_matched}</td>-->
+<!--                        <td>${m.import_uom}</td>-->
+<!--                        <td>${m.export_entry_number}</td>-->
+<!--                        <td>${m.export_date}</td>-->
+<!--                        <td>${m.export_country}</td>-->
+<!--                        <td>HTS</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.import_duty_rate}</td>-->
+<!--                        <td>${formatMoney(calcUnitValue(m))}</td>-->
+
+<!--                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcEnteredValue(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcExportDuty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">-->
+<!--                            ${formatMoney(calc99Duty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+
+<!--                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span> <span class="status-badge status-draft">DRAFT</span></td>-->
+<!--                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>-->
+<!--                    </tr>`).join('');-->
+
+<!--                showToast(`Success: ${matchCount} matches generated.`, "success");-->
+<!--            }-->
+<!--            loadStats();-->
+<!--        }-->
+
+
+
+
+        async function resetSystem() { if(confirm("WARNING: Delete ALL data?")) { toggleLoading(true, "Cleaning System..."); await safeFetch(`/drawback/api/reset`, { method: 'POST' }); window.location.reload(); } }
+
+
+        // --- MOCK API ---
+        async function mockApi(endpoint, options) {
+            // MOCK API REMOVED - Returning Empty/Error state only to satisfy strict mode logic if called explicitly
+            return { success: false, message: "Mock Mode Disabled" };
+        }
+
+        updateRoleUI();
+
+
+        setTimeout(() => {
+            if (window.CURRENT_USER_EMAIL === "system_fallback@launchpath.ai") {
+                console.warn("⚠️ No Parent Context received. Loading Default/Demo Mode.");
+                if(currentView === 'dashboard') loadStats();
+                toggleLoading(false);
+            }
+        }, 2000);
+
+    </script>
+</body>
+</html>

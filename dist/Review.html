@@ -7,9 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <style>
-
     html {
             font-size: 73%; /* This simulates exactly 80% zoom */
         }
@@ -339,7 +337,7 @@
 th {
     position: sticky !important; /* Force override */
     top: 0;
-    z-index: 50; /* Ensure it floats above data */
+    z-index: 30; /* Reduced from 50 to 30 */
     background-color: #F8FAFC; /* Slate-50: Must be opaque to hide scrolling data */
     box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Optional: Adds a subtle border shadow */
 }
@@ -616,6 +614,59 @@ th {
     </div>
 
 
+
+    <div id="reconciliation-modal" class="modal-overlay fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-[650px] p-8 animate-fadeIn border border-slate-200 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-0 opacity-50"></div>
+
+            <h3 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-3 relative z-10">
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg shadow-sm">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                Reconciliation Report
+            </h3>
+            <p class="text-xs text-slate-500 mb-6 pl-[52px]">Import file processing complete. Here is the data breakdown.</p>
+
+            <div class="grid grid-cols-3 gap-4 mb-8 relative z-10">
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
+                    <div class="text-emerald-600 text-2xl mb-1"><i class="fa-solid fa-check-circle"></i></div>
+                    <div class="text-2xl font-extrabold text-slate-800" id="recon-matched">0</div>
+                    <div class="text-[10px] font-bold text-emerald-700 uppercase tracking-wide mt-1">Matched Rows</div>
+                </div>
+
+                <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 text-center">
+                    <div class="text-orange-500 text-2xl mb-1"><i class="fa-solid fa-filter"></i></div>
+                    <div class="text-2xl font-extrabold text-slate-800" id="recon-discarded-exp">0</div>
+                    <div class="text-[10px] font-bold text-orange-700 uppercase tracking-wide mt-1">Discarded (Expeditors)</div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                    <div class="text-slate-400 text-2xl mb-1"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="text-2xl font-extrabold text-slate-800" id="recon-unused-ace">0</div>
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mt-1">Discarded (ACE)</div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6 flex gap-3 items-start relative z-10">
+                <i class="fa-solid fa-circle-info text-blue-600 mt-0.5"></i>
+                <div>
+                    <h4 class="text-xs font-bold text-blue-800 uppercase mb-1">What does this mean?</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        <b>Discarded</b> means it is not matched in other sheet.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 relative z-10">
+                <button onclick="document.getElementById('reconciliation-modal').classList.add('hidden')"
+                        class="px-8 py-2.5 text-sm bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-bold shadow-md transition-all uppercase tracking-wide">
+                    Acknowledge & Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <div id="claim-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
             <h3 class="text-lg font-bold text-blue-800 mb-2">Submit Claim Batch</h3>
@@ -639,7 +690,7 @@ th {
         </div>
     </div>
 
-    <div id="final-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
+    <div id="final-modal" class="modal-overlay fixed inset-0 z-[100] hidden flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn border-t-4 border-emerald-500">
             <h3 class="text-lg font-bold text-emerald-800 mb-2"><i class="fa-solid fa-flag-checkered mr-2"></i>Finalize Claim</h3>
             <p class="text-xs text-slate-500 mb-4">Mark this claim as "Complete" and lock it for history. Please enter the official Broker Claim ID for reference.</p>
@@ -922,6 +973,7 @@ th {
                             <ol class="list-decimal ml-4 space-y-0.5">
                                 <li>In case of components-to-finished goods matching (many-to-one matching between imports & exports)</li>
                                 <li>In case of partial matching an export entry with multiple imports</li>
+                                <li>Total Successful Matches Entries = Reviewer Consol Entries + Pending Approval Entries + Approved Entries. </li>
                             </ol>
                         </div>
                     </div>
@@ -1575,51 +1627,68 @@ th {
 
 
         // 1. Listen for Context from Parent
-        window.addEventListener('message', function(event) {
-            // OPTIONAL: Uncomment to restrict to specific Parent domain for security
-            // if (event.origin !== "http://your-parent-domain.com") return;
+        // 1. Listen for Context from Parent
+                window.addEventListener('message', function(event) {
+                    // OPTIONAL: Uncomment to restrict to specific Parent domain for security
+                    // if (event.origin !== "http://your-parent-domain.com") return;
 
-            console.log("📥 [Child] Received Message:", event.data);
+                    console.log("📥 [Child] Received Message:", event.data);
 
-            const data = event.data;
+                    const data = event.data;
 
-            if (data && data.type === 'SET_USER_CONTEXT') {
-                if(data.user) {
-                    // Set Email
-                    if (data.user.email) {
-                        window.CURRENT_USER_EMAIL = data.user.email;
-                    }
+                    if (data && data.type === 'SET_USER_CONTEXT') {
+                        if(data.user) {
+                            // Set Email
+                            if (data.user.email) {
+                                window.CURRENT_USER_EMAIL = data.user.email;
+                            }
 
-                    // 🆕 PATCH: Set Name
-                    if(data.user.first_name || data.user.last_name) {
-                        const first = data.user.first_name || '';
-                        const last = data.user.last_name || '';
-                        window.CURRENT_USER_FULL_NAME = `${first} ${last}`.trim();
-                    }
+                            // 🆕 PATCH: Set Name
+                            if(data.user.first_name || data.user.last_name) {
+                                const first = data.user.first_name || '';
+                                const last = data.user.last_name || '';
+                                window.CURRENT_USER_FULL_NAME = `${first} ${last}`.trim();
+                            }
 
-                    if (data.user.projectLoginUrl) {
-                        window.PROJECT_LOGIN_URL = data.user.projectLoginUrl;
-                    }
+                            if (data.user.projectLoginUrl) {
+                                window.PROJECT_LOGIN_URL = data.user.projectLoginUrl;
+                            }
 
-                    if (data.user.project_id) window.CURRENT_PROJECT_ID = data.user.project_id;
-                    if (data.user.workspace_id) window.CURRENT_WORKSPACE_ID = data.user.workspace_id;
+                            if (data.user.project_id) window.CURRENT_PROJECT_ID = data.user.project_id;
+                            if (data.user.workspace_id) window.CURRENT_WORKSPACE_ID = data.user.workspace_id;
 
-                    // Visual Confirmation
-                    console.log("✅ [Child] Context Received:", window.CURRENT_USER_EMAIL, window.CURRENT_USER_FULL_NAME, window.PROJECT_LOGIN_URL);
-                    showToast(`Connected as ${window.CURRENT_USER_FULL_NAME || window.CURRENT_USER_EMAIL}`, "success");
-                    console.log("✅ IDs Captured:", window.CURRENT_PROJECT_ID, window.CURRENT_WORKSPACE_ID);
+                            // Visual Confirmation
+                            console.log("✅ [Child] Context Received:", window.CURRENT_USER_EMAIL, window.CURRENT_USER_FULL_NAME, window.PROJECT_LOGIN_URL);
+                            showToast(`Connected as ${window.CURRENT_USER_FULL_NAME || window.CURRENT_USER_EMAIL}`, "success");
+                            console.log("✅ IDs Captured:", window.CURRENT_PROJECT_ID, window.CURRENT_WORKSPACE_ID);
 
-                    // Update Role Switcher if Role is provided
-                    if(data.user.role) {
-                        const roleSelect = document.getElementById('role-switcher');
-                        if(roleSelect) {
-                            roleSelect.value = data.user.role;
-                            updateRoleUI(); // Re-trigger UI update
+                            // Update Role Switcher if Role is provided
+                            if(data.user.role) {
+                                const roleSelect = document.getElementById('role-switcher');
+                                if(roleSelect) {
+                                    roleSelect.value = data.user.role;
+                                    updateRoleUI(); // Re-trigger UI update
+                                }
+                            }
+
+                            // 🚀 [PATCH FIX] REFRESH DASHBOARD NOW
+                            // Only load stats AFTER we have the correct Workspace ID
+                            if (currentView === 'dashboard') {
+                                loadStats();
+                            } else {
+                                // If on another tab, reload that table
+                                loadTableData(currentView);
+                            }
                         }
                     }
-                }
-            }
-        });
+                });
+
+
+
+
+
+
+
 
         // 2. Signal Readiness to Parent
         setTimeout(() => {
@@ -1655,10 +1724,10 @@ th {
                 { k: 'uom', l: 'UOM' },
                 { k: 'import_date', l: 'Date' },
                 { k: 'duty_paid', l: 'Duty Paid' },
-                { k: 'declaration_number', l: 'Dec Number' },
+                { k: 'declaration_number', l: 'Declaration #' },
                 { k: 'declaration_line_number', l: 'Line #' },
                 { k: 'hts_code', l: 'HTS Code' },
-                { k: 'duty_rate_1', l: 'Duty Rate 1' },
+                { k: 'duty_rate_1', l: 'Duty Rate' },
                 { k: 'customs_value', l: 'Customs Value' }
             ],
             exports: [
@@ -2387,7 +2456,8 @@ async function loadStats() {
 
             labels.forEach((l, i) => {
                 // We add 'sticky', 'top-0', and 'z-50' classes directly to the TH
-                html += `<th class="sticky top-0 z-50 bg-slate-50 border-b border-slate-200">${getHeaderHTML(l, tableId, i + offset)}</th>`;
+                // We changed z-50 to z-30 here
+html += `<th class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200">${getHeaderHTML(l, tableId, i + offset)}</th>`;
 <!--                html += `<th>${getHeaderHTML(l, tableId, i + offset)}</th>`;-->
             });
             html += '</tr>';
@@ -4075,8 +4145,6 @@ async function confirmVoid() {
         function downloadTemplate() { window.location.href = `${API_BASE}/drawback/api/template/${currentView}`; }
 
 
-
-
 async function handleFileUpload() {
             const fileInput = document.getElementById('file-input');
             if(fileInput.files.length === 0) return;
@@ -4086,9 +4154,7 @@ async function handleFileUpload() {
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
 
-                // 🟢 FIX: MANUALLY INJECT CONTEXT INTO FORMDATA
-                // Since safeFetch skips FormData, we must add these fields here so the backend
-                // can load the correct 'existing fingerprints' for duplicate checking.
+                // Context Injection
                 formData.append('workspace_id', window.CURRENT_WORKSPACE_ID);
                 formData.append('project_id', window.CURRENT_PROJECT_ID);
                 formData.append('actor_email', window.CURRENT_USER_EMAIL);
@@ -4098,7 +4164,26 @@ async function handleFileUpload() {
                 if(json && json.success) {
                     stagedData = json.data;
                     renderPreview(stagedData);
-                    showToast("File loaded. Review & Edit below.", "success");
+
+                    // 🟢 ENHANCED POP-UP LOGIC (Updated Regex)
+                    if (currentView === 'imports' && json.message.includes('Reconciliation')) {
+                        // Regex to extract numbers from the formatted backend string
+                        // Updated to match "Discarded ACE Lines"
+                        const matchCount = (json.message.match(/Total Matched Rows:\s*(\d+)/) || [0,0])[1];
+                        const expDiscard = (json.message.match(/Discarded Expeditors Rows:\s*(\d+)/) || [0,0])[1];
+                        const aceDiscard = (json.message.match(/Discarded ACE Lines:\s*(\d+)/) || [0,0])[1];
+
+                        // Populate the modal
+                        document.getElementById('recon-matched').innerText = parseInt(matchCount).toLocaleString();
+                        document.getElementById('recon-discarded-exp').innerText = parseInt(expDiscard).toLocaleString();
+                        document.getElementById('recon-unused-ace').innerText = parseInt(aceDiscard).toLocaleString();
+
+                        // Show the modal
+                        document.getElementById('reconciliation-modal').classList.remove('hidden');
+                    } else {
+                        showToast("File loaded successfully", "success");
+                    }
+
                 } else {
                     const errorMsg = json?.message || "Upload Failed: Server rejected the file.";
                     showErrorModal(errorMsg);
@@ -4111,6 +4196,7 @@ async function handleFileUpload() {
                 toggleLoading(false);
             }
         }
+
 
 // --- 🎨 UPDATED RENDERER ---
 function updateServerStatus(isOnline) {
@@ -4688,9 +4774,17 @@ async function runMatching() {
             return { success: false, message: "Mock Mode Disabled" };
         }
 
-        // --- 🚀 INITIALIZATION: Force initial UI update for Reviewer default ---
-        loadStats();
         updateRoleUI();
+
+
+        setTimeout(() => {
+            if (window.CURRENT_USER_EMAIL === "system_fallback@launchpath.ai") {
+                console.warn("⚠️ No Parent Context received. Loading Default/Demo Mode.");
+                if(currentView === 'dashboard') loadStats();
+                toggleLoading(false);
+            }
+        }, 2000);
+
     </script>
 </body>
 </html>
