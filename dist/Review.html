@@ -1070,77 +1070,120 @@ th {
                 </div>
             </div>
 
+
+
             <div id="view-management" class="view-section hidden fade-in">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-700 text-lg">Manage <span id="mgmt-title">Data</span></h3>
-                        <button onclick="downloadTemplate()" class="text-sm text-blue-600 hover:underline font-medium">
-                            <i class="fa-solid fa-download mr-1"></i> Download Template
-                        </button>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-6">
+
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 text-lg">Manage <span id="mgmt-title">Data</span></h3>
+            <button onclick="downloadTemplate()" class="text-sm text-blue-600 hover:underline font-medium">
+                <i class="fa-solid fa-download mr-1"></i> Download Template
+            </button>
+        </div>
+
+        <div class="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer relative group">
+            <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileUpload()">
+            <div class="pointer-events-none">
+                <i class="fa-solid fa-cloud-upload text-4xl text-slate-300 mb-3 group-hover:text-blue-500 transition"></i>
+                <p class="text-sm font-medium text-slate-600">Click to upload Data File</p>
+                <p class="text-xs text-slate-400 mt-1">Excel (.xlsx) or CSV supported</p>
+            </div>
+        </div>
+
+        <div id="staged-preview" class="hidden mt-6 border-t border-slate-100 pt-4">
+
+            <div class="flex flex-wrap md:flex-nowrap justify-between items-center mb-3 gap-4">
+
+                <div class="shrink-0">
+                    <h4 class="font-bold text-slate-700">Review & Edit</h4>
+                    <p class="text-xs text-slate-500" id="staged-count">0 rows ready • Click cells to edit</p>
+                </div>
+
+                <div id="persistent-recon-stats" class="hidden flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm">
+
+                    <div class="flex items-center gap-2" title="Successfully Matched Rows">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Matched</span>
+                        <span class="text-xs font-bold text-slate-800 font-mono" id="persist-match-count">0</span>
                     </div>
-                    <div class="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer relative group">
-                        <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileUpload()">
-                        <div class="pointer-events-none">
-                            <i class="fa-solid fa-cloud-upload text-4xl text-slate-300 mb-3 group-hover:text-blue-500 transition"></i>
-                            <p class="text-sm font-medium text-slate-600">Click to upload Data File</p>
-                            <p class="text-xs text-slate-400 mt-1">Excel (.xlsx) or CSV supported</p>
-                        </div>
+
+                    <div class="h-3 w-px bg-slate-300"></div>
+
+                    <div class="flex items-center gap-2" title="Rows discarded from Expeditors file">
+                        <div class="w-2 h-2 rounded-full bg-red-400"></div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Discarded Expeditors Entries</span>
+                        <span class="text-xs font-bold text-slate-800 font-mono" id="persist-exp-discard">0</span>
                     </div>
-                    <div id="smart-fill-legend" class="hidden mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md flex items-center gap-2">
-                        <i class="fa-solid fa-magic text-yellow-600"></i>
-                        <p class="text-xs text-yellow-800"><b>Smart Fill Active:</b> Cells highlighted in <span class="bg-yellow-200 px-1 rounded border border-yellow-300">yellow</span> have been auto-filled with default data. Please review.</p>
-                    </div>
-                    <div id="staged-preview" class="hidden mt-6 border-t border-slate-100 pt-4">
 
+                    <div class="h-3 w-px bg-slate-300"></div>
 
-
-
-                   <div class="flex justify-between items-center mb-3">
-                            <div>
-                                <h4 class="font-bold text-slate-700">Review & Edit</h4>
-                                <p class="text-xs text-slate-500" id="staged-count">0 rows ready • Click cells to edit</p>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="hidden md:flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-md shadow-sm">
-                                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
-                                    <span class="text-xs font-extrabold text-amber-700 uppercase tracking-wide">
-                                        Commit is Irreversible
-                                    </span>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    <button onclick="resetUpload()" class="px-3 py-2 text-sm text-slate-500 hover:text-slate-800 transition">Cancel</button>
-                                    <button id="btn-clean" onclick="removeErrors()" class="hidden px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded font-medium transition"><i class="fa-solid fa-broom mr-1"></i> Remove Invalid Rows</button>
-                                    <button id="btn-commit" onclick="commitData()" disabled class="px-4 py-2 text-sm bg-gray-300 text-white rounded shadow font-medium cursor-not-allowed transition-colors"><i class="fa-solid fa-database mr-1"></i> Commit to DB</button>
-                                </div>
-                            </div>
-                            </div>
-
-<div id="validation-summary" class="hidden mb-4 p-3 rounded text-sm"></div>
-                        <div class="bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                            <div class="overflow-x-auto max-h-[300px]">
-                                <table class="min-w-full text-xs text-left">
-                                    <thead class="bg-slate-100 text-slate-500 sticky top-0 z-10"><tr id="preview-header"></tr></thead>
-                                    <tbody id="preview-body" class="bg-white divide-y divide-slate-100"></tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="flex items-center gap-2" title="Rows discarded from ACE file">
+                        <div class="w-2 h-2 rounded-full bg-red-400"></div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Discarded ACE Entries</span>
+                        <span class="text-xs font-bold text-slate-800 font-mono" id="persist-ace-discard">0</span>
                     </div>
                 </div>
-                <div id="data-table-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
-                    <div class="px-6 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                         <span class="font-bold text-slate-600 text-sm">Data Records</span>
-                         <div class="text-xs text-slate-400 italic">Use column headers to filter & sort</div>
+
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded text-amber-700">
+                        <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-wide">Commit is Irreversible</span>
                     </div>
-                    <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md">
-                        <table class="min-w-full divide-y divide-slate-200 text-sm" id="data-table">
-                            <thead class="bg-slate-50 sticky top-0 shadow-sm z-10"></thead>
-                            <tbody class="divide-y divide-slate-100 bg-white"></tbody>
-                        </table>
+
+                    <div class="flex gap-2">
+                        <button onclick="resetUpload()" class="px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100 rounded transition">Cancel</button>
+                        <button id="btn-clean" onclick="removeErrors()" class="hidden px-3 py-1.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition"><i class="fa-solid fa-broom mr-1"></i> Clean</button>
+                        <button id="btn-commit" onclick="commitData()" disabled class="px-4 py-1.5 text-xs bg-gray-300 text-white rounded font-bold shadow-sm cursor-not-allowed transition-colors"><i class="fa-solid fa-database mr-1"></i> Commit Data</button>
                     </div>
                 </div>
             </div>
+
+            <div id="validation-summary" class="hidden mb-4 p-3 rounded text-sm"></div>
+
+            <div class="bg-slate-50 rounded border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto max-h-[500px]"> <table class="min-w-full text-xs text-left">
+                        <thead class="bg-slate-100 text-slate-500 sticky top-0 z-10 shadow-sm"><tr id="preview-header"></tr></thead>
+                        <tbody id="preview-body" class="bg-white divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="data-table-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
+        <div class="px-6 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+             <span class="font-bold text-slate-600 text-sm">Data Records</span>
+             <div class="text-xs text-slate-400 italic">Use column headers to filter & sort</div>
+        </div>
+        <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md">
+            <table class="min-w-full divide-y divide-slate-200 text-sm" id="data-table">
+                <thead class="bg-slate-50 sticky top-0 shadow-sm z-10"></thead>
+                <tbody class="divide-y divide-slate-100 bg-white"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             <div id="view-matching" class="view-section hidden fade-in">
                  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
@@ -1267,7 +1310,7 @@ th {
                             </div>
                             <h1 class="text-4xl font-bold tracking-tight text-white">Customs Drawbacks Enterprise Guide</h1>
                             <p class="text-base text-slate-300 leading-relaxed font-light max-w-2xl">
-                                This section outlines the end-to-end product workflow and explains key terminology used within the application. For comprehensive, step-by-step instructions—including detailed screenshots—users may download the full User Guide here.
+                                This screen outlines the end-to-end product workflow and explains key terminology used within the application. For comprehensive, step-by-step instructions - including detailed screenshots - users may download the full User Guide.
                             </p>
                         </div>
 
@@ -1276,8 +1319,8 @@ th {
                                 <i class="fa-solid fa-file-pdf text-xl group-hover:scale-110 transition-transform duration-300"></i>
                             </div>
                             <div class="text-left">
-                                <span class="block text-[10px] text-blue-200 uppercase tracking-wider font-bold">PDF Manual</span>
-                                <span class="block text-sm font-semibold text-white group-hover:text-blue-100 transition-colors">Download Full Guide</span>
+                                <span class="block text-[10px] text-blue-200 uppercase tracking-wider font-bold">Click Here To</span>
+                                <span class="block text-sm font-semibold text-white group-hover:text-blue-100 transition-colors">Download Complete User Guide</span>
                             </div>
                         </a>
                     </div>
@@ -1716,16 +1759,16 @@ th {
         // 🆕 ADDED 'qty_consumed' to imports and exports
         const TABLE_CONFIG = {
             imports: [
-                { k: 'entry_number', l: 'Entry Summary #' },
-                { k: 'material_number', l: 'Material #' },
+                { k: 'entry_number', l: 'Entry Summary Number' },
+                { k: 'material_number', l: 'Material Number' },
                 { k: 'qty', l: 'Qty' },
                 { k: 'qty_consumed', l: 'Consumed' }, // NEW
                 { k: 'pct_consumed', l: '% Used' }, // 🆕 NEW COLUMN
                 { k: 'uom', l: 'UOM' },
                 { k: 'import_date', l: 'Date' },
                 { k: 'duty_paid', l: 'Duty Paid' },
-                { k: 'declaration_number', l: 'Declaration #' },
-                { k: 'declaration_line_number', l: 'Line #' },
+                { k: 'declaration_number', l: 'Declaration Number' },
+                { k: 'declaration_line_number', l: 'Declaration Line Number' },
                 { k: 'hts_code', l: 'HTS Code' },
                 { k: 'duty_rate_1', l: 'Duty Rate' },
                 { k: 'customs_value', l: 'Customs Value' }
@@ -4145,57 +4188,70 @@ async function confirmVoid() {
         function downloadTemplate() { window.location.href = `${API_BASE}/drawback/api/template/${currentView}`; }
 
 
+
+
 async function handleFileUpload() {
-            const fileInput = document.getElementById('file-input');
-            if(fileInput.files.length === 0) return;
-            toggleLoading(true, "Parsing File...");
+    const fileInput = document.getElementById('file-input');
+    if(fileInput.files.length === 0) return;
+    toggleLoading(true, "Parsing File...");
 
-            try {
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
+    try {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        // Context Injection
+        formData.append('workspace_id', window.CURRENT_WORKSPACE_ID);
+        formData.append('project_id', window.CURRENT_PROJECT_ID);
+        formData.append('actor_email', window.CURRENT_USER_EMAIL);
 
-                // Context Injection
-                formData.append('workspace_id', window.CURRENT_WORKSPACE_ID);
-                formData.append('project_id', window.CURRENT_PROJECT_ID);
-                formData.append('actor_email', window.CURRENT_USER_EMAIL);
+        const json = await safeFetch(`/drawback/api/stage/${currentView}`, { method: 'POST', body: formData });
 
-                const json = await safeFetch(`/drawback/api/stage/${currentView}`, { method: 'POST', body: formData });
+        if(json && json.success) {
+            stagedData = json.data;
+            renderPreview(stagedData);
 
-                if(json && json.success) {
-                    stagedData = json.data;
-                    renderPreview(stagedData);
+            // 🟢 LOGIC: Handle Reconciliation Stats (Popup + Persistent Bar)
+            if (currentView === 'imports' && json.message.includes('Reconciliation')) {
+                const matchCount = (json.message.match(/Total Matched Rows:\s*(\d+)/) || [0,0])[1];
+                const expDiscard = (json.message.match(/Discarded Expeditors Rows:\s*(\d+)/) || [0,0])[1];
+                const aceDiscard = (json.message.match(/Discarded ACE Lines:\s*(\d+)/) || [0,0])[1];
 
-                    // 🟢 ENHANCED POP-UP LOGIC (Updated Regex)
-                    if (currentView === 'imports' && json.message.includes('Reconciliation')) {
-                        // Regex to extract numbers from the formatted backend string
-                        // Updated to match "Discarded ACE Lines"
-                        const matchCount = (json.message.match(/Total Matched Rows:\s*(\d+)/) || [0,0])[1];
-                        const expDiscard = (json.message.match(/Discarded Expeditors Rows:\s*(\d+)/) || [0,0])[1];
-                        const aceDiscard = (json.message.match(/Discarded ACE Lines:\s*(\d+)/) || [0,0])[1];
+                // 1. Modal (Popup)
+                document.getElementById('recon-matched').innerText = parseInt(matchCount).toLocaleString();
+                document.getElementById('recon-discarded-exp').innerText = parseInt(expDiscard).toLocaleString();
+                document.getElementById('recon-unused-ace').innerText = parseInt(aceDiscard).toLocaleString();
+                document.getElementById('reconciliation-modal').classList.remove('hidden');
 
-                        // Populate the modal
-                        document.getElementById('recon-matched').innerText = parseInt(matchCount).toLocaleString();
-                        document.getElementById('recon-discarded-exp').innerText = parseInt(expDiscard).toLocaleString();
-                        document.getElementById('recon-unused-ace').innerText = parseInt(aceDiscard).toLocaleString();
+                // 2. Persistent Header Bar
+                document.getElementById('persist-match-count').innerText = parseInt(matchCount).toLocaleString();
+                document.getElementById('persist-exp-discard').innerText = parseInt(expDiscard).toLocaleString();
+                document.getElementById('persist-ace-discard').innerText = parseInt(aceDiscard).toLocaleString();
 
-                        // Show the modal
-                        document.getElementById('reconciliation-modal').classList.remove('hidden');
-                    } else {
-                        showToast("File loaded successfully", "success");
-                    }
-
-                } else {
-                    const errorMsg = json?.message || "Upload Failed: Server rejected the file.";
-                    showErrorModal(errorMsg);
-                    fileInput.value = "";
-                }
-            } catch (error) {
-                console.error(error);
-                showErrorModal("Critical System Error: " + error.message);
-            } finally {
-                toggleLoading(false);
+                document.getElementById('persistent-recon-stats').classList.remove('hidden');
+                document.getElementById('persistent-recon-stats').classList.add('flex'); // Ensure flex is restored
+            } else {
+                // Hide persistent bar for normal files
+                document.getElementById('persistent-recon-stats').classList.add('hidden');
+                document.getElementById('persistent-recon-stats').classList.remove('flex');
+                showToast("File loaded successfully", "success");
             }
+
+        } else {
+            const errorMsg = json?.message || "Upload Failed.";
+            showErrorModal(errorMsg);
+            fileInput.value = "";
         }
+    } catch (error) {
+        console.error(error);
+        showErrorModal("Critical System Error: " + error.message);
+    } finally {
+        toggleLoading(false);
+    }
+}
+
+
+
+
+
 
 
 // --- 🎨 UPDATED RENDERER ---
@@ -4217,76 +4273,82 @@ function updateServerStatus(isOnline) {
         // ... (Keep existing renderer functions: renderPreview, renderDynamicHeaders, etc.) ...
 
         // RE-INCLUDE NECESSARY RENDERERS FOR CONTEXT
+
+
+
         function renderPreview(data) {
-            if(!data || data.length === 0) return;
-            data.forEach(row => {
-                if (!row._backend_errors) row._backend_errors = row._errors || [];
-                const validation = validateRow(row);
-                row._errors = validation.messages;
-                row._error_fields = validation.fields;
-            });
-            data.sort((a, b) => {
-                const aErr = a._errors.length > 0;
-                const bErr = b._errors.length > 0;
-                if (aErr && !bErr) return -1;
-                if (!aErr && bErr) return 1;
-                return 0;
-            });
-            document.getElementById('staged-preview').classList.remove('hidden');
-            document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
+    if (!data || data.length === 0) return;
 
-            const legend = document.getElementById('smart-fill-legend');
-            const hasSmartFill = data.some(r => r._smart_filled_fields && r._smart_filled_fields.length > 0);
-            if(hasSmartFill && currentView === 'imports') legend.classList.remove('hidden');
-            else legend.classList.add('hidden');
+    data.forEach(row => {
+        if (!row._backend_errors) row._backend_errors = row._errors || [];
+        const validation = validateRow(row);
+        row._errors = validation.messages;
+        row._error_fields = validation.fields;
+    });
 
-            const header = document.getElementById('preview-header');
-            const body = document.getElementById('preview-body');
-            const rawConfig = TABLE_CONFIG[currentView];
-            const config = rawConfig ? rawConfig.filter(c => c.k !== 'qty_consumed') : null;
-            let keys = config ? config.map(c => c.k) : Object.keys(data[0]).filter(k => !k.startsWith('_'));
-            let labels = config ? config.map(c => c.l) : keys;
+    // Sort: Errors first
+    data.sort((a, b) => {
+        const aErr = a._errors.length > 0;
+        const bErr = b._errors.length > 0;
+        if (aErr && !bErr) return -1;
+        if (!aErr && bErr) return 1;
+        return 0;
+    });
 
-            header.innerHTML = `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">Status</th>` +
-                               labels.map(l => `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase">${l}</th>`).join('');
+    document.getElementById('staged-preview').classList.remove('hidden');
+    document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
 
-            body.innerHTML = data.map((row, i) => {
-                let statusHtml = "";
-                let rowClass = "border-b border-slate-50";
-                if (row._errors && row._errors.length > 0) {
-                    rowClass = "error-row border-b border-red-200";
-                    let tooltip = row._errors.join('\n');
-                    let errorMsg = row._errors[0];
-                    if (row._errors.length > 1) errorMsg += ` (+${row._errors.length - 1})`;
-                    statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" id="status-${i}" title="${tooltip}"><i class="fa-solid fa-circle-xmark mr-1"></i>${errorMsg}</span>`;
-                } else {
-                    statusHtml = `<span class="text-green-600 font-bold text-xs" id="status-${i}"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
-                }
-                return `<tr class="${rowClass}" id="row-${i}"><td class="p-2 text-center align-middle">${statusHtml}</td>` +
-                    keys.map(k => {
-                        let cellVal = row[k] !== undefined ? row[k] : '';
-                        let cellClass = 'edit-input text-xs text-slate-600';
-                        let cellTitle = "";
-                        let cellAction = "";
-                        if (row._error_fields && row._error_fields.includes(k)) {
-                            cellClass += ' invalid-cell';
-                            cellTitle = "Invalid Value. Click to see details.";
-                            cellAction = `onclick="showToast('Error in ${k}: Please fix format or value', 'error')"`;
-                        }
-                        if (row._smart_filled_fields && row._smart_filled_fields.includes(k)) {
-                            cellClass += ' smart-filled-cell';
-                            cellTitle = "Auto-filled by System";
-                        }
-                        if (k === 'uom') {
-                            const options = VALID_UOMS.map(u => `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`).join('');
-                            return `<td class="p-2"><div class="relative w-full h-full group"><select onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" id="cell-${i}-${k}" title="${cellTitle}" ${cellAction} style="text-align-last:center;"><option value="" disabled ${!cellVal ? 'selected' : ''}>--</option>${options}</select><div class="pointer-events-none absolute inset-y-0 right-1 flex items-center px-1 text-slate-400 group-hover:text-blue-500"><i class="fa-solid fa-chevron-down text-[10px]"></i></div></div></td>`;
-                        } else {
-                            return `<td class="p-2"><input type="text" value="${cellVal}" title="${cellTitle}" ${cellAction} onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass}" id="cell-${i}-${k}"></td>`;
-                        }
-                    }).join('') + `</tr>`;
-            }).join('');
-            recalcStatus();
+    // 🟢 FIX: Removed the block that tried to access 'smart-fill-legend'
+
+    const header = document.getElementById('preview-header');
+    const body = document.getElementById('preview-body');
+    const rawConfig = TABLE_CONFIG[currentView];
+    const config = rawConfig ? rawConfig.filter(c => c.k !== 'qty_consumed') : null;
+    let keys = config ? config.map(c => c.k) : Object.keys(data[0]).filter(k => !k.startsWith('_'));
+    let labels = config ? config.map(c => c.l) : keys;
+
+    header.innerHTML = `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase bg-slate-100">Status</th>` +
+                       labels.map(l => `<th class="px-4 py-2 text-center font-bold text-slate-600 text-xs uppercase bg-slate-100">${l}</th>`).join('');
+
+    body.innerHTML = data.map((row, i) => {
+        let statusHtml = "";
+        let rowClass = "border-b border-slate-50";
+
+        if (row._errors && row._errors.length > 0) {
+            rowClass = "error-row border-b border-red-200 bg-red-50";
+            let tooltip = row._errors.join('\n');
+            statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" title="${tooltip}"><i class="fa-solid fa-circle-xmark mr-1"></i>Error</span>`;
+        } else {
+            statusHtml = `<span class="text-green-600 font-bold text-xs"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
         }
+
+        return `<tr class="${rowClass}" id="row-${i}"><td class="p-2 text-center align-middle">${statusHtml}</td>` +
+            keys.map(k => {
+                let cellVal = row[k] !== undefined ? row[k] : '';
+                let cellClass = 'edit-input text-xs text-slate-600';
+                let cellTitle = "";
+
+                if (row._error_fields && row._error_fields.includes(k)) {
+                    cellClass += ' invalid-cell';
+                    cellTitle = "Invalid Value";
+                }
+                // Smart Fill Styling
+                if (row._smart_filled_fields && row._smart_filled_fields.includes(k)) {
+                    cellClass += ' smart-filled-cell';
+                    cellTitle = "Auto-filled by System";
+                }
+
+                if (k === 'uom') {
+                    const options = VALID_UOMS.map(u => `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`).join('');
+                    return `<td class="p-2"><div class="relative w-full h-full"><select onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" style="text-align-last:center;">${options}</select></div></td>`;
+                } else {
+                    return `<td class="p-2"><input type="text" value="${cellVal}" title="${cellTitle}" onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass}" id="cell-${i}-${k}"></td>`;
+                }
+            }).join('') + `</tr>`;
+    }).join('');
+
+    recalcStatus();
+}
 
 
 
@@ -4465,38 +4527,50 @@ function removeErrors() {
             else { renderPreview(stagedData); showToast(`Removed ${initialCount - stagedData.length} invalid rows.`, "success"); }
         }
 
-        function recalcStatus() {
-            // Check if any row has strictly *errors*
-            const hasErrors = stagedData.some(r => (r._errors && r._errors.length > 0) || (r._error_fields && r._error_fields.length > 0));
-            const hasWarnings = stagedData.some(r => r._warnings && r._warnings.length > 0);
 
-            const btn = document.getElementById('btn-commit');
-            const cleanBtn = document.getElementById('btn-clean');
-            const summary = document.getElementById('validation-summary');
 
-            cleanBtn.classList.add('hidden'); summary.classList.add('hidden');
 
-            if (hasErrors) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> Fix Errors to Commit`;
-                btn.className = "px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded shadow font-medium transition-colors";
-                cleanBtn.classList.remove('hidden');
-                summary.classList.remove('hidden');
-                summary.className = "mb-4 p-3 rounded text-sm bg-red-100 text-red-700 border border-red-200 flex items-center";
-                summary.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-2"></i> <b>Errors Found:</b> Please fix highlighted red cells or remove rows.`;
-            } else {
-                // Issue 6: Green button even if warnings exist
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-check mr-1"></i> Commit Data`;
-                btn.className = "px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded shadow font-medium transition-colors";
 
-                if (hasWarnings) {
-                    summary.classList.remove('hidden');
-                    summary.className = "mb-4 p-3 rounded text-sm bg-yellow-100 text-yellow-800 border border-yellow-200 flex items-center";
-                    summary.innerHTML = `<i class="fa-solid fa-magic mr-2"></i> <b>Smart Fill Active:</b> Yellow cells were auto-filled. Review before committing.`;
-                }
-            }
+function recalcStatus() {
+    const hasErrors = stagedData.some(r => (r._errors && r._errors.length > 0) || (r._error_fields && r._error_fields.length > 0));
+    const hasSmartFill = stagedData.some(r => r._smart_filled_fields && r._smart_filled_fields.length > 0);
+
+    const btn = document.getElementById('btn-commit');
+    const cleanBtn = document.getElementById('btn-clean');
+    const summary = document.getElementById('validation-summary');
+
+    cleanBtn.classList.add('hidden');
+    summary.classList.add('hidden'); // Reset summary state
+
+    // 1. Error State (High Priority)
+    if (hasErrors) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> Fix Errors`;
+        btn.className = "px-4 py-1.5 text-xs bg-red-500 hover:bg-red-600 text-white rounded font-bold transition-colors";
+
+        cleanBtn.classList.remove('hidden');
+        summary.classList.remove('hidden');
+        summary.className = "mb-4 p-2.5 rounded text-xs bg-red-100 text-red-700 border border-red-200 flex items-center font-medium";
+        summary.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-2 text-sm"></i> <b>Action Required:</b> Please fix rows highlighted in Red before committing.`;
+    }
+    // 2. Smart Fill / Warning State (Medium Priority)
+    else {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-check mr-1"></i> Commit Data`;
+        btn.className = "px-4 py-1.5 text-xs bg-green-600 hover:bg-green-700 text-white rounded font-bold shadow-md transition-colors";
+
+        if (hasSmartFill) {
+            summary.classList.remove('hidden');
+            summary.className = "mb-4 p-2.5 rounded text-xs bg-yellow-50 text-yellow-800 border border-yellow-200 flex items-center font-medium";
+            summary.innerHTML = `<i class="fa-solid fa-pen-nib mr-2 text-yellow-600"></i> <b>Smart Fill Active:</b> Cells highlighted in yellow were auto-filled by the system. Please review.`;
         }
+    }
+}
+
+
+
+
+
 
         async function commitData() {
             if(stagedData.some(r => (r._errors && r._errors.length > 0) || (r._error_fields && r._error_fields.length > 0))) {
@@ -4521,8 +4595,17 @@ function removeErrors() {
             stagedData = [];
             document.getElementById('file-input').value = "";
             document.getElementById('staged-preview').classList.add('hidden');
-            // FIX: Ensure Smart Fill Legend is hidden on reset
-            document.getElementById('smart-fill-legend').classList.add('hidden');
+
+            // Hide the single validation summary
+            const valSum = document.getElementById('validation-summary');
+            if(valSum) valSum.classList.add('hidden');
+
+            // Hide the header stats
+            const persistBar = document.getElementById('persistent-recon-stats');
+            if(persistBar) {
+                persistBar.classList.add('hidden');
+                persistBar.classList.remove('flex');
+            }
         }
 
         async function deleteRow(target, id) { if(!confirm("Delete this record?")) return; toggleLoading(true, "Deleting..."); await safeFetch(`/drawback/api/delete/${target}/${id}`, { method: 'DELETE' }); toggleLoading(false); loadTableData(target); }
