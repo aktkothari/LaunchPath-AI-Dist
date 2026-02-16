@@ -348,7 +348,7 @@ th {
 
     <div id="toast">Notification</div>
 
-    <div id="loading-overlay">
+    <div id="loading-overlay" style="display: flex;">
         <div class="text-center">
             <div class="spinner mx-auto mb-4"></div>
             <p class="text-slate-600 font-semibold text-sm" id="loader-text">Processing...</p>
@@ -1050,24 +1050,50 @@ th {
 
 
 
+<div class="w-full">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center gap-4">
+            <h3 class="font-bold text-slate-700 text-sm whitespace-nowrap">Available Quantity</h3>
 
-                <div class="w-full">
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-700 text-sm">Available Quantity</h3>
-                            <span class="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">Pending Items</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-sm text-left" id="inventory-table">
-                                <thead class="bg-white text-slate-500 border-b">
-                                    </thead>
-                                <tbody class="divide-y divide-slate-50 text-xs" id="inventory-body">
-                                    <tr><td colspan="4" class="p-6 text-center text-slate-400">Loading DB Stats...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <div class="relative w-full max-w-xs">
+                <input type="text" id="inv-search-input"
+                       onkeyup="handleInventorySearch(this.value)"
+                       placeholder="Search Material #..."
+                       class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                <i class="fa-solid fa-search absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+            </div>
+        </div>
+
+        <table class="min-w-full text-sm text-left table-fixed">
+            <thead class="bg-white text-slate-500 border-b shadow-sm sticky top-0 z-10">
+                <tr>
+                    <th class="w-1/4 px-6 py-3 font-semibold bg-slate-50 text-center">Material Number</th>
+                    <th class="w-1/4 px-6 py-3 font-semibold bg-slate-50 text-center">Total Imported</th>
+                    <th class="w-1/4 px-6 py-3 font-semibold bg-slate-50 text-center">Available</th>
+                    <th class="w-1/4 px-6 py-3 font-semibold bg-slate-50 text-center">Utilization</th>
+                </tr>
+            </thead>
+        </table>
+
+        <div id="inv-scroll-container"
+             class="overflow-y-auto max-h-[331px]"
+             onscroll="handleInventoryScroll(this)">
+
+            <table class="min-w-full text-sm text-left table-fixed">
+                <tbody class="divide-y divide-slate-50 text-xs" id="inventory-body">
+                    </tbody>
+            </table>
+
+            <div id="inv-loader" class="hidden py-4 text-center text-slate-400 text-xs">
+                <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading more...
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
             </div>
 
 
@@ -1717,7 +1743,10 @@ th {
                             // 🚀 [PATCH FIX] REFRESH DASHBOARD NOW
                             // Only load stats AFTER we have the correct Workspace ID
                             if (currentView === 'dashboard') {
-                                loadStats();
+                                // 🚀 PATCH 2: Chain the inventory load so the bottom table populates
+                                loadStats().then(() => {
+                                    loadInventory(true);
+                                });
                             } else {
                                 // If on another tab, reload that table
                                 loadTableData(currentView);
@@ -2295,7 +2324,13 @@ function switchView(viewId) {
 
             if(viewId === 'dashboard') {
                 document.getElementById('view-dashboard').classList.remove('hidden');
-                loadStats();
+
+                // 1. Load Stats FIRST (The Upper Tabs)
+                loadStats().then(() => {
+                    // 2. ONLY after Stats are done, load the Inventory (The Bottom Table)
+                    console.log("Stats loaded. Now fetching inventory...");
+                    loadInventory(true);
+                });
             } else if(viewId === 'matching') {
                 document.getElementById('view-matching').classList.remove('hidden');
                 // 🆕 REORDERED HEADERS: [Status, Notes, View] moved to front.
@@ -2391,85 +2426,45 @@ function switchView(viewId) {
 
 
 
-        // --- DASHBOARD (UPDATED FOR NEW DESIGN) ---
-
+// --- DASHBOARD (UPDATED FOR NEW DESIGN) ---
 async function loadStats() {
-            toggleLoading(true, "Updating Dashboard...");
-            try {
-                // 🟢 FIX: Changed to POST to send workspace_id context
-                const json = await safeFetch('/drawback/api/stats', { method: 'POST' });
+    // ✅ ENABLED: Show the full-screen loader with a custom message
+    toggleLoading(true, "Loading Dashboard Analytics...");
 
-                const potential = json?.data?.kpis?.potential_duty || 0;
-                const recovered = json?.data?.kpis?.recovered_duty || 0;
-                const realized = potential > 0 ? ((recovered / potential) * 100).toFixed(1) : 0;
-                const unrealized = potential - recovered;
+    try {
+        const json = await safeFetch('/drawback/api/stats', { method: 'POST' });
 
-                const approvedCount = json?.data?.counts?.approved || 0;
-                const pendingApproval = json?.data?.counts?.pending_approval || 0;
-                const pendingClaims = json?.data?.counts?.claims || 0;
+        // 1. Update KPIs
+        const potential = json?.data?.kpis?.potential_duty || 0;
+        const recovered = json?.data?.kpis?.recovered_duty || 0;
+        const realized = potential > 0 ? ((recovered / potential) * 100).toFixed(1) : 0;
+        const unrealized = potential - recovered;
 
-                // const prodCount = json?.data?.counts?.products || 0; // Removed from UI
-                const impCount = json?.data?.counts?.imports || 0;
-                const expCount = json?.data?.counts?.exports || 0;
-                const matchSuccess = json?.data?.counts?.matches_success || 0;
-                const matchFail = json?.data?.counts?.matches_fail || 0;
+        document.getElementById('stat-potential').innerText = formatMoney(potential);
+        document.getElementById('stat-recovered').innerText = formatMoney(recovered);
+        document.getElementById('stat-realized-pct').innerText = realized + "%";
+        document.getElementById('prog-realized').style.width = realized + "%";
+        document.getElementById('stat-unrealized').innerText = formatMoney(unrealized);
 
-                document.getElementById('stat-potential').innerText = formatMoney(potential);
-                document.getElementById('stat-recovered').innerText = formatMoney(recovered);
-                document.getElementById('stat-realized-pct').innerText = realized + "%";
-                document.getElementById('prog-realized').style.width = realized + "%";
-                document.getElementById('stat-unrealized').innerText = formatMoney(unrealized);
+        // 2. Update Counts
+        const c = json?.data?.counts || {};
+        document.getElementById('stat-approved-count').innerText = c.approved || 0;
+        document.getElementById('stat-pending-approval-count').innerText = c.pending_approval || 0;
+        document.getElementById('stat-pending-claims-count').innerText = c.claims || 0;
+        document.getElementById('count-imports').innerText = c.imports || 0;
+        document.getElementById('count-exports').innerText = c.exports || 0;
+        document.getElementById('stat-matches-success').innerText = c.matches_success || 0;
+        document.getElementById('stat-matches-fail').innerText = c.matches_fail || 0;
 
-                document.getElementById('stat-approved-count').innerText = approvedCount;
-                document.getElementById('stat-pending-approval-count').innerText = pendingApproval;
-                document.getElementById('stat-pending-claims-count').innerText = pendingClaims;
-
-                // REMOVED: document.getElementById('stat-products-count').innerText = prodCount;
-
-                document.getElementById('count-imports').innerText = impCount;
-                document.getElementById('count-exports').innerText = expCount;
-                document.getElementById('stat-matches-success').innerText = matchSuccess;
-                document.getElementById('stat-matches-fail').innerText = matchFail;
-
-                renderDynamicHeaders('inventory-table', ['Material Number', 'Total Imported', 'Available', 'Utilization'], 0);
-                const invBody = document.getElementById('inventory-body');
-
-                if (json.data && json.data.inventory && json.data.inventory.length > 0) {
-                    const sortedInventory = json.data.inventory.sort((a, b) => {
-                        const utilA = a.total_original > 0 ? (1 - (a.total_available / a.total_original)) : 0;
-                        const utilB = b.total_original > 0 ? (1 - (b.total_available / b.total_original)) : 0;
-                        return utilB - utilA;
-                    });
-
-                    invBody.innerHTML = sortedInventory.map(item => {
-                        const utilization = item.total_original > 0 ? ((1 - (item.total_available / item.total_original)) * 100).toFixed(1) : 0;
-                        let color = "bg-blue-600";
-                        if (utilization > 80) color = "bg-emerald-500";
-                        if (utilization < 20) color = "bg-slate-300";
-
-                        return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                            <td class="px-6 py-3 font-medium text-slate-700">${item.material_number}</td>
-                            <td class="px-6 py-3 text-center text-slate-600 font-mono">${item.total_original.toLocaleString()}</td>
-                            <td class="px-6 py-3 text-center text-blue-600 font-mono font-bold">${item.total_available.toLocaleString()}</td>
-                            <td class="px-6 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="${color} h-2 rounded-full" style="width: ${utilization}%"></div>
-                                    </div>
-                                    <span class="text-xs font-bold text-slate-500">${utilization}%</span>
-                                </div>
-                            </td>
-                        </tr>`;
-                    }).join('');
-                } else {
-                    invBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">No inventory data found.</td></tr>`;
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                toggleLoading(false);
-            }
-        }
+    } catch (e) {
+        console.error(e);
+        showToast("Error loading dashboard stats", "error");
+    } finally {
+        // ✅ This will hide the full-screen loader once stats are done
+        // The Inventory table will then start loading with its own small spinner at the bottom
+        toggleLoading(false);
+    }
+}
 
 
 
@@ -3782,74 +3777,83 @@ function renderApproverTable(data) {
 
 
 
-
-
-
-
 function renderHistoryTable(data) {
-            const tbody = document.getElementById('history-body');
+    const tbody = document.getElementById('history-body');
 
-            // 🆕 REORDERED HEADERS: Status, View, Actions at start. Approve Date at end.
-            const headers = ['Status', 'View', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'];
+    // 🆕 REORDERED HEADERS: Status, View, Actions at start. Approve Date at end.
+    const headers = ['Status', 'View', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'];
 
-            renderDynamicHeaders('history-table', headers, 0);
+    renderDynamicHeaders('history-table', headers, 0);
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = data.map(m => {
-                const isVoided = m.status === 'VOIDED';
-                let rowClass = isVoided ? "bg-gray-100 text-gray-400 border-b border-gray-200" : "border-b border-slate-50 hover:bg-purple-50 transition";
-                let statusBadge = isVoided ? `<span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>` : `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = data.map(m => {
+        const isVoided = m.status === 'VOIDED';
+        const isComplete = m.status === 'COMPLETE'; // 🟢 1. Check for Completed Status
 
-                let actionBtn = '';
-                if(!isVoided) {
-                    actionBtn = `<button onclick='openVoidModal(${escapeJSON(m)})' class="text-red-400 hover:text-red-700 font-bold" title="Void & Reclaim"><i class="fa-solid fa-ban"></i></button>`;
-                } else {
-                    actionBtn = `<span class="text-xs text-gray-300">-</span>`;
-                }
+        let rowClass = isVoided ? "bg-gray-100 text-gray-400 border-b border-gray-200" : "border-b border-slate-50 hover:bg-purple-50 transition";
 
-                let noteDisplay = m.claim_id || 'Legacy';
-                if(isVoided && m.rejection_reason) {
-                     noteDisplay += `<br><span class="text-[9px] text-red-400 italic">${m.rejection_reason}</span>`;
-                }
-
-                return `
-                <tr class="${rowClass}">
-                    <td class="text-center">${statusBadge}</td>
-                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>
-                    <td class="text-center bg-red-50">${actionBtn}</td>
-
-                    <td>${m.import_entry_number}</td>
-                    <td>${m.import_dec_line}</td>
-                    <td>${m.import_material_number}</td>
-                    <td>${m.export_material_number || m.matched_material_number}</td>
-                    <td>${m.import_date}</td>
-                    <td>${m.export_desc}</td>
-                    <td>${formatMoney(calcExportDuty(m))}</td>
-                    <td>${m.import_hts}</td>
-                    <td>${m.qty_matched}</td>
-                    <td>${m.import_uom}</td>
-                    <td>${m.export_entry_number}</td>
-                    <td>${m.export_date}</td>
-                    <td>${m.export_country}</td>
-                    <td>HTS</td>
-                    <td>${m.import_hts}</td>
-                    <td>${m.import_duty_rate}</td>
-                    <td>${formatMoney(calcUnitValue(m))}</td>
-                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
-                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
-                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
-                    <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
-
-                    <td class="bg-purple-50 border-l border-purple-100 text-center">
-                        <span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>
-                    </td>
-                </tr>`
-            }).join('');
+        // 🟢 2. Update Badge Logic
+        let statusBadge = isVoided ? `<span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>` : `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
+        if (isComplete) {
+            statusBadge = `<span class="status-badge status-complete">COMPLETE</span>`;
         }
 
+        let actionBtn = '';
+
+        // 🟢 3. Update Action Button Logic
+        if(!isVoided && !isComplete) {
+            // Standard Approved Item: Show Void Button
+            actionBtn = `<button onclick='openVoidModal(${escapeJSON(m)})' class="text-red-400 hover:text-red-700 font-bold" title="Void & Reclaim"><i class="fa-solid fa-ban"></i></button>`;
+        } else if (isComplete) {
+            // Finalized Item: Show Lock Icon
+            actionBtn = `<span class="text-slate-300" title="Locked (Finalized)"><i class="fa-solid fa-lock"></i></span>`;
+        } else {
+            // Voided Item: Show Dash
+            actionBtn = `<span class="text-xs text-gray-300">-</span>`;
+        }
+
+        let noteDisplay = m.claim_id || 'Legacy';
+        if(isVoided && m.rejection_reason) {
+                noteDisplay += `<br><span class="text-[9px] text-red-400 italic">${m.rejection_reason}</span>`;
+        }
+
+        return `
+        <tr class="${rowClass}">
+            <td class="text-center">${statusBadge}</td>
+            <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>
+            <td class="text-center bg-red-50">${actionBtn}</td>
+
+            <td>${m.import_entry_number}</td>
+            <td>${m.import_dec_line}</td>
+            <td>${m.import_material_number}</td>
+            <td>${m.export_material_number || m.matched_material_number}</td>
+            <td>${m.import_date}</td>
+            <td>${m.export_desc}</td>
+            <td>${formatMoney(calcExportDuty(m))}</td>
+            <td>${m.import_hts}</td>
+            <td>${m.qty_matched}</td>
+            <td>${m.import_uom}</td>
+            <td>${m.export_entry_number}</td>
+            <td>${m.export_date}</td>
+            <td>${m.export_country}</td>
+            <td>HTS</td>
+            <td>${m.import_hts}</td>
+            <td>${m.import_duty_rate}</td>
+            <td>${formatMoney(calcUnitValue(m))}</td>
+            <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
+            <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
+            <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
+            <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
+
+            <td class="bg-purple-50 border-l border-purple-100 text-center">
+                <span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>
+            </td>
+        </tr>`
+    }).join('');
+}
 
 
 <!--        function renderHistoryTable(data) {-->
@@ -4859,15 +4863,172 @@ async function runMatching() {
 
         updateRoleUI();
 
+        // 🚀 PATCH 1: Show full-screen loader immediately on first load
+        toggleLoading(true, "Loading Data...");
+
 
         setTimeout(() => {
             if (window.CURRENT_USER_EMAIL === "system_fallback@launchpath.ai") {
                 console.warn("⚠️ No Parent Context received. Loading Default/Demo Mode.");
-                if(currentView === 'dashboard') loadStats();
-                toggleLoading(false);
+                if(currentView === 'dashboard') {
+                     loadStats().then(() => {
+                        loadInventory(true);
+                    });
+                } else {
+                    // Only force-close the loader if we ARE NOT on the dashboard.
+                    // If we are on the dashboard, loadStats() will close it automatically when the numbers arrive.
+                    toggleLoading(false);
+                }
             }
         }, 2000);
 
+
+
+
+
+        /////////////////////////////////
+        /////////////////////////////////
+        ////////////////////////////////
+
+
+
+// --- INVENTORY PAGINATION LOGIC ---
+
+// Global State
+let invState = {
+    page: 1,
+    limit: 10,
+    loading: false,
+    hasMore: true,
+    search: ""
+};
+
+// 1. Main Load Function
+// 1. Main Load Function
+async function loadInventory(reset = false) {
+    if (reset) {
+        invState.page = 1;
+        invState.hasMore = true;
+        // INJECT INLINE SPINNER: Replaces the blank table with a loading row
+        document.getElementById('inventory-body').innerHTML = `
+            <tr>
+                <td colspan="4" class="p-8 text-center text-slate-400 italic">
+                    <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading Inventory...
+                </td>
+            </tr>`;
+    }
+
+    if (invState.loading || !invState.hasMore) return;
+
+    invState.loading = true;
+
+    // RESTRICT BOTTOM SPINNER: Only show it if we are fetching page 2+ (infinite scroll)
+    if (!reset) {
+        document.getElementById('inv-loader').classList.remove('hidden');
+    }
+
+    try {
+        const url = '/drawback/api/inventory';
+
+        const res = await safeFetch(url, {
+            method: 'POST',
+            body: JSON.stringify({
+                page: invState.page,
+                limit: invState.limit,
+                search: invState.search
+            })
+        });
+
+        const rows = res.data || [];
+
+        if (rows.length < invState.limit) {
+            invState.hasMore = false;
+        }
+
+        // CLEAR PLACEHOLDER: Remove the inline spinner right before rendering the actual data
+        if (reset) {
+            document.getElementById('inventory-body').innerHTML = "";
+        }
+
+        renderInventoryRows(rows);
+        invState.page++;
+
+        // 🚀 PATCH: "Smart Auto-Fill" Check
+        // If the rendered rows didn't fill the box enough to create a scrollbar, load more automatically!
+        setTimeout(() => {
+            const container = document.getElementById('inv-scroll-container');
+            if (container && container.scrollHeight <= container.clientHeight && invState.hasMore) {
+                loadInventory(false);
+            }
+        }, 100);
+
+    } catch (e) {
+        console.error("Inventory Load Error", e);
+        if (reset) {
+            document.getElementById('inventory-body').innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-400 italic">Failed to load inventory.</td></tr>`;
+        }
+    } finally {
+        invState.loading = false;
+        document.getElementById('inv-loader').classList.add('hidden');
+    }
+}
+
+
+
+
+// 2. Render Rows (Append Mode)
+function renderInventoryRows(rows) {
+    const tbody = document.getElementById('inventory-body');
+
+    if (rows.length === 0 && invState.page === 1) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">No items found.</td></tr>`;
+        return;
+    }
+
+    const html = rows.map(item => {
+        const total = parseFloat(item.total_original) || 0;
+        const avail = parseFloat(item.total_available) || 0;
+        const util = total > 0 ? ((1 - (avail / total)) * 100).toFixed(1) : 0;
+
+        let color = "bg-blue-600";
+        if (util > 80) color = "bg-emerald-500";
+        if (util < 20) color = "bg-slate-300";
+
+        return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition h-10 animate-fadeIn">
+            <td class="px-6 py-2 font-medium text-slate-700 w-1/4 align-middle">${item.material_number}</td>
+            <td class="px-6 py-2 text-center text-slate-600 font-mono w-1/4 align-middle">${total.toLocaleString()}</td>
+            <td class="px-6 py-2 text-center text-blue-600 font-mono font-bold w-1/4 align-middle">${avail.toLocaleString()}</td>
+            <td class="px-6 py-2 w-1/4 align-middle">
+                <div class="flex items-center">
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mr-2">
+                        <div class="${color} h-1.5 rounded-full" style="width: ${util}%"></div>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-500">${util}%</span>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+
+    tbody.insertAdjacentHTML('beforeend', html);
+}
+
+// 3. Infinite Scroll Handler
+function handleInventoryScroll(container) {
+    // Trigger when user scrolls near the bottom (50px threshold)
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
+        loadInventory(false);
+    }
+}
+
+// 4. Search Handler (Debounced)
+let searchTimeout;
+function handleInventorySearch(val) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        invState.search = val;
+        loadInventory(true); // Reset and reload
+    }, 400);
+}
     </script>
 </body>
 </html>
