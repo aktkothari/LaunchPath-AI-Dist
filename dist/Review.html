@@ -637,7 +637,7 @@ th {
                 <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 text-center">
                     <div class="text-orange-500 text-2xl mb-1"><i class="fa-solid fa-filter"></i></div>
                     <div class="text-2xl font-extrabold text-slate-800" id="recon-discarded-exp">0</div>
-                    <div class="text-[10px] font-bold text-orange-700 uppercase tracking-wide mt-1">Discarded (Expeditors)</div>
+                    <div class="text-[10px] font-bold text-orange-700 uppercase tracking-wide mt-1">Discarded (Broker)</div>
                 </div>
 
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
@@ -1138,7 +1138,7 @@ th {
 
                     <div class="flex items-center gap-2" title="Rows discarded from Expeditors file">
                         <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">Discarded Expeditors Entries</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Discarded Broker Entries</span>
                         <span class="text-xs font-bold text-slate-800 font-mono" id="persist-exp-discard">0</span>
                     </div>
 
@@ -1821,7 +1821,7 @@ th {
                 { k: 'hts_code', l: 'HTS Code' },
                 { k: 'uom', l: 'UOM' },
                 { k: 'duty_rate', l: 'Default Duty Rate' },
-                { k: 'conversion_factor', l: 'Conv. Factor' }
+                { k: 'conversion_factor', l: 'Conversion Factor' }
             ],
             material_mappings: [
                 { k: 'export_material_number', l: 'Export Material Number' },
@@ -4216,7 +4216,7 @@ async function handleFileUpload() {
             // 🟢 LOGIC: Handle Reconciliation Stats (Popup + Persistent Bar)
             if (currentView === 'imports' && json.message.includes('Reconciliation')) {
                 const matchCount = (json.message.match(/Total Matched Rows:\s*(\d+)/) || [0,0])[1];
-                const expDiscard = (json.message.match(/Discarded Expeditors Rows:\s*(\d+)/) || [0,0])[1];
+                const expDiscard = (json.message.match(/Discarded Broker Rows:\s*(\d+)/) || [0,0])[1];
                 const aceDiscard = (json.message.match(/Discarded ACE Lines:\s*(\d+)/) || [0,0])[1];
 
                 // 1. Modal (Popup)
