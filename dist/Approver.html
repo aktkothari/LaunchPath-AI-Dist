@@ -1862,7 +1862,7 @@ th {
                     <i class="fa-solid fa-sort text-slate-300 hover:text-slate-600 transition" id="sort-icon-${tableId}-${colIdx}"></i>
                 </div>
                 <input type="text" class="th-input" onclick="event.stopPropagation()" onkeyup="filterMulti('${tableId}')" placeholder="Search...">
-                <div class="resizer" onmousedown="initResize(event, this)"></div>
+                <div class="resizer" onmousedown="initResize(event, this)" onclick="event.stopPropagation()"></div>
             </div>`;
         }
 
@@ -1979,36 +1979,53 @@ async function discardMatch(matchId) {
             rows.forEach(row => tbody.appendChild(row));
         }
 
-        function filterMulti(tableId) {
-            const table = document.getElementById(tableId);
-            const headers = table.tHead.rows[0].cells;
-            const inputs = [];
 
-            // Collect filters
-            for (let i = 0; i < headers.length; i++) {
-                // FIX: Only select inputs with class 'th-input' (the text search boxes) to avoid grabbing the checkbox
-                const input = headers[i].querySelector('input.th-input');
-                if (input && input.value) inputs.push({ idx: i, val: input.value.toUpperCase() });
-            }
 
-            const rows = table.tBodies[0].rows;
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                if (row.cells.length <= 1) continue; // Skip "Loading..." or "No data" rows
 
-                let show = true;
-                for (let filter of inputs) {
-                    if (filter.val) {
-                        const cellText = row.cells[filter.idx].innerText || "";
-                        if (cellText.toUpperCase().indexOf(filter.val) === -1) {
-                            show = false;
-                            break;
-                        }
-                    }
-                }
-                row.style.display = show ? "" : "none";
+// Add a global variable for the search delay outside the function
+let columnSearchTimeout;
+
+function filterMulti(tableId) {
+    // Clear the previous timeout so it doesn't run until you stop typing
+    clearTimeout(columnSearchTimeout);
+
+    // Wait 300ms after the last keystroke before filtering
+    columnSearchTimeout = setTimeout(() => {
+        const table = document.getElementById(tableId);
+        const headers = table.tHead.rows[0].cells;
+        const inputs = [];
+
+        // Collect active filters
+        for (let i = 0; i < headers.length; i++) {
+            const input = headers[i].querySelector('input.th-input');
+            if (input && input.value) {
+                inputs.push({ idx: i, val: input.value.toUpperCase() });
             }
         }
+
+        const rows = table.tBodies[0].rows;
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.cells.length <= 1) continue; // Skip "Loading..." rows
+
+            let show = true;
+            for (let filter of inputs) {
+                if (filter.val) {
+                    // FIX: Use textContent instead of innerText (10x faster!)
+                    const cellText = row.cells[filter.idx].textContent || "";
+                    if (cellText.toUpperCase().indexOf(filter.val) === -1) {
+                        show = false;
+                        break;
+                    }
+                }
+            }
+            row.style.display = show ? "" : "none";
+        }
+    }, 300); // 300 millisecond delay
+}
+
+
+
 
 
 
