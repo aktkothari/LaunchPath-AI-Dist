@@ -4280,7 +4280,7 @@ function updateServerStatus(isOnline) {
 
 
 
-        function renderPreview(data) {
+function renderPreview(data) {
     if (!data || data.length === 0) return;
 
     data.forEach(row => {
@@ -4302,8 +4302,6 @@ function updateServerStatus(isOnline) {
     document.getElementById('staged-preview').classList.remove('hidden');
     document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
 
-    // 🟢 FIX: Removed the block that tried to access 'smart-fill-legend'
-
     const header = document.getElementById('preview-header');
     const body = document.getElementById('preview-body');
     const rawConfig = TABLE_CONFIG[currentView];
@@ -4321,12 +4319,16 @@ function updateServerStatus(isOnline) {
         if (row._errors && row._errors.length > 0) {
             rowClass = "error-row border-b border-red-200 bg-red-50";
             let tooltip = row._errors.join('\n');
-            statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help" title="${tooltip}"><i class="fa-solid fa-circle-xmark mr-1"></i>Error</span>`;
+
+            // 🔴 FIX: Showing the specific error message [0] instead of the word "Error"
+            statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help flex items-center justify-center gap-1" title="${tooltip}">
+                            <i class="fa-solid fa-circle-xmark"></i> ${row._errors[0]}
+                          </span>`;
         } else {
             statusHtml = `<span class="text-green-600 font-bold text-xs"><i class="fa-solid fa-check mr-1"></i>OK</span>`;
         }
 
-        return `<tr class="${rowClass}" id="row-${i}"><td class="p-2 text-center align-middle">${statusHtml}</td>` +
+        return `<tr class="${rowClass}" id="row-${i}"><td class="p-2 text-center align-middle" id="status-${i}">${statusHtml}</td>` +
             keys.map(k => {
                 let cellVal = row[k] !== undefined ? row[k] : '';
                 let cellClass = 'edit-input text-xs text-slate-600';
@@ -4336,7 +4338,6 @@ function updateServerStatus(isOnline) {
                     cellClass += ' invalid-cell';
                     cellTitle = "Invalid Value";
                 }
-                // Smart Fill Styling
                 if (row._smart_filled_fields && row._smart_filled_fields.includes(k)) {
                     cellClass += ' smart-filled-cell';
                     cellTitle = "Auto-filled by System";
@@ -4353,8 +4354,6 @@ function updateServerStatus(isOnline) {
 
     recalcStatus();
 }
-
-
 
 
 
@@ -4481,45 +4480,49 @@ function validateRow(row) {
         // ==========================================
         // 2. UPDATED EDIT HANDLER
         // ==========================================
-        function updateStagedValue(index, key, value) {
-            // [PATCH] Auto-uppercase UOM
-            if (key === 'uom') value = value.toUpperCase();
+function updateStagedValue(index, key, value) {
+    // [PATCH] Auto-uppercase UOM
+    if (key === 'uom') value = value.toUpperCase();
 
-            // Update Data Model
-            stagedData[index][key] = value.trim();
-            const row = stagedData[index];
+    // Update Data Model
+    stagedData[index][key] = value.trim();
+    const row = stagedData[index];
 
-            // Re-validate this specific row completely
-            const validation = validateRow(row);
-            row._errors = validation.messages;
-            row._error_fields = validation.fields;
+    // Re-validate this specific row completely
+    const validation = validateRow(row);
+    row._errors = validation.messages;
+    row._error_fields = validation.fields;
 
-            // Update UI: Get Elements
-            const rowEl = document.getElementById(`row-${index}`);
-            const statusEl = document.getElementById(`status-${index}`);
-            const cellEl = document.getElementById(`cell-${index}-${key}`);
+    // Update UI: Get Elements
+    const rowEl = document.getElementById(`row-${index}`);
+    const statusEl = document.getElementById(`status-${index}`); // Target the ID we added in renderPreview
+    const cellEl = document.getElementById(`cell-${index}-${key}`);
 
-            // Update Cell Styling (Remove invalid class if fixed)
-            if (row._error_fields.includes(key)) {
-                cellEl.classList.add('invalid-cell');
-            } else {
-                cellEl.classList.remove('invalid-cell');
-            }
+    // Update Cell Styling (Remove invalid class if fixed)
+    if (row._error_fields.includes(key)) {
+        if(cellEl) cellEl.classList.add('invalid-cell');
+    } else {
+        if(cellEl) cellEl.classList.remove('invalid-cell');
+    }
 
-            // Update Row Status UI
-            if (row._errors.length > 0) {
-                // Still has errors
-                rowEl.className = "error-row border-b border-red-200 transition";
-                const displayError = row._errors[0];
-                statusEl.innerHTML = `<span class="text-red-600 font-bold text-xs"><i class="fa-solid fa-circle-xmark mr-1"></i>${displayError}</span>`;
-            } else {
-                // All fixed
-                rowEl.className = "border-b border-slate-50 bg-blue-50 transition";
-                statusEl.innerHTML = `<span class="text-blue-600 font-bold text-xs"><i class="fa-solid fa-check-circle mr-1"></i>Fixed</span>`;
-            }
+    // Update Row Status UI
+    if (row._errors.length > 0) {
+        // Still has errors
+        rowEl.className = "error-row border-b border-red-200 transition";
+        const displayError = row._errors[0];
 
-            recalcStatus();
-        }
+        // 🔴 FIX: Show the text here too
+        statusEl.innerHTML = `<span class="text-red-600 font-bold text-xs flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-circle-xmark"></i> ${displayError}
+                              </span>`;
+    } else {
+        // All fixed
+        rowEl.className = "border-b border-slate-50 bg-blue-50 transition";
+        statusEl.innerHTML = `<span class="text-blue-600 font-bold text-xs"><i class="fa-solid fa-check-circle mr-1"></i>Fixed</span>`;
+    }
+
+    recalcStatus();
+}
 
 
 
