@@ -1307,7 +1307,11 @@ th {
                  <div id="history-summary-view" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                       <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
                         <div><h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims History</h3><p class="text-xs text-purple-600 mt-1">Select a Claim ID to view details or download specific reports.</p></div>
-<!--                        <div class="flex gap-2"><button onclick="window.open(API_BASE + '/drawback/api/export_matches')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium"><i class="fa-solid fa-file-csv mr-1"></i> Export All</button></div>-->
+                        <div class="flex gap-2">
+                            <button onclick="exportAllMatches()" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium transition shadow-sm">
+                                <i class="fa-solid fa-file-csv mr-1"></i> Export All
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto"><table class="min-w-full text-sm text-left" id="history-summary-table"><thead class="bg-slate-50 text-slate-500 border-b"></thead><tbody class="divide-y divide-slate-50" id="history-summary-body"><tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Loading History...</td></tr></tbody></table></div>
                 </div>
@@ -3204,75 +3208,86 @@ async function loadApproverQueue(claimId) {
 
 
 async function loadHistorySummary() {
-            toggleLoading(true, "Loading Claim History...");
-            const tbody = document.getElementById('history-summary-body');
-            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;
+    toggleLoading(true, "Loading Claim History...");
+    const tbody = document.getElementById('history-summary-body');
+    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;
 
-            try {
-                // 🟢 FIX: Changed to POST
-                const json = await safeFetch('/drawback/api/claims/list/HISTORY', { method: 'POST' });
+    try {
+        // 🟢 FIX: Changed to POST
+        const json = await safeFetch('/drawback/api/claims/list/HISTORY', { method: 'POST' });
 
-                if (json.data && json.data.length > 0) {
-                    const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
-                    renderDynamicHeaders('history-summary-table', headers, 0);
+        if (json.data && json.data.length > 0) {
+            const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
+            renderDynamicHeaders('history-summary-table', headers, 0);
 
-                    const toDDMMYYYY = (isoStr) => {
-                        if(!isoStr) return '-';
-                        const d = new Date(isoStr);
-                        if(isNaN(d)) return isoStr.substring(0,10);
-                        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-                    };
+            const toDDMMYYYY = (isoStr) => {
+                if(!isoStr) return '-';
+                const d = new Date(isoStr);
+                if(isNaN(d)) return isoStr.substring(0,10);
+                return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+            };
 
-                    tbody.innerHTML = json.data.map(c => {
-                        let displayId = c.claim_id;
-                        if (!displayId.startsWith('X')) displayId = 'X' + displayId;
-                        let safeBrokerId = c.broker_claim_id || 'PENDING';
+            tbody.innerHTML = json.data.map(c => {
+                let displayId = c.claim_id;
+                if (!displayId.startsWith('X')) displayId = 'X' + displayId;
+                let safeBrokerId = c.broker_claim_id || 'PENDING';
 
-                        let acceptanceHtml = '';
-                        let isFinalized = !!c.finalized_date;
+                let acceptanceHtml = '';
+                let isFinalized = !!c.finalized_date;
 
-                        if (c.finalized_date) {
-                            acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">
-                                <i class="fa-solid fa-circle-check text-lg"></i>
-                                <div class="text-left leading-tight">
-                                    <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
-                                    <div class="text-xs font-mono">${toDDMMYYYY(c.finalized_date)}</div>
-                                    <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>
-                                </div>
-                            </div>`;
-                        } else if (c.valid_entries > 0) {
-                            acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto"><i class="fa-regular fa-square group-hover:hidden text-lg"></i><i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i><span class="text-xs font-semibold">Mark Final</span></button>`;
-                        } else {
-                            acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;
-                        }
-
-                        let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
-                        if (isFinalized) statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;
-                        else if (c.voided_entries > 0 && c.valid_entries == 0) statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
-                        else if (c.voided_entries > 0) statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
-
-                        return `
-                        <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
-                             <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
-                            <td class="px-6 py-4 text-center">
-                                <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details"><i class="fa-solid fa-circle-info text-lg"></i></button>
-                            </td>
-                            <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>
-                            <td class="px-6 py-4 text-center">${statusBadge}</td>
-                            <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>
-                            <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>
-                            <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
-                            <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
-                            <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toDDMMYYYY(c.approved_date)}</td>
-                        </tr>
-                    `}).join('');
+                if (c.finalized_date) {
+                    acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">
+                        <i class="fa-solid fa-circle-check text-lg"></i>
+                        <div class="text-left leading-tight">
+                            <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
+                            <div class="text-xs font-mono">${toDDMMYYYY(c.finalized_date)}</div>
+                            <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>
+                        </div>
+                    </div>`;
+                } else if (c.valid_entries > 0) {
+                    acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto"><i class="fa-regular fa-square group-hover:hidden text-lg"></i><i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i><span class="text-xs font-semibold">Mark Final</span></button>`;
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;
+                    acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;
                 }
-            } finally {
-                toggleLoading(false);
-            }
+
+                let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
+                if (isFinalized) statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;
+                else if (c.voided_entries > 0 && c.valid_entries == 0) statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
+                else if (c.voided_entries > 0) statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
+
+                return `
+                <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
+                     <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
+
+                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download CSV">
+                            <i class="fa-solid fa-download text-lg"></i>
+                        </button>
+                        <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
+                            <i class="fa-solid fa-circle-info text-lg"></i>
+                        </button>
+                    </td>
+
+                    <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>
+                    <td class="px-6 py-4 text-center">${statusBadge}</td>
+                    <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>
+                    <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>
+                    <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
+                    <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
+                    <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toDDMMYYYY(c.approved_date)}</td>
+                </tr>
+            `}).join('');
+        } else {
+            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;
         }
+    } finally {
+        toggleLoading(false);
+    }
+}
+
+
+
+
 
 
 
@@ -3546,6 +3561,30 @@ async function loadHistorySummary() {
 <!--                 toggleLoading(false);-->
 <!--             }-->
 <!--        }-->
+
+
+
+
+
+function exportAllMatches() {
+    // 1. Ensure we have the context IDs
+    const workspaceId = window.CURRENT_WORKSPACE_ID;
+    const projectId = window.CURRENT_PROJECT_ID;
+
+    if (!workspaceId || !projectId) {
+        showToast("Error: Missing workspace context for export.", "error");
+        return;
+    }
+
+    // 2. Show a loading notification
+    showToast("Preparing full export...", "success");
+
+    // 3. Build the authenticated URL
+    const exportUrl = `${API_BASE}/drawback/api/export_matches?workspace_id=${workspaceId}&project_id=${projectId}`;
+
+    // 4. Trigger the download
+    window.open(exportUrl, '_blank');
+}
 
 
 
