@@ -1236,7 +1236,15 @@ th {
             <div id="view-reviewer" class="view-section hidden fade-in">
                  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-100 bg-blue-50 flex justify-between items-center">
-                        <div><h3 class="font-bold text-blue-800"><i class="fa-solid fa-magnifying-glass mr-2"></i>Reviewer Console</h3><p class="text-xs text-blue-600 mt-1">Review matches before approval.</p></div>
+                        <div>
+                            <h3 class="font-bold text-blue-800"><i class="fa-solid fa-magnifying-glass mr-2"></i>Reviewer Console</h3>
+                            <p class="text-xs text-blue-600 mt-1 flex items-center gap-2">
+                                Review matches before approval.
+                                <span class="bg-yellow-100 text-yellow-800 font-bold px-2 py-0.5 rounded-md border border-yellow-300 flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-circle-exclamation text-yellow-600"></i> Max 500 items per claim
+                                </span>
+                            </p>
+                        </div>
                         <div class="flex items-center gap-3"><button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition"><i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim</button><button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div>
                     </div>
                     <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="reviewer-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="reviewer-body"><tr><td colspan="24" class="p-8 text-center text-slate-400">Loading Queue...</td></tr></tbody></table></div>
@@ -1308,9 +1316,9 @@ th {
                       <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
                         <div><h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims History</h3><p class="text-xs text-purple-600 mt-1">Select a Claim ID to view details or download specific reports.</p></div>
                         <div class="flex gap-2">
-                            <button onclick="exportAllMatches()" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium transition shadow-sm">
-                                <i class="fa-solid fa-file-csv mr-1"></i> Export All
-                            </button>
+<!--                            <button onclick="exportAllMatches()" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium transition shadow-sm">-->
+<!--                                <i class="fa-solid fa-file-csv mr-1"></i> Export All-->
+<!--                            </button>-->
                         </div>
                     </div>
                     <div class="overflow-x-auto"><table class="min-w-full text-sm text-left" id="history-summary-table"><thead class="bg-slate-50 text-slate-500 border-b"></thead><tbody class="divide-y divide-slate-50" id="history-summary-body"><tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Loading History...</td></tr></tbody></table></div>
@@ -3260,9 +3268,9 @@ async function loadHistorySummary() {
                      <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
 
                     <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download CSV">
-                            <i class="fa-solid fa-download text-lg"></i>
-                        </button>
+<!--                        <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download CSV">-->
+<!--                            <i class="fa-solid fa-download text-lg"></i>-->
+<!--                        </button>-->
                         <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
                             <i class="fa-solid fa-circle-info text-lg"></i>
                         </button>
@@ -4253,6 +4261,17 @@ async function confirmVoid() {
 async function handleFileUpload() {
     const fileInput = document.getElementById('file-input');
     if(fileInput.files.length === 0) return;
+
+    const file = fileInput.files[0];
+    const fileName = file.name.toLowerCase();
+
+    // 🛑 NEW: Strict File Type Validation
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls') && !fileName.endsWith('.csv')) {
+        showErrorModal("Invalid File Type.\n\nYou uploaded an unsupported file format.\nPlease upload only Excel (.xlsx, .xls) or CSV (.csv) files.");
+        fileInput.value = ""; // Clear the bad file
+        return; // Stop the upload process immediately
+    }
+
     toggleLoading(true, "Parsing File...");
 
     try {
@@ -4401,7 +4420,7 @@ function renderPreview(data) {
 
                 if (k === 'uom') {
                     const options = VALID_UOMS.map(u => `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`).join('');
-                    return `<td class="p-2"><div class="relative w-full h-full"><select onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" style="text-align-last:center;">${options}</select></div></td>`;
+                    return `<td class="p-2"><div class="relative w-full h-full"><select id="cell-${i}-${k}" onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" style="text-align-last:center;">${options}</select></div></td>`;
                 } else {
                     return `<td class="p-2"><input type="text" value="${cellVal}" title="${cellTitle}" onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass}" id="cell-${i}-${k}"></td>`;
                 }
@@ -5036,6 +5055,7 @@ async function loadInventory(reset = false) {
 
 
 // 2. Render Rows (Append Mode)
+// 2. Render Rows (Append Mode)
 function renderInventoryRows(rows) {
     const tbody = document.getElementById('inventory-body');
 
@@ -5049,12 +5069,17 @@ function renderInventoryRows(rows) {
         const avail = parseFloat(item.total_available) || 0;
         const util = total > 0 ? ((1 - (avail / total)) * 100).toFixed(1) : 0;
 
+        // Safely extract UOM to append to the Material Number display
+        const displayUom = item.uom ? ` <span class="text-[10px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded ml-1">${item.uom}</span>` : '';
+
         let color = "bg-blue-600";
         if (util > 80) color = "bg-emerald-500";
         if (util < 20) color = "bg-slate-300";
 
         return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition h-10 animate-fadeIn">
-            <td class="px-6 py-2 font-medium text-slate-700 w-1/4 align-middle">${item.material_number}</td>
+            <td class="px-6 py-2 font-medium text-slate-700 w-1/4 align-middle flex items-center h-full">
+                ${item.material_number} ${displayUom}
+            </td>
             <td class="px-6 py-2 text-center text-slate-600 font-mono w-1/4 align-middle">${total.toLocaleString()}</td>
             <td class="px-6 py-2 text-center text-blue-600 font-mono font-bold w-1/4 align-middle">${avail.toLocaleString()}</td>
             <td class="px-6 py-2 w-1/4 align-middle">
@@ -5070,6 +5095,11 @@ function renderInventoryRows(rows) {
 
     tbody.insertAdjacentHTML('beforeend', html);
 }
+
+
+
+
+
 
 // 3. Infinite Scroll Handler
 function handleInventoryScroll(container) {
