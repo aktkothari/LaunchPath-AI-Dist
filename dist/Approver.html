@@ -1191,26 +1191,6 @@ th {
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <div id="view-matching" class="view-section hidden fade-in">
                  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 class="font-bold text-slate-800 mb-4">Matching Logic</h3>
@@ -1803,8 +1783,8 @@ th {
                 { k: 'entry_number', l: 'Entry Summary Number' },
                 { k: 'material_number', l: 'Material Number' },
                 { k: 'qty', l: 'Qty' },
-                { k: 'qty_consumed', l: 'Consumed' }, // NEW
-                { k: 'pct_consumed', l: '% Used' }, // 🆕 NEW COLUMN
+                { k: 'qty_consumed', l: 'Consumed' },
+                { k: 'pct_consumed', l: '% Used' },
                 { k: 'uom', l: 'UOM' },
                 { k: 'import_date', l: 'Date' },
                 { k: 'duty_paid', l: 'Duty Paid' },
@@ -1819,8 +1799,8 @@ th {
                 { k: 'material_number', l: 'Material' },
                 { k: 'description', l: 'Material Description' },
                 { k: 'qty', l: 'Quantity' },
-                { k: 'qty_consumed', l: 'Consumed' }, // NEW
-                { k: 'pct_consumed', l: '% Used' }, // 🆕 NEW COLUMN
+                { k: 'qty_consumed', l: 'Consumed' },
+                { k: 'pct_consumed', l: '% Used' },
                 { k: 'uom', l: 'UOM' },
                 { k: 'country', l: 'Country' },
                 { k: 'invoice_no', l: 'Invoice No' },
@@ -1828,10 +1808,12 @@ th {
                 { k: 'origin_plant', l: 'Origin Plant' }
             ],
             products: [
+                { k: 'is_default', l: 'Default' }, // 🚀 MOVED TO FRONT (Right after Action column)
                 { k: 'material_number', l: 'Material Number' },
                 { k: 'description', l: 'Description' },
                 { k: 'hts_code', l: 'HTS Code' },
-                { k: 'uom', l: 'UOM' },
+                { k: 'export_uom', l: 'Export UOM' },
+                { k: 'uom', l: 'Import UOM' },
                 { k: 'duty_rate', l: 'Default Duty Rate' },
                 { k: 'conversion_factor', l: 'Conversion Factor' }
             ],
@@ -1864,7 +1846,7 @@ th {
         // --- 🆕 EXCEL-LIKE SORTING & FILTERING LOGIC ---
         function getHeaderHTML(title, tableId, colIdx) {
             // FIX: Don't show inputs for checkboxes or Actions if title is empty or specific names
-            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || title === 'Final Acceptance') {
+            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || title === 'Final Acceptance' || title === 'Default') {
                 return `<div class="th-static font-bold text-xs uppercase">${title}</div>`;
             }
             return `
@@ -2538,8 +2520,6 @@ html += `<th class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200">${g
 // --- TABLE DATA LOADER (PATCHED FOR ARCHIVING) ---
 
 // --- TABLE DATA LOADER (PATCHED: Archiving & No-Restore Logic) ---
-
-
 async function loadTableData(target) {
     toggleLoading(true, "Loading Data...");
     const tbody = document.querySelector('#data-table tbody');
@@ -2557,7 +2537,6 @@ async function loadTableData(target) {
         if (target === 'imports' || target === 'exports') {
             rows.forEach(row => {
                 const consumed = parseFloat(row.qty_consumed) || 0;
-                // Imports use 'qty_original', Exports use 'qty'
                 const total = parseFloat(target === 'imports' ? row.qty_original : row.qty) || 0;
 
                 if (total > 0) {
@@ -2605,38 +2584,42 @@ async function loadTableData(target) {
                     bRows += `<td class="px-6 py-3 text-center"><button onclick="toggleArchive('${target}', '${row.id}')" class="${btnColor} transition" title="${title}"><i class="fa-solid ${icon}"></i></button></td>`;
                 }
 
-                // DETERMINE ROW COLOR LOGIC
                 const pct = row.pct_consumed || 0;
-
-                // Default: 0% -> Light Red Highlight
                 let usageStyle = "text-red-500 font-bold bg-red-50";
-
-                // > 0% -> Green Highlight
                 if(pct > 0) {
                     usageStyle = "text-emerald-600 font-bold bg-emerald-50";
                 }
 
                 config.forEach(col => {
                     let val = row[col.k] !== undefined && row[col.k] !== null ? row[col.k] : "";
-
-                    // Money Formatting
-                    if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
-                        val = formatMoney(val);
-                    }
-
                     let cellClasses = "px-6 py-3 whitespace-nowrap text-center";
 
-                    // === UNIFIED STYLING LOGIC ===
-                    // Applies styling to BOTH 'Consumed' and '% Used' columns
-                    if (col.k === 'qty_consumed') {
-                        cellClasses = `px-6 py-3 ${usageStyle} text-center font-mono border-l border-slate-100`;
+                    // 🚀 NEW: Special Rendering for 'is_default' Column
+                    if (col.k === 'is_default') {
+                        if (isArchived) {
+                            val = `<i class="fa-solid fa-star text-slate-200 text-lg opacity-50"></i>`;
+                        } else if (val == 1) {
+                            val = `<i class="fa-solid fa-star text-yellow-400 text-lg drop-shadow-sm" title="Default Mapping"></i>`;
+                        } else {
+                            val = `<button onclick="setDefaultMapping('${row.id}', '${row.material_number}')" class="text-slate-300 hover:text-yellow-400 transition" title="Set as Default"><i class="fa-regular fa-star text-lg hover:scale-110 transform"></i></button>`;
+                        }
                     }
-                    else if (col.k === 'pct_consumed') {
-                         cellClasses = `px-6 py-3 ${usageStyle} text-center border-r border-slate-100`;
-                         val = val + "%";
+                    else {
+                        // Standard Formatting
+                        if((col.k.includes('duty') || col.k.includes('price') || col.k.includes('amount') || col.k.includes('value')) && !col.k.includes('rate')) {
+                            val = formatMoney(val);
+                        }
+
+                        if (col.k === 'qty_consumed') {
+                            cellClasses = `px-6 py-3 ${usageStyle} text-center font-mono border-l border-slate-100`;
+                        }
+                        else if (col.k === 'pct_consumed') {
+                             cellClasses = `px-6 py-3 ${usageStyle} text-center border-r border-slate-100`;
+                             val = val + "%";
+                        }
                     }
 
-                    if (isArchived) cellClasses += " opacity-60";
+                    if (isArchived && col.k !== 'is_default') cellClasses += " opacity-60";
                     bRows += `<td class="${cellClasses}">${val}</td>`;
                 });
                 bRows += `</tr>`;
@@ -2647,7 +2630,6 @@ async function loadTableData(target) {
         toggleLoading(false);
     }
 }
-
 
 
 
@@ -2683,6 +2665,37 @@ async function loadTableData(target) {
             }
         }
 
+
+
+
+
+// 🚀 NEW: Default Mapping Handler
+// 🚀 NEW: Default Mapping Handler
+        async function setDefaultMapping(id, materialNumber) {
+            toggleLoading(true, "Updating Default Mapping...");
+            try {
+                const res = await safeFetch('/drawback/api/set_default_mapping', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id: id,
+                        material_number: materialNumber
+                    })
+                });
+
+                if(res.success) {
+                    showToast(res.message || "Default Updated", "success");
+                    loadTableData('products'); // Refresh the table to update the stars
+                } else {
+                    showToast(res.message || "Update Failed", "error");
+                }
+            } catch(e) {
+                console.error(e);
+                showToast("Network Error", "error");
+            } finally {
+                toggleLoading(false);
+            }
+        }
 
 
         // --- HELPER TO ESCAPE JSON FOR ONCLICK ---
@@ -4395,7 +4408,6 @@ function renderPreview(data) {
             rowClass = "error-row border-b border-red-200 bg-red-50";
             let tooltip = row._errors.join('\n');
 
-            // 🔴 FIX: Showing the specific error message [0] instead of the word "Error"
             statusHtml = `<span class="text-red-600 font-bold text-xs cursor-help flex items-center justify-center gap-1" title="${tooltip}">
                             <i class="fa-solid fa-circle-xmark"></i> ${row._errors[0]}
                           </span>`;
@@ -4418,7 +4430,8 @@ function renderPreview(data) {
                     cellTitle = "Auto-filled by System";
                 }
 
-                if (k === 'uom') {
+                // 🚀 NEW: Render Dropdowns for BOTH UOM fields
+                if (k === 'uom' || k === 'export_uom') {
                     const options = VALID_UOMS.map(u => `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`).join('');
                     return `<td class="p-2"><div class="relative w-full h-full"><select id="cell-${i}-${k}" onchange="updateStagedValue(${i}, '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" style="text-align-last:center;">${options}</select></div></td>`;
                 } else {
@@ -4429,8 +4442,6 @@ function renderPreview(data) {
 
     recalcStatus();
 }
-
-
 
 
 
@@ -4455,7 +4466,6 @@ function renderPreview(data) {
 
 
 
-
 function validateRow(row) {
     let messages = [];
     let fields = [];
@@ -4464,11 +4474,23 @@ function validateRow(row) {
     if (['imports', 'exports', 'products'].includes(currentView)) {
         const uom = (row.uom || '').toUpperCase();
         if (!uom) {
-            messages.push("Missing UOM");
+            messages.push(currentView === 'products' ? "Missing Import UOM" : "Missing UOM");
             fields.push('uom');
         } else if (!VALID_UOMS.includes(uom)) {
-            messages.push(`Invalid UOM: ${uom}`);
+            messages.push(currentView === 'products' ? `Invalid Import UOM: ${uom}` : `Invalid UOM: ${uom}`);
             fields.push('uom');
+        }
+
+        // 🚀 NEW: Export UOM Validation specifically for Product Master
+        if (currentView === 'products') {
+            const exportUom = (row.export_uom || '').toUpperCase();
+            if (!exportUom) {
+                messages.push("Missing Export UOM");
+                fields.push('export_uom');
+            } else if (!VALID_UOMS.includes(exportUom)) {
+                messages.push(`Invalid Export UOM: ${exportUom}`);
+                fields.push('export_uom');
+            }
         }
     }
 
@@ -4503,8 +4525,6 @@ function validateRow(row) {
     });
 
     // 4. Dates (STRICT PATCH)
-    // 🚀 Fix: Added regex check to ensure full MM/DD/YYYY or YYYY-MM-DD format
-    // This prevents strings like "2024" from passing as a valid date.
     ['import_date', 'export_date'].forEach(field => {
         if (row[field] !== undefined) {
             const dateStr = String(row[field] || '').trim();
@@ -4512,8 +4532,6 @@ function validateRow(row) {
                 messages.push("Date Required");
                 fields.push(field);
             } else {
-                // Strict regex: requires digits followed by / or - then digits then / or - then digits
-                // This forces the presence of month, day, and year.
                 const strictDateRegex = /^(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})$/;
                 const d = new Date(dateStr);
                 const now = new Date();
@@ -4550,14 +4568,12 @@ function validateRow(row) {
 }
 
 
-
-
         // ==========================================
         // 2. UPDATED EDIT HANDLER
         // ==========================================
 function updateStagedValue(index, key, value) {
-    // [PATCH] Auto-uppercase UOM
-    if (key === 'uom') value = value.toUpperCase();
+    // 🚀 NEW: Auto-uppercase BOTH UOM fields
+    if (key === 'uom' || key === 'export_uom') value = value.toUpperCase();
 
     // Update Data Model
     stagedData[index][key] = value.trim();
@@ -4586,7 +4602,6 @@ function updateStagedValue(index, key, value) {
         rowEl.className = "error-row border-b border-red-200 transition";
         const displayError = row._errors[0];
 
-        // 🔴 FIX: Show the text here too
         statusEl.innerHTML = `<span class="text-red-600 font-bold text-xs flex items-center justify-center gap-1">
                                 <i class="fa-solid fa-circle-xmark"></i> ${displayError}
                               </span>`;
