@@ -2741,21 +2741,27 @@ async function loadTableData(target) {
 
 // --- SHOW MATCH DETAILS MODAL (Premium UI + Full Email Visibility) ---
 function showMatchDetails(match) {
-    // 1. Header Information
     document.getElementById('det-uuid').innerText = match.match_uuid || match.id;
 
-    // 2. Export Record Side
+    // 🛠️ PATCH: Calculate Actual Allocated Export Qty using the applied Conversion Factor
+    let cf = parseFloat(match.conversion_factor_used) || 1.0;
+    let allocatedExportQty = parseFloat(match.qty_matched) / cf;
+
+    // Export Side
     document.getElementById('det-exp-entry').innerText = match.export_entry_number || '-';
     document.getElementById('det-exp-material').innerText = match.export_material_number || '-';
     document.getElementById('det-exp-date').innerText = match.export_date || '-';
-    document.getElementById('det-exp-qty').innerText = match.export_qty_total || '-';
+
+    // 🛠️ PATCH: Display Allocated Qty vs Total Qty to clear up CF confusion
+    document.getElementById('det-exp-qty').innerText = `${allocatedExportQty} (out of ${match.export_qty_total})`;
+
     document.getElementById('det-exp-uom').innerText = match.export_uom || '-';
     document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';
     document.getElementById('det-exp-country').innerText = match.export_country || '-';
     document.getElementById('det-exp-desc').innerText = match.export_desc || '-';
     document.getElementById('det-exp-id').innerText = match.export_id || '-';
 
-    // 3. Import Record Side
+    // Import Side
     document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';
     document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
     document.getElementById('det-imp-date').innerText = match.import_date || '-';
@@ -2769,18 +2775,17 @@ function showMatchDetails(match) {
     document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);
     document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);
 
-    // 4. Match Logic & Calculations
     document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;
 
     let enteredVal = 0;
     if (parseFloat(match.import_qty_original) > 0) {
-        enteredVal = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_customs_val);
+         enteredVal = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_customs_val);
     }
     document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);
 
-    // Calculate Export Duty based on ACTUAL IMPORT DUTY PAID
+    // UPDATED: Calculate Export Duty based on ACTUAL IMPORT DUTY PAID, NOT RATE
     let exportDuty = 0;
-    if (parseFloat(match.import_qty_original) > 0) {
+    if(parseFloat(match.import_qty_original) > 0) {
         exportDuty = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_duty_paid);
     }
     document.getElementById('det-export-duty').innerText = formatMoney(exportDuty);
@@ -2793,18 +2798,12 @@ function showMatchDetails(match) {
     document.getElementById('det-status').innerText = match.status;
     document.getElementById('det-notes').innerText = match.notes || 'No comments.';
 
-    // 5. 🆕 PREMIUM TRANSACTION LIFECYCLE (FIXED SELECTOR)
-    // 🚨 FIX: We now select by the persistent Container ID, not the child element that gets deleted.
     const auditContainer = document.getElementById('transaction-lifecycle-container');
-
     if (auditContainer) {
-        // Helpers for the timeline design
         const renderStep = (label, name, email, color, icon, isCompleted) => {
             const opacity = isCompleted ? 'opacity-100' : 'opacity-50 grayscale';
             const border = isCompleted ? `border-${color}-200 bg-white` : 'border-slate-100 bg-slate-50';
             const iconBg = isCompleted ? `bg-${color}-50 text-${color}-600` : 'bg-slate-100 text-slate-300';
-
-            // 🔧 FIX: Removed 'truncate' and added 'break-all' to ensure email wraps and shows fully
             const displayEmail = email ? `<div class="text-[10px] text-slate-400 font-mono leading-tight break-all mt-0.5">${email}</div>` : '';
             const displayName = name || '<span class="text-slate-300 italic">Pending</span>';
 
@@ -2827,12 +2826,10 @@ function showMatchDetails(match) {
             return `<div class="w-8 h-0.5 ${lineColor} hidden md:block self-center"></div>`;
         };
 
-        // Determine States
         const hasReview = !!(match.reviewed_by || match.reviewed_by_name);
         const hasApproval = !!(match.approved_by || match.approved_by_name);
         const hasFinal = !!(match.finalized_by || match.finalized_by_name);
 
-        // Inject HTML with new Title
         auditContainer.innerHTML = `
             <div class="flex items-center justify-between mb-4">
                 <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
@@ -2853,9 +2850,14 @@ function showMatchDetails(match) {
         `;
     }
 
-    // 6. Show Modal
     document.getElementById('details-modal').classList.remove('hidden');
 }
+
+
+
+
+
+
 
 
 <!--        function showMatchDetails(match) {-->
@@ -4528,18 +4530,19 @@ function validateRow(row) {
         }
     }
 
-    // 3. Numerics (PATCHED)
-    ['qty', 'duty_paid', 'duty_rate', 'conversion_factor', 'customs_value'].forEach(field => {
+    // 3. Numerics (PATCHED to include duty_rate_1)
+    ['qty', 'duty_paid', 'duty_rate', 'duty_rate_1', 'conversion_factor', 'customs_value'].forEach(field => {
         if (row[field] !== undefined) {
             const val = parseFloat(row[field]);
+            const displayName = field === 'duty_rate_1' ? 'Duty Rate' : field;
 
             // Generic Positive Check
             if (isNaN(val) || val <= 0) {
-                messages.push(`${field} must be > 0`);
+                messages.push(`${displayName} must be > 0`);
                 fields.push(field);
             }
             // PATCH: Specific Check for Duty Rate (Must be <= 1.0)
-            else if (field === 'duty_rate' && val > 1.0) {
+            else if ((field === 'duty_rate' || field === 'duty_rate_1') && val > 1.0) {
                 messages.push("Duty Rate must be <= 1.0");
                 fields.push(field);
             }
@@ -4588,6 +4591,9 @@ function validateRow(row) {
 
     return { messages, fields };
 }
+
+
+
 
 
         // ==========================================
