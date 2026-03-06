@@ -1845,8 +1845,8 @@ th {
 
         // --- 🆕 EXCEL-LIKE SORTING & FILTERING LOGIC ---
         function getHeaderHTML(title, tableId, colIdx) {
-            // FIX: Don't show inputs for checkboxes or Actions if title is empty or specific names
-            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || title === 'Final Acceptance' || title === 'Default') {
+            // FIX: Removed 'Default' from the exclusion list
+            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || title === 'Final Acceptance') {
                 return `<div class="th-static font-bold text-xs uppercase">${title}</div>`;
             }
             return `
@@ -1921,6 +1921,13 @@ async function discardMatch(matchId) {
             }
         }
 
+
+
+
+
+
+
+
         function sortTable(tableId, colIndex) {
             const table = document.getElementById(tableId);
             const tbody = table.tBodies[0];
@@ -1939,8 +1946,9 @@ async function discardMatch(matchId) {
             if(activeIcon) activeIcon.className = dir === 'asc' ? 'fa-solid fa-sort-up text-blue-600' : 'fa-solid fa-sort-down text-blue-600';
 
             rows.sort((a, b) => {
-                let valA = a.cells[colIndex].innerText.trim();
-                let valB = b.cells[colIndex].innerText.trim();
+                // 🚀 FIX: Used textContent instead of innerText to read hidden spans (1 or 0)
+                let valA = a.cells[colIndex].textContent.trim();
+                let valB = b.cells[colIndex].textContent.trim();
 
                 // FIX: Strip HTML tags if any (for status badges etc)
                 valA = valA.replace(/<[^>]*>?/gm, '');
@@ -1972,6 +1980,11 @@ async function discardMatch(matchId) {
 
             rows.forEach(row => tbody.appendChild(row));
         }
+
+
+
+
+
 
 
 
@@ -2597,11 +2610,11 @@ async function loadTableData(target) {
                     // 🚀 NEW: Special Rendering for 'is_default' Column
                     if (col.k === 'is_default') {
                         if (isArchived) {
-                            val = `<i class="fa-solid fa-star text-slate-200 text-lg opacity-50"></i>`;
+                            val = `<span class="hidden">0</span><i class="fa-solid fa-star text-slate-200 text-lg opacity-50"></i>`;
                         } else if (val == 1) {
-                            val = `<i class="fa-solid fa-star text-yellow-400 text-lg drop-shadow-sm" title="Default Mapping"></i>`;
+                            val = `<span class="hidden">1</span><i class="fa-solid fa-star text-yellow-400 text-lg drop-shadow-sm" title="Default Mapping"></i>`;
                         } else {
-                            val = `<button onclick="setDefaultMapping('${row.id}', '${row.material_number}')" class="text-slate-300 hover:text-yellow-400 transition" title="Set as Default"><i class="fa-regular fa-star text-lg hover:scale-110 transform"></i></button>`;
+                            val = `<span class="hidden">0</span><button onclick="setDefaultMapping('${row.id}', '${row.material_number}')" class="text-slate-300 hover:text-yellow-400 transition" title="Set as Default"><i class="fa-regular fa-star text-lg hover:scale-110 transform"></i></button>`;
                         }
                     }
                     else {
@@ -2630,6 +2643,15 @@ async function loadTableData(target) {
         toggleLoading(false);
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 
