@@ -427,39 +427,48 @@ th {
                 </div>
             </div>
 
+
+
+
+
+
+
             <div class="mt-6 bg-white rounded-lg shadow-sm border border-slate-200 p-5">
                 <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 border-b border-slate-100 pb-2">Match Logic & Calculation Breakdown</h4>
-                <div class="grid grid-cols-7 gap-4 text-center">
-                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                        <div class="detail-label">Algorithm</div>
-                        <div id="det-algo" class="font-bold text-blue-600"></div>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                        <div class="detail-label">Consumed Qty</div>
-                        <div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div>
-                    </div>
-                    <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
-                        <div class="detail-label">Entered Value</div>
-                        <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
-                    </div>
-                    <div class="bg-orange-50 p-3 rounded border border-orange-100">
-                        <div class="detail-label">Export Duty (100%)</div>
-                        <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
-                    </div>
-                    <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
-                        <div class="detail-label">99% Duty</div>
-                        <div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                        <div class="detail-label">Total Refund</div>
-                        <div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded border border-slate-100">
-                        <div class="detail-label">Status</div>
-                        <div id="det-status"></div>
-                    </div>
-                </div>
-                <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
+
+                <div class="overflow-x-auto pb-2">
+                    <div class="grid grid-cols-7 gap-4 text-center min-w-[800px]">
+
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Algorithm</div>
+                            <div id="det-algo" class="font-bold text-blue-600"></div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Consumed Qty</div>
+                            <div id="det-match-qty" class="font-bold text-slate-800 text-lg"></div>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
+                            <div class="detail-label">Entered Value</div>
+                            <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded border border-orange-100">
+                            <div class="detail-label">Export Duty (100%)</div>
+                            <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
+                            <div class="detail-label">99% Duty</div>
+                            <div id="det-99-duty" class="font-bold text-emerald-700 text-lg"></div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Total Refund</div>
+                            <div id="det-total-refund" class="font-bold text-slate-700 text-xl"></div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                            <div class="detail-label">Status</div>
+                            <div id="det-status"></div>
+                        </div>
+
+                    </div> </div> <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
                     <i class="fa-solid fa-circle-info mr-1 text-yellow-600"></i> <span id="det-notes"></span>
                 </div>
             </div>
@@ -2876,12 +2885,14 @@ function showMatchDetails(match) {
                 </span>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-4 align-stretch">
-                ${renderStep('Reviewer', match.reviewed_by_name, match.reviewed_by, 'blue', 'fa-magnifying-glass', hasReview)}
-                ${renderLine(hasApproval, 'emerald')}
-                ${renderStep('Approver', match.approved_by_name, match.approved_by, 'emerald', 'fa-stamp', hasApproval)}
-                ${renderLine(hasFinal, 'purple')}
-                ${renderStep('Broker Filing', match.finalized_by_name, match.finalized_by, 'purple', 'fa-flag-checkered', hasFinal)}
+            <div class="overflow-x-auto pb-2">
+                <div class="flex flex-row gap-4 align-stretch min-w-[600px]">
+                    ${renderStep('Reviewer', match.reviewed_by_name, match.reviewed_by, 'blue', 'fa-magnifying-glass', hasReview)}
+                    ${renderLine(hasApproval, 'emerald')}
+                    ${renderStep('Approver', match.approved_by_name, match.approved_by, 'emerald', 'fa-stamp', hasApproval)}
+                    ${renderLine(hasFinal, 'purple')}
+                    ${renderStep('Broker Filing', match.finalized_by_name, match.finalized_by, 'purple', 'fa-flag-checkered', hasFinal)}
+                </div>
             </div>
         `;
     }
@@ -4949,6 +4960,10 @@ function validateRow(row) {
     }
 
     // 3. Numerics (Strips out $ and commas securely)
+// 3. Numerics (Strict Validation)
+
+
+// 3. Numerics (Strict Validation)
     const numericFields = [
         { k: 'qty', l: 'Quantity' },
         { k: 'duty_paid', l: 'Duty Paid' },
@@ -4958,36 +4973,32 @@ function validateRow(row) {
         { k: 'customs_value', l: 'Customs Value' }
     ];
 
-
-
-
-
-numericFields.forEach(f => {
+    numericFields.forEach(f => {
         if (activeKeys.includes(f.k)) {
             const strVal = String(row[f.k] || '').trim();
             let val;
 
-            // 🟢 PATCH: Intercept "FREE" for duty rates and convert to 0.0 safely
-            if ((f.k === 'duty_rate' || f.k === 'duty_rate_1') && strVal.toUpperCase() === 'FREE') {
+            // 🟢 PATCH: Explicitly added duty_paid so "FREE" is accepted across all duty columns
+            if ((f.k === 'duty_rate' || f.k === 'duty_rate_1' || f.k === 'duty_paid') && strVal.toUpperCase() === 'FREE') {
                 val = 0.0;
             } else {
-                val = parseFloat(strVal.replace(/[^0-9.-]+/g,""));
+                const cleanStr = strVal.replace(/[$,\s]/g, "");
+                val = Number(cleanStr);
             }
 
             // Change: Allow 0 for duty_rate, duty_rate_1, and duty_paid
             if (f.k === 'duty_rate' || f.k === 'duty_rate_1' || f.k === 'duty_paid') {
                 if (strVal === '' || isNaN(val) || val < 0) {
-                    messages.push(`${f.l} cannot be negative`);
+                    messages.push(`${f.l} must be a valid number or 'FREE' (>= 0)`);
                     fields.push(f.k);
                 } else if ((f.k === 'duty_rate' || f.k === 'duty_rate_1') && val > 1.0) {
-                    // Only cap the percentage rates at 1.0, leave duty_paid uncapped
                     messages.push(`${f.l} must be <= 1.0`);
                     fields.push(f.k);
                 }
             } else {
                 // Keep strictly > 0 for Qty, Customs Value, and Conversion Factor
-                if (!strVal || isNaN(val) || val <= 0) {
-                    messages.push(`${f.l} must be > 0`);
+                if (strVal === '' || isNaN(val) || val <= 0) {
+                    messages.push(`${f.l} must be a valid number > 0`);
                     fields.push(f.k);
                 }
             }
