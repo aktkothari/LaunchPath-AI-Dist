@@ -399,31 +399,46 @@ th {
                 </div>
 
                 <div class="bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
-                    <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100 flex justify-between items-center">
-                        <span class="font-bold text-emerald-800 text-sm uppercase"><i class="fa-solid fa-ship mr-2"></i>Matched Import (Source)</span>
-                        <span class="text-xs text-emerald-600 bg-white px-2 py-1 rounded border border-emerald-100 font-mono" id="det-imp-entry">...</span>
-                    </div>
-                    <div class="p-5 grid grid-cols-3 gap-y-5 gap-x-4 text-sm">
-                        <div class="col-span-2">
-                            <div class="detail-label">Import Material</div>
-                            <div id="det-imp-material" class="text-lg font-bold text-slate-800"></div>
-                        </div>
-                        <div>
-                            <div class="detail-label">Import Date</div>
-                            <div id="det-imp-date"></div>
-                        </div>
-                        <div><div class="detail-label">Declaration #</div><div id="det-imp-dec"></div></div>
-                        <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
-                        <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
-                        <div class="col-span-3 border-t border-dashed border-slate-100"></div>
-                        <div><div class="detail-label">Original Qty</div><div id="det-imp-orig"></div></div>
-                        <div><div class="detail-label">Available Qty</div><div id="det-imp-avail"></div></div>
-                        <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
-                        <div class="col-span-3 border-t border-dashed border-slate-100"></div>
-                        <div><div class="detail-label">Customs Value (Total)</div><div id="det-imp-val"></div></div>
-                        <div><div class="detail-label">Duty Paid</div><div id="det-imp-paid"></div></div>
-                        <div><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
-                    </div>
+
+
+
+                   <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100 flex justify-between items-center">
+    <span class="font-bold text-emerald-800 text-sm uppercase"><i class="fa-solid fa-ship mr-2"></i>Matched Import (Source)</span>
+    <span class="text-xs text-emerald-600 bg-white px-2 py-1 rounded border border-emerald-100 font-mono" id="det-imp-entry">...</span>
+</div>
+<div class="p-5 grid grid-cols-2 gap-y-5 gap-x-4 text-sm">
+    <div class="col-span-2 flex justify-between">
+        <div>
+            <div class="detail-label">Import Material</div>
+            <div id="det-imp-material" class="text-lg font-bold text-slate-800"></div>
+        </div>
+        <div class="text-right">
+            <div class="detail-label">Import Date</div>
+            <div id="det-imp-date"></div>
+        </div>
+    </div>
+
+    <div><div class="detail-label">Declaration #</div><div id="det-imp-dec" class="font-mono"></div></div>
+    <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
+
+    <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
+    <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
+
+    <div class="col-span-2 border-t border-dashed border-slate-100"></div>
+
+    <div><div class="detail-label">Original Qty</div><div id="det-imp-orig"></div></div>
+    <div><div class="detail-label">Available Qty</div><div id="det-imp-avail"></div></div>
+
+    <div class="col-span-2 border-t border-dashed border-slate-100"></div>
+
+    <div><div class="detail-label">Customs Value (Total)</div><div id="det-imp-val"></div></div>
+    <div><div class="detail-label">Duty Paid</div><div id="det-imp-paid"></div></div>
+    <div class="col-span-2"><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
+</div>
+
+
+
+
                 </div>
             </div>
 
@@ -2810,7 +2825,9 @@ function showMatchDetails(match) {
     document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';
     document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
     document.getElementById('det-imp-date').innerText = match.import_date || '-';
-    document.getElementById('det-imp-dec').innerText = match.import_dec_number || '-';
+    // Clean the timestamp off the declaration number if it exists
+    let rawDec = match.import_dec_number || '-';
+    document.getElementById('det-imp-dec').innerText = rawDec.split(' ')[0];
     document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';
     document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';
     document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';
@@ -4589,8 +4606,17 @@ function renderPreview(data) {
             }
 
             if (k === 'uom' || k === 'export_uom') {
+                // 1. Check if the underlying data is actually empty
+                const isBlank = !cellVal || String(cellVal).trim() === '';
+
+                // 2. Create a disabled, hidden placeholder. Force it to be selected if data is blank.
+                const placeholder = `<option value="" disabled ${isBlank ? 'selected' : ''} hidden>Select...</option>`;
+
+                // 3. Generate standard options
                 const options = VALID_UOMS.map(u => `<option value="${u}" ${String(cellVal).toUpperCase() === u ? 'selected' : ''}>${u}</option>`).join('');
-                return `<td class="p-2"><div class="relative w-full h-full"><select id="cell-${row._id}-${k}" onchange="updateStagedValue('${row._id}', '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" style="text-align-last:center;">${options}</select></div></td>`;
+
+                // 4. Inject placeholder before options
+                return `<td class="p-2"><div class="relative w-full h-full"><select id="cell-${row._id}-${k}" onchange="updateStagedValue('${row._id}', '${k}', this.value)" class="${cellClass} appearance-none cursor-pointer font-bold pr-6" style="text-align-last:center;">${placeholder}${options}</select></div></td>`;
             } else {
                 return `<td class="p-2"><input type="text" value="${cellVal}" title="${cellTitle}" oninput="updateStagedValue('${row._id}', '${k}', this.value)" class="${cellClass}" id="cell-${row._id}-${k}"></td>`;
             }
