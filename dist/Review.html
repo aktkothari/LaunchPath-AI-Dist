@@ -1207,11 +1207,17 @@ th {
  <div id="data-table-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
         <div class="px-6 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
              <span class="font-bold text-slate-600 text-sm">Data Records</span>
+
+
              <div class="flex items-center gap-4">
-                 <button onclick="exportCurrentTab()" class="text-xs bg-white border border-slate-300 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1.5 font-medium">
-                     <i class="fa-solid fa-file-export"></i> Export Tab Data
+                 <button id="export-tab-btn" onclick="exportCurrentTab()" class="text-xs bg-white border border-slate-300 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1.5 font-medium">
+                     <i class="fa-solid fa-file-export"></i> Download Data
                  </button>
                  <div class="h-4 w-px bg-slate-300"></div>
+
+
+
+
                  <div class="text-xs text-slate-400 italic">Use column headers to filter & sort</div>
              </div>
         </div>
@@ -2435,11 +2441,21 @@ function switchView(viewId) {
                 document.getElementById('view-management').classList.remove('hidden');
 
                 // 🆕 PATCH: Use the same map for the inner header "Manage [Title]"
-                document.getElementById('mgmt-title').innerText = displayTitle;
+                const mgmtTitle = document.getElementById('mgmt-title');
+                if (mgmtTitle) mgmtTitle.innerText = displayTitle;
+
+                // 🚀 PATCH: Update Export Button Text dynamically
+                const exportBtn = document.getElementById('export-tab-btn');
+                if (exportBtn) {
+                    exportBtn.innerHTML = `<i class="fa-solid fa-file-export"></i> Download ${displayTitle}`;
+                }
 
                 resetUpload();
                 loadTableData(viewId);
             }
+
+
+
             currentView = viewId;
         }
 
@@ -3315,7 +3331,6 @@ async function loadApproverQueue(claimId) {
 <!--        }-->
 
 
-
 function exportCurrentTab() {
     // Determine which tab is currently active
     const targetTab = currentView;
@@ -3335,48 +3350,27 @@ function exportCurrentTab() {
         return;
     }
 
-    showToast(`Preparing ${targetTab} export...`, "success");
+    showToast(`Preparing ${targetTab} download...`, "success");
 
     // Construct the authenticated GET URL
     const exportUrl = `${API_BASE}/drawback/api/export_tab/${targetTab}?workspace_id=${workspaceId}&project_id=${projectId}`;
+
+    // Generate timestamp and format name for the file
+    const now = new Date();
+    const ts = now.getFullYear().toString() +
+               String(now.getMonth() + 1).padStart(2, '0') +
+               String(now.getDate()).padStart(2, '0') + "_" +
+               String(now.getHours()).padStart(2, '0') +
+               String(now.getMinutes()).padStart(2, '0');
+
+    // Format tab name for file (e.g. material_mappings -> Material_Mappings)
+    const formattedTab = targetTab.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_');
 
     // Create a temporary link to trigger the download silently
     const link = document.createElement('a');
     link.href = exportUrl;
     link.target = '_blank';
-    link.download = `Export_${targetTab}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}function exportCurrentTab() {
-    // Determine which tab is currently active
-    const targetTab = currentView;
-
-    // Ensure we are on a valid data management tab
-    const validTabs = ['imports', 'exports', 'products', 'material_mappings'];
-    if (!validTabs.includes(targetTab)) {
-        showToast("Export is not available for this view.", "warning");
-        return;
-    }
-
-    const workspaceId = window.CURRENT_WORKSPACE_ID;
-    const projectId = window.CURRENT_PROJECT_ID;
-
-    if (!workspaceId || !projectId) {
-        showToast("Error: Missing workspace context for export.", "error");
-        return;
-    }
-
-    showToast(`Preparing ${targetTab} export...`, "success");
-
-    // Construct the authenticated GET URL
-    const exportUrl = `${API_BASE}/drawback/api/export_tab/${targetTab}?workspace_id=${workspaceId}&project_id=${projectId}`;
-
-    // Create a temporary link to trigger the download silently
-    const link = document.createElement('a');
-    link.href = exportUrl;
-    link.target = '_blank';
-    link.download = `Export_${targetTab}.xlsx`;
+    link.download = `Customs_Drawbacks_${formattedTab}_${ts}.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -4678,7 +4672,10 @@ function togglePreviewSelection(rowId) {
 
 
 function updateStagedValue(rowId, key, value) {
-    if (key === 'uom' || key === 'export_uom') value = value.toUpperCase();
+    if (key === 'uom' || key === 'export_uom') {
+        value = String(value).toUpperCase().trim();
+        if (value === 'PC') value = 'PCS';
+    }
 
     const row = stagedData.find(r => r._id === rowId);
     if (!row) return;
@@ -4736,12 +4733,24 @@ async function processRowValidation(rowId) {
         };
 
         // Dynamically build payload & logic rules based on the current tab
-        if (currentView === 'imports' || currentView === 'exports') {
-            payload.entry_number = row.entry_number || row.material_document || row.entry_summary_number || '';
-            payload.date = row.import_date || row.export_date || row.date || '';
-            payload.qty = row.qty || row.quantity || row.sum_of_item_quantity || '';
-            payload.uom = row.uom || row.export_uom || row.import_uom || '';
+        if (currentView === 'imports') {
+            payload.entry_number = row.entry_number || row.entry_summary_number || '';
+            payload.qty = row.qty || row.sum_of_item_quantity || '';
+            payload.declaration_line_number = row.declaration_line_number || '';
+            payload.customs_value = row.customs_value || '0';
 
+            // Check if all 5 required import fields exist before pinging the database
+            if (payload.entry_number && payload.material_number && payload.qty && payload.declaration_line_number && payload.customs_value !== '') {
+                isValidToPing = true;
+            }
+        }
+        else if (currentView === 'exports') {
+            payload.entry_number = row.entry_number || row.material_document || '';
+            payload.date = row.export_date || row.date || '';
+            payload.qty = row.qty || row.quantity || '';
+            payload.uom = row.uom || row.export_uom || '';
+
+            // Check if all required export fields exist before pinging the database
             if (payload.entry_number && payload.material_number && payload.date && payload.qty && payload.uom) {
                 isValidToPing = true;
             }
@@ -4820,16 +4829,30 @@ function sweepLocalDuplicates() {
             const impMat = String(r.import_material_number || '').toUpperCase().trim();
             return `${expMat}|${impMat}`;
         }
-        else {
-            // Imports & Exports
-            const entry = String(r.entry_number || r.material_document || r.entry_summary_number || '').toUpperCase().trim();
-            const date = String(r.import_date || r.export_date || r.date || '').split(" ")[0];
-            const qty = r.qty || r.quantity || r.sum_of_item_quantity || '';
-            const uom = String(r.uom || r.export_uom || r.import_uom || '').toUpperCase().trim();
+        else if (currentView === 'imports') {
+            const entry = String(r.entry_number || r.entry_summary_number || '').toUpperCase().trim();
+            const qty = r.qty || r.sum_of_item_quantity || '';
+            const rawQty = parseFloat(String(qty).replace(/[^0-9.-]+/g,""));
+            const cleanQty = isNaN(rawQty) ? "0.0" : String(rawQty);
+
+            const lineNo = String(r.declaration_line_number || '').toUpperCase().trim();
+            const cVal = r.customs_value || '0';
+            const rawCVal = parseFloat(String(cVal).replace(/[^0-9.-]+/g,""));
+            const cleanCVal = isNaN(rawCVal) ? "0.0" : String(rawCVal);
+
+            // New 5-field fingerprint for Imports
+            return `${entry}|${mat}|${cleanQty}|${lineNo}|${cleanCVal}`;
+        }
+        else if (currentView === 'exports') {
+            const entry = String(r.entry_number || r.material_document || '').toUpperCase().trim();
+            const date = String(r.export_date || r.date || '').split(" ")[0];
+            const qty = r.qty || r.quantity || '';
+            const uom = String(r.uom || r.export_uom || '').toUpperCase().trim();
 
             const rawQty = parseFloat(String(qty).replace(/[^0-9.-]+/g,""));
             const cleanQty = isNaN(rawQty) ? "0.0" : String(rawQty);
 
+            // Original fingerprint for Exports
             return `${entry}|${mat}|${date}|${cleanQty}|${uom}`;
         }
     };
@@ -4952,7 +4975,7 @@ function updateRowDOM(rowId) {
 // ==========================================
 // 1. EXTRACTED VALIDATION FUNCTION (GLOBAL)
 // ==========================================
-const VALID_UOMS = ['KG', 'PCS', 'LBS', 'M', 'SQM', 'L', 'GR', 'SET', 'PAIR', 'DOZ', 'EA', 'GAL', 'CM'];
+const VALID_UOMS = ['KG', 'PCS', 'PC', 'LBS', 'M', 'SQM', 'L', 'GR', 'SET', 'PAIR', 'DOZ', 'EA', 'GAL', 'CM'];
 
 // ==========================================
 // 1. BULLETPROOF VALIDATION (Ignores hidden backend fields)
