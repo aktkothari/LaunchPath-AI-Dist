@@ -682,9 +682,6 @@ th {
             </div>
 
             <div class="flex justify-end gap-3 relative z-10">
-                <button id="btn-download-recon-errors" class="hidden px-6 py-2.5 text-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl font-bold transition-all uppercase tracking-wide items-center gap-2">
-                    <i class="fa-solid fa-download"></i> Download Errors
-                </button>
                 <button onclick="document.getElementById('reconciliation-modal').classList.add('hidden')"
                         class="px-8 py-2.5 text-sm bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-bold shadow-md transition-all uppercase tracking-wide">
                     Acknowledge & Review
@@ -1176,9 +1173,6 @@ th {
                         <span class="text-[10px] font-bold text-slate-500 uppercase">Discarded ACE Entries</span>
                         <span class="text-xs font-bold text-slate-800 font-mono" id="persist-ace-discard">0</span>
                     </div>
-                    <button id="btn-persistent-download-errors" class="hidden px-3 py-1.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition shadow-sm">
-                            <i class="fa-solid fa-download mr-1"></i>
-                        </button>
                 </div>
 
                 <div class="flex items-center gap-3 shrink-0">
@@ -1188,12 +1182,8 @@ th {
                     </div>
 
                     <div class="flex gap-2">
-
                         <button onclick="resetUpload()" class="px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100 rounded transition">Cancel</button>
-
                         <button id="btn-discard-selected" onclick="discardSelected()" class="hidden px-3 py-1.5 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition"><i class="fa-solid fa-trash mr-1"></i> Discard Selected</button>
-
-
                         <button id="btn-commit-selected" onclick="commitSelected()" class="hidden px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded font-bold shadow-sm transition"><i class="fa-solid fa-check-double mr-1"></i> Commit Selected</button>
                         <button id="btn-clean" onclick="removeErrors()" class="hidden px-3 py-1.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition"><i class="fa-solid fa-broom mr-1"></i> Clean</button>
                         <button id="btn-commit" onclick="commitData()" disabled class="px-4 py-1.5 text-xs bg-gray-300 text-white rounded font-bold shadow-sm cursor-not-allowed transition-colors"><i class="fa-solid fa-database mr-1"></i> Commit Valid</button>
@@ -4461,10 +4451,7 @@ async function handleFileUpload() {
             renderPreview(stagedData);
 
             // 🟢 LOGIC: Handle Reconciliation Stats (Popup + Persistent Bar)
-            // 🟢 LOGIC: Handle Reconciliation Stats (Popup + Persistent Bar)
             if (currentView === 'imports' && json.message.includes('Reconciliation')) {
-
-                // 🚀 REGEX FIX: Now correctly looking for the exact "Broker" string
                 const matchCount = (json.message.match(/Total Matched Rows:\s*(\d+)/) || [0,0])[1];
                 const expDiscard = (json.message.match(/Discarded Broker Rows:\s*(\d+)/) || [0,0])[1];
                 const aceDiscard = (json.message.match(/Discarded ACE Lines:\s*(\d+)/) || [0,0])[1];
@@ -4474,25 +4461,6 @@ async function handleFileUpload() {
                 document.getElementById('recon-discarded-exp').innerText = parseInt(expDiscard).toLocaleString();
                 document.getElementById('recon-unused-ace').innerText = parseInt(aceDiscard).toLocaleString();
                 document.getElementById('reconciliation-modal').classList.remove('hidden');
-
-                // 🚀 NEW PATCH: Bind BOTH Modal Download Button AND Persistent Bar Download Button
-                const modalDownloadBtn = document.getElementById('btn-download-recon-errors');
-                const persistDownloadBtn = document.getElementById('btn-persistent-download-errors');
-
-                if (json.error_file_uuid) {
-                    if (modalDownloadBtn) {
-                        modalDownloadBtn.classList.remove('hidden');
-                        modalDownloadBtn.classList.add('flex');
-                        modalDownloadBtn.onclick = () => { window.open(`/drawback/api/download_errors/${json.error_file_uuid}`, '_blank'); };
-                    }
-                    if (persistDownloadBtn) {
-                        persistDownloadBtn.classList.remove('hidden');
-                        persistDownloadBtn.onclick = () => { window.open(`/drawback/api/download_errors/${json.error_file_uuid}`, '_blank'); };
-                    }
-                } else {
-                    if (modalDownloadBtn) { modalDownloadBtn.classList.add('hidden'); modalDownloadBtn.classList.remove('flex'); modalDownloadBtn.onclick = null; }
-                    if (persistDownloadBtn) { persistDownloadBtn.classList.add('hidden'); persistDownloadBtn.onclick = null; }
-                }
 
                 // 2. Persistent Header Bar
                 document.getElementById('persist-match-count').innerText = parseInt(matchCount).toLocaleString();
@@ -4520,6 +4488,9 @@ async function handleFileUpload() {
         toggleLoading(false);
     }
 }
+
+
+
 
 
 
@@ -4568,7 +4539,7 @@ function renderPreview(data) {
     });
 
     document.getElementById('staged-preview').classList.remove('hidden');
-    document.getElementById('staged-count').innerText = `${data.length} rows ready`;
+    document.getElementById('staged-count').innerText = `${data.length} rows ready • Click cells to edit`;
 
     const header = document.getElementById('preview-header');
     const body = document.getElementById('preview-body');
@@ -5308,11 +5279,6 @@ async function executeCommit(dataToCommit, loadingText) {
 
 function resetUpload() {
     stagedData = [];
-
-    const persistDownloadBtn = document.getElementById('btn-persistent-download-errors');
-    if (persistDownloadBtn) persistDownloadBtn.classList.add('hidden');
-
-
     previewSelection.clear(); // Ensure tracking memory is cleared
     document.getElementById('file-input').value = "";
     document.getElementById('staged-preview').classList.add('hidden');
