@@ -2431,7 +2431,9 @@ function switchView(viewId) {
             } else if(viewId === 'matching') {
                 document.getElementById('view-matching').classList.remove('hidden');
                 // 🆕 REORDERED HEADERS: [Status, Notes, View] moved to front.
-                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
+                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+<!--                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
                 renderDynamicHeaders('matches-table', matchHeaders, 0);
             } else if(viewId === 'reviewer') {
                 document.getElementById('view-reviewer').classList.remove('hidden');
@@ -3150,7 +3152,8 @@ async function loadApproverQueue(claimId) {
 
             try {
                 // 🆕 REORDERED HEADERS: Status, View moved to front.
-                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
+                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
 
                 renderDynamicHeaders('approver-table', approverHeaders, 1);
 
@@ -3622,7 +3625,7 @@ async function loadHistorySummary() {
                 // 1. Define the Exact Headers required (22 Columns)
                 const headers = [
                     'Imp Entry No','Entry Line No','Import Material Number','Export Material Number',
-                    'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ',
+                    'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM',
                     'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate',
                     'Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
                 ];
@@ -3654,6 +3657,7 @@ async function loadHistorySummary() {
                         row.import_hts,
                         row.qty_matched,
                         row.import_uom,
+                        row.export_uom,
                         row.export_entry_number,
                         row.export_date,
                         row.export_country,
@@ -3827,7 +3831,9 @@ function renderReviewerTable(data) {
             reviewerSelection.clear();
 
             // 🆕 REORDERED HEADERS: Status, Notes, Actions moved to indices 1, 2, 3 (After Checkbox)
-            const headers = ['Status', 'Notes', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
+            // To this (Adding 'Export UOM'):
+            const headers = ['Status', 'Notes', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
 
             renderDynamicHeaders('reviewer-table', headers, 1); // 1 = Has Checkbox at index 0
 
@@ -3866,6 +3872,7 @@ function renderReviewerTable(data) {
                     <td>${m.import_hts}</td>
                     <td>${m.qty_matched}</td>
                     <td>${m.import_uom}</td>
+                    <td>${m.export_uom}</td>
                     <td>${m.export_entry_number}</td>
                     <td>${m.export_date}</td>
                     <td>${m.export_country}</td>
@@ -3959,6 +3966,7 @@ function renderApproverTable(data) {
                     <td>${m.import_hts}</td>
                     <td>${m.qty_matched}</td>
                     <td>${m.import_uom}</td>
+                    <td>${m.export_uom}</td>
                     <td>${m.export_entry_number}</td>
                     <td>${m.export_date}</td>
                     <td>${m.export_country}</td>
@@ -4017,8 +4025,8 @@ function renderHistoryTable(data) {
     const tbody = document.getElementById('history-body');
 
     // 🆕 REORDERED HEADERS: Status, View, Actions at start. Approve Date at end.
-    const headers = ['Status', 'View', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'];
-
+    // To this:
+        const headers = ['Status', 'View', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'];
     renderDynamicHeaders('history-table', headers, 0);
 
     if (data.length === 0) {
@@ -4072,6 +4080,7 @@ function renderHistoryTable(data) {
             <td>${m.import_hts}</td>
             <td>${m.qty_matched}</td>
             <td>${m.import_uom}</td>
+            <td>${m.export_uom}</td>
             <td>${m.export_entry_number}</td>
             <td>${m.export_date}</td>
             <td>${m.export_country}</td>
@@ -5388,6 +5397,7 @@ async function runMatching() {
                         <td>${m.import_hts}</td>
                         <td>${m.qty_matched}</td>
                         <td>${m.import_uom}</td>
+                        <td>${m.export_uom}</td>
                         <td>${m.export_entry_number}</td>
                         <td>${m.export_date}</td>
                         <td>${m.export_country}</td>
