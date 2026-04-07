@@ -2849,8 +2849,7 @@ function showMatchDetails(match) {
     document.getElementById('det-exp-date').innerText = match.export_date || '-';
 
     // 🛠️ PATCH: Display Allocated Qty vs Total Qty to clear up CF confusion
-    document.getElementById('det-exp-qty').innerText = `${allocatedExportQty} (out of ${match.export_qty_total})`;
-
+    document.getElementById('det-exp-qty').innerText = allocatedExportQty.toFixed(2);
     document.getElementById('det-exp-uom').innerText = match.export_uom || '-';
     document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';
     document.getElementById('det-exp-country').innerText = match.export_country || '-';
@@ -3873,8 +3872,7 @@ function renderReviewerTable(data) {
 
         let cf = parseFloat(m.conversion_factor_used) || 1.0;
         let importQtyConsumed = parseFloat(m.qty_matched) || 0;
-<!--        let actualExportQty = (importQtyConsumed / cf).toFixed(2);-->
-        let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+        let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
         return `
         <tr class="${rowClass}" id="reviewer-row-${m.match_id}">
@@ -3982,7 +3980,7 @@ function renderApproverTable(data) {
     tbody.innerHTML = data.map(m => {
         let cf = parseFloat(m.conversion_factor_used) || 1.0;
         let importQtyConsumed = parseFloat(m.qty_matched) || 0;
-        let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+        let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
         return `
         <tr class="border-b border-slate-50 hover:bg-emerald-50 transition">
@@ -4099,8 +4097,7 @@ function renderHistoryTable(data) {
 
         let cf = parseFloat(m.conversion_factor_used) || 1.0;
         let importQtyConsumed = parseFloat(m.qty_matched) || 0;
-<!--        let actualExportQty = (importQtyConsumed / cf).toFixed(2);-->
-        let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+        let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
         return `
         <tr class="${rowClass}">
@@ -5422,7 +5419,7 @@ async function runMatching() {
                 tbody.innerHTML = json.data.map(m => {
                     let cf = parseFloat(m.conversion_factor_used) || 1.0;
                     let importQtyConsumed = parseFloat(m.qty_matched) || 0;
-                    let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+                    let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
                     return `
                     <tr class="border-b border-slate-50 hover:bg-blue-50 transition">
