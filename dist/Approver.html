@@ -2432,7 +2432,15 @@ function switchView(viewId) {
                 document.getElementById('view-matching').classList.remove('hidden');
                 // 🆕 REORDERED HEADERS: [Status, Notes, View] moved to front.
 
-                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+                const matchHeaders = [
+                    'Status', 'Notes', 'View', 'Imp Entry No','Entry Line No',
+                    'Import Material Number','Export Material Number','Imp Date',
+                    'Goods Description','Line Duty','HTSUS No',
+                    'Export Qty', 'Export UOM', 'Conv. Factor', 'Import Qty', 'Import UOM',
+                    'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
+                    'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
+                ];
+
 <!--                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
                 renderDynamicHeaders('matches-table', matchHeaders, 0);
             } else if(viewId === 'reviewer') {
@@ -3153,7 +3161,17 @@ async function loadApproverQueue(claimId) {
             try {
                 // 🆕 REORDERED HEADERS: Status, View moved to front.
 
-                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+
+                const approverHeaders = [
+                    'Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number',
+                    'Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No',
+                    'Export Qty', 'Export UOM', 'Conv. Factor', 'Import Qty', 'Import UOM',
+                    'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate',
+                    'Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
+                ];
+
+
+<!--                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
 
                 renderDynamicHeaders('approver-table', approverHeaders, 1);
 
@@ -3824,68 +3842,80 @@ function exportAllMatches() {
         const calc99Duty = (m) => calcExportDuty(m) * 0.99;
 
 
-
-
 function renderReviewerTable(data) {
-            const tbody = document.getElementById('reviewer-body');
-            reviewerSelection.clear();
+    const tbody = document.getElementById('reviewer-body');
+    reviewerSelection.clear();
 
-            // 🆕 REORDERED HEADERS: Status, Notes, Actions moved to indices 1, 2, 3 (After Checkbox)
+    // 🆕 REORDERED: Export Qty -> Export UOM -> CF -> Import Qty -> Import UOM
+    const headers = [
+        'Status', 'Notes', 'Actions', 'Imp Entry No','Entry Line No',
+        'Import Material Number', 'Export Material Number', 'Imp Date',
+        'Goods Description','Line Duty','HTSUS No',
+        'Export Qty', 'Export UOM', 'Conv. Factor', 'Import Qty', 'Import UOM',
+        'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
+        'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
+    ];
 
-            // To this (Adding 'Export UOM'):
-            const headers = ['Status', 'Notes', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
+    renderDynamicHeaders('reviewer-table', headers, 1);
 
-            renderDynamicHeaders('reviewer-table', headers, 1); // 1 = Has Checkbox at index 0
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="27" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;
+        return;
+    }
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = data.map(m => {
-                let noteHtml = m.notes || '-';
-                let rowClass = "border-b border-slate-50 hover:bg-blue-50 transition";
-                if(m.rejection_reason) {
-                    rowClass = "border-l-4 border-red-500 bg-red-50 hover:bg-red-100 transition";
-                    noteHtml = `<div class="text-red-600 font-bold text-xs mb-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Returned: ${m.rejection_reason}</div>` + noteHtml;
-                }
-                return `
-                <tr class="${rowClass}" id="reviewer-row-${m.match_id}">
-                    <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>
-
-                    <td class="text-xs text-slate-500 font-bold">DRAFT</td>
-
-                    <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>
-
-                    <td class="text-center flex items-center justify-center gap-2 py-3">
-                        <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-
-                    <td>${m.import_entry_number}</td>
-                    <td>${m.import_dec_line}</td>
-                    <td>${m.import_material_number}</td>
-                    <td>${m.export_material_number || m.matched_material_number}</td>
-                    <td>${m.import_date}</td>
-                    <td>${m.export_desc}</td>
-                    <td>${formatMoney(calcExportDuty(m))}</td>
-                    <td>${m.import_hts}</td>
-                    <td>${m.qty_matched}</td>
-                    <td>${m.import_uom}</td>
-                    <td>${m.export_uom}</td>
-                    <td>${m.export_entry_number}</td>
-                    <td>${m.export_date}</td>
-                    <td>${m.export_country}</td>
-                    <td>HTS</td>
-                    <td>${m.import_hts}</td>
-                    <td>${m.import_duty_rate}</td>
-                    <td>${formatMoney(calcUnitValue(m))}</td>
-                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
-                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
-                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
-                    <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
-                </tr>`}).join('');
+    tbody.innerHTML = data.map(m => {
+        let noteHtml = m.notes || '-';
+        let rowClass = "border-b border-slate-50 hover:bg-blue-50 transition";
+        if(m.rejection_reason) {
+            rowClass = "border-l-4 border-red-500 bg-red-50 hover:bg-red-100 transition";
+            noteHtml = `<div class="text-red-600 font-bold text-xs mb-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Returned: ${m.rejection_reason}</div>` + noteHtml;
         }
+
+        let cf = parseFloat(m.conversion_factor_used) || 1.0;
+        let importQtyConsumed = parseFloat(m.qty_matched) || 0;
+<!--        let actualExportQty = (importQtyConsumed / cf).toFixed(2);-->
+        let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+
+        return `
+        <tr class="${rowClass}" id="reviewer-row-${m.match_id}">
+            <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>
+
+            <td class="text-xs text-slate-500 font-bold">DRAFT</td>
+            <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>
+            <td class="text-center flex items-center justify-center gap-2 py-3">
+                <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button>
+                <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>
+            </td>
+
+            <td>${m.import_entry_number}</td>
+            <td>${m.import_dec_line}</td>
+            <td>${m.import_material_number}</td>
+            <td>${m.export_material_number || m.matched_material_number}</td>
+            <td>${m.import_date}</td>
+            <td>${m.export_desc}</td>
+            <td>${formatMoney(calcExportDuty(m))}</td>
+            <td>${m.import_hts}</td>
+
+            <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
+            <td class="text-slate-500">${m.export_uom}</td>
+            <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">× ${cf}</td>
+            <td class="font-mono text-slate-700">${importQtyConsumed}</td>
+            <td class="text-slate-500">${m.import_uom}</td>
+
+            <td>${m.export_entry_number}</td>
+            <td>${m.export_date}</td>
+            <td>${m.export_country}</td>
+            <td>HTS</td>
+            <td>${m.import_hts}</td>
+            <td>${m.import_duty_rate}</td>
+            <td>${formatMoney(calcUnitValue(m))}</td>
+            <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
+            <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
+            <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
+            <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
+        </tr>`}).join('');
+}
 
 <!--function renderReviewerTable(data) {-->
 <!--            const tbody = document.getElementById('reviewer-body');-->
@@ -3940,46 +3970,56 @@ function renderReviewerTable(data) {
 <!--                </tr>`}).join('');-->
 <!--        }-->
 
-
-
 function renderApproverTable(data) {
-            const tbody = document.getElementById('approver-body');
-            approverSelection.clear();
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="24" class="p-8 text-center text-slate-400 italic">No matches in this claim.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = data.map(m => `
-                <tr class="border-b border-slate-50 hover:bg-emerald-50 transition">
-                    <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')" class="accent-emerald-600 w-4 h-4"></td>
+    const tbody = document.getElementById('approver-body');
+    approverSelection.clear();
 
-                    <td><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">REVIEWED</span></td>
-                    <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="27" class="p-8 text-center text-slate-400 italic">No matches in this claim.</td></tr>`;
+        return;
+    }
 
-                    <td>${m.import_entry_number}</td>
-                    <td>${m.import_dec_line}</td>
-                    <td>${m.import_material_number}</td>
-                    <td>${m.export_material_number || m.matched_material_number}</td>
-                    <td>${m.import_date}</td>
-                    <td>${m.export_desc}</td>
-                    <td>${formatMoney(calcExportDuty(m))}</td>
-                    <td>${m.import_hts}</td>
-                    <td>${m.qty_matched}</td>
-                    <td>${m.import_uom}</td>
-                    <td>${m.export_uom}</td>
-                    <td>${m.export_entry_number}</td>
-                    <td>${m.export_date}</td>
-                    <td>${m.export_country}</td>
-                    <td>HTS</td>
-                    <td>${m.import_hts}</td>
-                    <td>${m.import_duty_rate}</td>
-                    <td>${formatMoney(calcUnitValue(m))}</td>
-                    <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
-                    <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
-                    <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
-                    <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
-                </tr>`).join('');
-        }
+    tbody.innerHTML = data.map(m => {
+        let cf = parseFloat(m.conversion_factor_used) || 1.0;
+        let importQtyConsumed = parseFloat(m.qty_matched) || 0;
+        let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+
+        return `
+        <tr class="border-b border-slate-50 hover:bg-emerald-50 transition">
+            <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleSelection('${m.match_id}')" class="accent-emerald-600 w-4 h-4"></td>
+
+            <td><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">REVIEWED</span></td>
+            <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-emerald-600"><i class="fa-solid fa-eye"></i></button></td>
+
+            <td>${m.import_entry_number}</td>
+            <td>${m.import_dec_line}</td>
+            <td>${m.import_material_number}</td>
+            <td>${m.export_material_number || m.matched_material_number}</td>
+            <td>${m.import_date}</td>
+            <td>${m.export_desc}</td>
+            <td>${formatMoney(calcExportDuty(m))}</td>
+            <td>${m.import_hts}</td>
+
+            <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
+            <td class="text-slate-500">${m.export_uom}</td>
+            <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">× ${cf}</td>
+            <td class="font-mono text-slate-700">${importQtyConsumed}</td>
+            <td class="text-slate-500">${m.import_uom}</td>
+
+            <td>${m.export_entry_number}</td>
+            <td>${m.export_date}</td>
+            <td>${m.export_country}</td>
+            <td>HTS</td>
+            <td>${m.import_hts}</td>
+            <td>${m.import_duty_rate}</td>
+            <td>${formatMoney(calcUnitValue(m))}</td>
+            <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
+            <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
+            <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
+            <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
+        </tr>`
+    }).join('');
+}
 
 
 
@@ -4020,49 +4060,47 @@ function renderApproverTable(data) {
 <!--        }-->
 
 
-
 function renderHistoryTable(data) {
     const tbody = document.getElementById('history-body');
 
-    // 🆕 REORDERED HEADERS: Status, View, Actions at start. Approve Date at end.
-    // To this:
-        const headers = ['Status', 'View', 'Actions', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'];
+    // 🆕 REORDERED HEADERS
+    const headers = [
+        'Status', 'View', 'Actions', 'Imp Entry No','Entry Line No',
+        'Import Material Number','Export Material Number','Imp Date',
+        'Goods Description','Line Duty','HTSUS No',
+        'Export Qty', 'Export UOM', 'Conv. Factor', 'Import Qty', 'Import UOM',
+        'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
+        'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'
+    ];
     renderDynamicHeaders('history-table', headers, 0);
 
     if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="28" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;
         return;
     }
+
     tbody.innerHTML = data.map(m => {
         const isVoided = m.status === 'VOIDED';
-        const isComplete = m.status === 'COMPLETE'; // 🟢 1. Check for Completed Status
+        const isComplete = m.status === 'COMPLETE';
 
         let rowClass = isVoided ? "bg-gray-100 text-gray-400 border-b border-gray-200" : "border-b border-slate-50 hover:bg-purple-50 transition";
 
-        // 🟢 2. Update Badge Logic
         let statusBadge = isVoided ? `<span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>` : `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;
-        if (isComplete) {
-            statusBadge = `<span class="status-badge status-complete">COMPLETE</span>`;
-        }
+        if (isComplete) statusBadge = `<span class="status-badge status-complete">COMPLETE</span>`;
 
         let actionBtn = '';
-
-        // 🟢 3. Update Action Button Logic
         if(!isVoided && !isComplete) {
-            // Standard Approved Item: Show Void Button
             actionBtn = `<button onclick='openVoidModal(${escapeJSON(m)})' class="text-red-400 hover:text-red-700 font-bold" title="Void & Reclaim"><i class="fa-solid fa-ban"></i></button>`;
         } else if (isComplete) {
-            // Finalized Item: Show Lock Icon
             actionBtn = `<span class="text-slate-300" title="Locked (Finalized)"><i class="fa-solid fa-lock"></i></span>`;
         } else {
-            // Voided Item: Show Dash
             actionBtn = `<span class="text-xs text-gray-300">-</span>`;
         }
 
-        let noteDisplay = m.claim_id || 'Legacy';
-        if(isVoided && m.rejection_reason) {
-                noteDisplay += `<br><span class="text-[9px] text-red-400 italic">${m.rejection_reason}</span>`;
-        }
+        let cf = parseFloat(m.conversion_factor_used) || 1.0;
+        let importQtyConsumed = parseFloat(m.qty_matched) || 0;
+<!--        let actualExportQty = (importQtyConsumed / cf).toFixed(2);-->
+        let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
 
         return `
         <tr class="${rowClass}">
@@ -4078,9 +4116,13 @@ function renderHistoryTable(data) {
             <td>${m.export_desc}</td>
             <td>${formatMoney(calcExportDuty(m))}</td>
             <td>${m.import_hts}</td>
-            <td>${m.qty_matched}</td>
-            <td>${m.import_uom}</td>
-            <td>${m.export_uom}</td>
+
+            <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
+            <td class="text-slate-500">${m.export_uom}</td>
+            <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">× ${cf}</td>
+            <td class="font-mono text-slate-700">${importQtyConsumed}</td>
+            <td class="text-slate-500">${m.import_uom}</td>
+
             <td>${m.export_entry_number}</td>
             <td>${m.export_date}</td>
             <td>${m.export_country}</td>
@@ -4099,7 +4141,6 @@ function renderHistoryTable(data) {
         </tr>`
     }).join('');
 }
-
 
 <!--        function renderHistoryTable(data) {-->
 <!--            const tbody = document.getElementById('history-body');-->
@@ -5378,13 +5419,15 @@ async function runMatching() {
                     return calcExportDuty(m) * 0.99;
                 }
 
-                tbody.innerHTML = json.data.map(m => `
+                tbody.innerHTML = json.data.map(m => {
+                    let cf = parseFloat(m.conversion_factor_used) || 1.0;
+                    let importQtyConsumed = parseFloat(m.qty_matched) || 0;
+                    let actualExportQty = parseFloat(m.export_qty_total).toFixed(2);
+
+                    return `
                     <tr class="border-b border-slate-50 hover:bg-blue-50 transition">
-
                         <td class="text-center"><span class="status-badge status-draft">DRAFT</span></td>
-
                         <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span></td>
-
                         <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>
 
                         <td>${m.import_entry_number}</td>
@@ -5395,9 +5438,13 @@ async function runMatching() {
                         <td>${m.export_desc}</td>
                         <td>${formatMoney(calcExportDuty(m))}</td>
                         <td>${m.import_hts}</td>
-                        <td>${m.qty_matched}</td>
-                        <td>${m.import_uom}</td>
-                        <td>${m.export_uom}</td>
+
+                        <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
+                        <td class="text-slate-500">${m.export_uom}</td>
+                        <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">× ${cf}</td>
+                        <td class="font-mono text-slate-700">${importQtyConsumed}</td>
+                        <td class="text-slate-500">${m.import_uom}</td>
+
                         <td>${m.export_entry_number}</td>
                         <td>${m.export_date}</td>
                         <td>${m.export_country}</td>
@@ -5416,7 +5463,48 @@ async function runMatching() {
                             ${formatMoney(calc99Duty(m))}
                         </td>
                         <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
-                    </tr>`).join('');
+                    </tr>`
+                }).join('');
+
+<!--                tbody.innerHTML = json.data.map(m => `-->
+<!--                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">-->
+
+<!--                        <td class="text-center"><span class="status-badge status-draft">DRAFT</span></td>-->
+
+<!--                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span></td>-->
+
+<!--                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>-->
+
+<!--                        <td>${m.import_entry_number}</td>-->
+<!--                        <td>${m.import_dec_line}</td>-->
+<!--                        <td>${m.import_material_number}</td>-->
+<!--                        <td>${m.export_material_number || m.matched_material_number}</td>-->
+<!--                        <td>${m.import_date}</td>-->
+<!--                        <td>${m.export_desc}</td>-->
+<!--                        <td>${formatMoney(calcExportDuty(m))}</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.qty_matched}</td>-->
+<!--                        <td>${m.import_uom}</td>-->
+<!--                        <td>${m.export_uom}</td>-->
+<!--                        <td>${m.export_entry_number}</td>-->
+<!--                        <td>${m.export_date}</td>-->
+<!--                        <td>${m.export_country}</td>-->
+<!--                        <td>HTS</td>-->
+<!--                        <td>${m.import_hts}</td>-->
+<!--                        <td>${m.import_duty_rate}</td>-->
+<!--                        <td>${formatMoney(calcUnitValue(m))}</td>-->
+
+<!--                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcEnteredValue(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">-->
+<!--                            ${formatMoney(calcExportDuty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">-->
+<!--                            ${formatMoney(calc99Duty(m))}-->
+<!--                        </td>-->
+<!--                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>-->
+<!--                    </tr>`).join('');-->
 
                 showToast(`Success: ${matchCount} matches generated.`, "success");
             }
