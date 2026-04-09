@@ -2690,15 +2690,32 @@ async function loadTableData(target) {
                     bRows += `<td class="px-6 py-3 text-center"><button onclick="toggleArchive('${target}', '${row.id}')" class="${btnColor} transition" title="${title}"><i class="fa-solid ${icon}"></i></button></td>`;
                 }
 
+<!--                const pct = row.pct_consumed || 0;-->
+<!--                let usageStyle = "text-red-500 font-bold bg-red-50";-->
+<!--                if(pct > 0) {-->
+<!--                    usageStyle = "text-emerald-600 font-bold bg-emerald-50";-->
+<!--                }-->
+
+<!--                config.forEach(col => {-->
+<!--                    let val = row[col.k] !== undefined && row[col.k] !== null ? row[col.k] : "";-->
+<!--                    let cellClasses = "px-6 py-3 whitespace-nowrap text-center";-->
+
                 const pct = row.pct_consumed || 0;
+                const actualConsumed = parseFloat(row.qty_consumed) || 0; // 🟢 Grab the raw consumed amount
+
                 let usageStyle = "text-red-500 font-bold bg-red-50";
-                if(pct > 0) {
+
+                // 🟢 Check the raw amount instead of the rounded percentage
+                if (actualConsumed > 0) {
                     usageStyle = "text-emerald-600 font-bold bg-emerald-50";
                 }
 
                 config.forEach(col => {
                     let val = row[col.k] !== undefined && row[col.k] !== null ? row[col.k] : "";
                     let cellClasses = "px-6 py-3 whitespace-nowrap text-center";
+
+
+
 
                     // 🚀 NEW: Special Rendering for 'is_default' Column
                     // 🚀 NEW: Special Rendering for 'is_default' Column
@@ -2724,7 +2741,12 @@ async function loadTableData(target) {
                         }
                         else if (col.k === 'pct_consumed') {
                              cellClasses = `px-6 py-3 ${usageStyle} text-center border-r border-slate-100`;
-                             val = val + "%";
+                             // 🟢 If there is consumption but it rounded to 0, show <1% so the user knows it isn't completely empty
+                             if (actualConsumed > 0 && pct === 0) {
+                                 val = "<1%";
+                             } else {
+                                 val = val + "%";
+                             }
                         }
                     }
 
