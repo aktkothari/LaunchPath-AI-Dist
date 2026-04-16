@@ -694,6 +694,9 @@ th {
     </div>
 
 
+
+
+
     <div id="claim-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
             <h3 class="text-lg font-bold text-blue-800 mb-2">Submit Claim Batch</h3>
@@ -713,6 +716,44 @@ th {
                 <button onclick="confirmClaimSubmission()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">
                     Submit Claim
                 </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="evolution-modal" class="modal-overlay fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fadeIn overflow-hidden border-t-4 border-amber-500">
+            <div class="p-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid fa-code-branch"></i>
+                    </div>
+                    Component Evolution Detected
+                </h3>
+                <p class="text-sm text-slate-600 mb-6 pl-14">
+                    You mapped new components to finished goods that already have active components. <b>To prevent the engine from double-dipping and overdrawing inventory</b>, please archive the legacy components below.
+                </p>
+
+                <div class="max-h-[50vh] overflow-y-auto bg-slate-50 rounded-xl border border-slate-200">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="bg-white text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold">Finished Good (Export)</th>
+                                <th class="px-6 py-3 font-semibold text-emerald-700 bg-emerald-50/50">Newly Added Components</th>
+                                <th class="px-6 py-3 font-semibold text-amber-800 bg-amber-100">Legacy Components (Archive?)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evolution-body" class="divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-8">
+                    <button onclick="closeEvolutionModal()" class="px-6 py-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl font-bold transition">Skip For Now</button>
+                    <button onclick="archiveLegacyComponents()" class="px-6 py-2.5 bg-amber-500 text-white hover:bg-amber-600 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-box-archive"></i> Archive Selected Legacy Components
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -5440,6 +5481,7 @@ async function commitData() {
 
 
 
+
 async function executeCommit(dataToCommit, loadingText) {
     toggleLoading(true, loadingText);
     try {
@@ -5460,7 +5502,15 @@ async function executeCommit(dataToCommit, loadingText) {
             } else {
                 renderPreview(stagedData);
             }
-            loadTableData(currentView);
+
+            // 🚀 NEW: Trigger Evolution Modal if Backend returned warnings
+            const respData = json.data;
+            if (currentView === 'material_mappings' && respData && respData.evolution_warnings && respData.evolution_warnings.length > 0) {
+                showEvolutionModal(respData.evolution_warnings);
+            } else {
+                loadTableData(currentView); // Normal flow
+            }
+
         } else {
             showToast("Save failed", "error");
         }
@@ -5468,6 +5518,108 @@ async function executeCommit(dataToCommit, loadingText) {
         toggleLoading(false);
     }
 }
+
+// --- 🚀 NEW EVOLUTION UI HANDLERS ---
+function showEvolutionModal(warnings) {
+    const tbody = document.getElementById('evolution-body');
+    let html = '';
+
+    warnings.forEach(w => {
+        const newComps = w.new_components.map(c => `<span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded shadow-sm font-bold border border-emerald-200 inline-block m-1 font-mono text-xs">${c.import_sku}</span>`).join('');
+
+        // FIX: Removed the 'checked' attribute so it defaults to unchecked
+        const oldComps = w.legacy_components.map(c => `
+            <label class="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg cursor-pointer transition border border-transparent hover:border-amber-200 w-fit">
+                <input type="checkbox" class="legacy-archive-cb accent-amber-600 w-4 h-4" value="${c.id}">
+                <span class="font-mono text-slate-700 font-bold">${c.import_sku}</span>
+            </label>
+        `).join('');
+
+        // FIX: Added 'border-b-4 border-slate-300' to create a thick horizontal boundary between rows
+        html += `
+            <tr class="hover:bg-slate-50 border-b-4 border-slate-300 last:border-b-0">
+                <td class="px-6 py-5 font-bold text-slate-800 font-mono align-middle bg-white">${w.export_sku}</td>
+                <td class="px-6 py-5 bg-emerald-50/20 align-middle">${newComps}</td>
+                <td class="px-6 py-5 bg-amber-50/50 border-l border-amber-200 align-middle">${oldComps}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    document.getElementById('evolution-modal').classList.remove('hidden');
+}
+
+function closeEvolutionModal() {
+    document.getElementById('evolution-modal').classList.add('hidden');
+    loadTableData('material_mappings'); // Reload table to show final states
+}
+
+
+
+
+
+async function archiveLegacyComponents() {
+    const checkboxes = document.querySelectorAll('.legacy-archive-cb:checked');
+    const idsToArchive = Array.from(checkboxes).map(cb => cb.value);
+
+    // 🚀 NEW: Warn the user if they clicked the button but didn't select anything
+    if (idsToArchive.length === 0) {
+        showToast("Please select at least one component to archive, or click 'Skip For Now'.", "warning");
+        return;
+    }
+
+    toggleLoading(true, "Archiving Legacy Components...");
+    try {
+        const res = await safeFetch('/drawback/api/archive/bulk', {
+            method: 'POST',
+            body: JSON.stringify({
+                target: 'material_mappings',
+                ids: idsToArchive,
+                user: currentUserRole
+            })
+        });
+
+        if (res.success) {
+            showToast(`Successfully archived ${idsToArchive.length} legacy components.`, "success");
+            closeEvolutionModal();
+        } else {
+            showToast(res.message || "Archive Failed", "error");
+        }
+    } catch (e) {
+        console.error(e);
+        showToast("Network Error", "error");
+    } finally {
+        toggleLoading(false);
+    }
+}
+<!--async function executeCommit(dataToCommit, loadingText) {-->
+<!--    toggleLoading(true, loadingText);-->
+<!--    try {-->
+<!--        const json = await safeFetch(`/drawback/api/commit`, {-->
+<!--            method: 'POST',-->
+<!--            headers: { 'Content-Type': 'application/json' },-->
+<!--            body: JSON.stringify({ target: currentView, data: dataToCommit })-->
+<!--        });-->
+
+<!--        if(json && (json.success || json.data)) {-->
+<!--            showToast(`Success! Records saved.`, "success");-->
+<!--            const committedIds = new Set(dataToCommit.map(r => r._id));-->
+<!--            stagedData = stagedData.filter(r => !committedIds.has(r._id));-->
+<!--            previewSelection.clear();-->
+
+<!--            if (stagedData.length === 0) {-->
+<!--                resetUpload();-->
+<!--            } else {-->
+<!--                renderPreview(stagedData);-->
+<!--            }-->
+<!--            loadTableData(currentView);-->
+<!--        } else {-->
+<!--            showToast("Save failed", "error");-->
+<!--        }-->
+<!--    } finally {-->
+<!--        toggleLoading(false);-->
+<!--    }-->
+<!--}-->
 
 
 
