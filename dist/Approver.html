@@ -1926,8 +1926,10 @@ const validationCounters = {};
                 { k: 'conversion_factor', l: 'Conversion Factor' }
             ],
             material_mappings: [
+                { k: 'import_material_number', l: 'Import Material Number' },
+                { k: 'import_description', l: 'Import Description' },
                 { k: 'export_material_number', l: 'Export Material Number' },
-                { k: 'import_material_number', l: 'Import Material Number' }
+                { k: 'export_description', l: 'Export Description' }
             ]
         };
 
@@ -2063,9 +2065,13 @@ function sortTable(tableId, colIndex) {
         valA = valA.replace(/<[^>]*>?/gm, '');
         valB = valB.replace(/<[^>]*>?/gm, '');
 
-        // Strip currency formatting
-        const cleanA = valA.replace(/[$,]/g, '');
-        const cleanB = valB.replace(/[$,]/g, '');
+        // Strip currency and percentage formatting
+        let cleanA = valA.replace(/[$,%]/g, '').trim();
+        let cleanB = valB.replace(/[$,%]/g, '').trim();
+
+        // Handle the special "<1%" case so it sorts mathematically between 1 and 0
+        if (cleanA === '<1') cleanA = '0.5';
+        if (cleanB === '<1') cleanB = '0.5';
 
         // Detect Numbers
         if(!isNaN(cleanA) && !isNaN(cleanB) && cleanA !== '' && cleanB !== '') {
@@ -2705,7 +2711,7 @@ async function loadTableData(target) {
             if (target === 'exports' || target === 'imports') {
                  const pctA = a.pct_consumed || 0;
                  const pctB = b.pct_consumed || 0;
-                 if (pctA !== pctB) return pctA - pctB;
+                 if (pctA !== pctB) return pctB - pctA; // <--- CHANGED: DESCENDING (Highest % at top)
             }
             return (b.id || 0) - (a.id || 0);
         });
@@ -3580,11 +3586,12 @@ async function loadHistorySummary() {
             const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
             renderDynamicHeaders('history-summary-table', headers, 0);
 
-            const toDDMMYYYY = (isoStr) => {
+            const toMMDDYYYY = (isoStr) => {
                 if(!isoStr) return '-';
                 const d = new Date(isoStr);
                 if(isNaN(d)) return isoStr.substring(0,10);
-                return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                // Swapped month and date, and changed '/' to '-'
+                return `${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${d.getFullYear()}`;
             };
 
             tbody.innerHTML = json.data.map(c => {
