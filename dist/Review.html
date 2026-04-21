@@ -1927,9 +1927,9 @@ const validationCounters = {};
             ],
             material_mappings: [
                 { k: 'import_material_number', l: 'Import Material Number' },
-                { k: 'import_description', l: 'Import Description' },
+                { k: 'import_description', l: 'Import Material Description' },
                 { k: 'export_material_number', l: 'Export Material Number' },
-                { k: 'export_description', l: 'Export Description' }
+                { k: 'export_description', l: 'Export Material Description' }
             ]
         };
 
@@ -2058,15 +2058,15 @@ function sortTable(tableId, colIndex) {
     };
 
     rows.sort((a, b) => {
+
         let valA = getCellValue(a.cells[colIndex]);
         let valB = getCellValue(b.cells[colIndex]);
 
-        // Strip HTML tags if any (for status badges etc)
-        valA = valA.replace(/<[^>]*>?/gm, '');
-        valB = valB.replace(/<[^>]*>?/gm, '');
+        // (Deleted the HTML Regex that was breaking "<1%")
 
         // Strip currency and percentage formatting
         let cleanA = valA.replace(/[$,%]/g, '').trim();
+
         let cleanB = valB.replace(/[$,%]/g, '').trim();
 
         // Handle the special "<1%" case so it sorts mathematically between 1 and 0
@@ -2696,7 +2696,12 @@ async function loadTableData(target) {
                 const consumed = parseFloat(row.qty_consumed) || 0;
                 const total = parseFloat(target === 'imports' ? row.qty_original : row.qty) || 0;
                 if (total > 0) {
-                    row.pct_consumed = Math.round((consumed / total) * 100);
+                    let rawPct = (consumed / total) * 100;
+                    if (rawPct > 0 && rawPct < 1) {
+                        row.pct_consumed = 0.5; // ✅ Assign 0.5 so it sorts properly above 0
+                    } else {
+                        row.pct_consumed = Math.round(rawPct);
+                    }
                 } else {
                     row.pct_consumed = 0;
                 }
@@ -2781,10 +2786,10 @@ async function loadTableData(target) {
                             cellClasses = `px-6 py-3 ${usageStyle} text-center font-mono border-l border-slate-100`;
                         } else if (col.k === 'pct_consumed') {
                              cellClasses = `px-6 py-3 ${usageStyle} text-center border-r border-slate-100`;
-                             if (actualConsumed > 0 && pct === 0) {
+                             if (actualConsumed > 0 && pct < 1) { // ✅ Catch the 0.5 value we just made
                                  val = "<1%";
                              } else {
-                                 val = val + "%";
+                                 val = Math.round(pct) + "%";
                              }
                         }
                     }
@@ -5315,10 +5320,16 @@ function validateRow(row) {
                 messages.push("Date Required");
                 fields.push(field);
             } else {
-                const strictDateRegex = /^(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})$/;
-                const d = new Date(dateStr);
+                // ✅ UPDATED: Strictly look for MM-DD-YYYY
+                const strictDateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+
+                // JavaScript's new Date() can be picky with dashes vs slashes.
+                // Replacing with slashes purely for the Date object ensures it validates without throwing NaN.
+                const safeDateStr = dateStr.replace(/-/g, '/');
+                const d = new Date(safeDateStr);
+
                 if (!strictDateRegex.test(dateStr) || isNaN(d.getTime())) {
-                    messages.push("Use MM/DD/YYYY format");
+                    messages.push("Format must be MM-DD-YYYY"); // ✅ UPDATED MESSAGE
                     fields.push(field);
                 } else if (d > new Date()) {
                     messages.push("Future Date Not Allowed");
