@@ -1927,9 +1927,9 @@ const validationCounters = {};
             ],
             material_mappings: [
                 { k: 'import_material_number', l: 'Import Material Number' },
-                { k: 'import_description', l: 'Import Material Description' },
+                { k: 'import_description', l: 'Import Description' },
                 { k: 'export_material_number', l: 'Export Material Number' },
-                { k: 'export_description', l: 'Export Material Description' }
+                { k: 'export_description', l: 'Export Description' }
             ]
         };
 
@@ -3581,13 +3581,22 @@ function exportCurrentTab() {
 async function loadHistorySummary() {
     toggleLoading(true, "Loading Claim History...");
     const tbody = document.getElementById('history-summary-body');
+
+    // Set initial loading state (This matches your current HTML)
     tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;
 
     try {
-        // 🟢 FIX: Changed to POST
-        const json = await safeFetch('/drawback/api/claims/list/HISTORY', { method: 'POST' });
+        // 🟢 FIX 1: Pass IDs in the body for the POST request
+        const json = await safeFetch('/drawback/api/claims/list/HISTORY', {
+            method: 'POST',
+            body: JSON.stringify({
+                workspace_id: window.CURRENT_WORKSPACE_ID,
+                project_id: window.CURRENT_PROJECT_ID
+            })
+        });
 
-        if (json.data && json.data.length > 0) {
+        // 🟢 FIX 2: Added json.success check to ensure the response is valid
+        if (json.success && json.data && json.data.length > 0) {
             const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
             renderDynamicHeaders('history-summary-table', headers, 0);
 
@@ -3595,7 +3604,6 @@ async function loadHistorySummary() {
                 if(!isoStr) return '-';
                 const d = new Date(isoStr);
                 if(isNaN(d)) return isoStr.substring(0,10);
-                // Swapped month and date, and changed '/' to '-'
                 return `${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${d.getFullYear()}`;
             };
 
@@ -3612,7 +3620,7 @@ async function loadHistorySummary() {
                         <i class="fa-solid fa-circle-check text-lg"></i>
                         <div class="text-left leading-tight">
                             <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
-                            <div class="text-xs font-mono">${toDDMMYYYY(c.finalized_date)}</div>
+                            <div class="text-xs font-mono">${toMMDDYYYY(c.finalized_date)}</div>
                             <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>
                         </div>
                     </div>`;
@@ -3632,9 +3640,6 @@ async function loadHistorySummary() {
                      <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
 
                     <td class="px-6 py-4 text-center whitespace-nowrap">
-<!--                        <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download CSV">-->
-<!--                            <i class="fa-solid fa-download text-lg"></i>-->
-<!--                        </button>-->
                         <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
                             <i class="fa-solid fa-circle-info text-lg"></i>
                         </button>
@@ -3646,16 +3651,100 @@ async function loadHistorySummary() {
                     <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>
                     <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
                     <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
-                    <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toDDMMYYYY(c.approved_date)}</td>
-                </tr>
-            `}).join('');
+                    <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toMMDDYYYY(c.approved_date)}</td>
+                </tr>`;
+            }).join('');
         } else {
-            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;
+            // 🟢 FIX 3: Clear the "Fetching..." row if no data is returned
+            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found for this workspace.</td></tr>`;
         }
+    } catch (e) {
+        console.error("History Summary error:", e);
+        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-red-400 italic">Error loading claim history.</td></tr>`;
     } finally {
         toggleLoading(false);
     }
 }
+
+
+<!--async function loadHistorySummary() {-->
+<!--    toggleLoading(true, "Loading Claim History...");-->
+<!--    const tbody = document.getElementById('history-summary-body');-->
+<!--    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Fetching Claim Archive...</td></tr>`;-->
+
+<!--    try {-->
+<!--        // 🟢 FIX: Changed to POST-->
+<!--        const json = await safeFetch('/drawback/api/claims/list/HISTORY', { method: 'POST' });-->
+
+<!--        if (json.data && json.data.length > 0) {-->
+<!--            const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];-->
+<!--            renderDynamicHeaders('history-summary-table', headers, 0);-->
+
+<!--            const toMMDDYYYY = (isoStr) => {-->
+<!--                if(!isoStr) return '-';-->
+<!--                const d = new Date(isoStr);-->
+<!--                if(isNaN(d)) return isoStr.substring(0,10);-->
+<!--                // Swapped month and date, and changed '/' to '-'-->
+<!--                return `${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${d.getFullYear()}`;-->
+<!--            };-->
+
+<!--            tbody.innerHTML = json.data.map(c => {-->
+<!--                let displayId = c.claim_id;-->
+<!--                if (!displayId.startsWith('X')) displayId = 'X' + displayId;-->
+<!--                let safeBrokerId = c.broker_claim_id || 'PENDING';-->
+
+<!--                let acceptanceHtml = '';-->
+<!--                let isFinalized = !!c.finalized_date;-->
+
+<!--                if (c.finalized_date) {-->
+<!--                    acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">-->
+<!--                        <i class="fa-solid fa-circle-check text-lg"></i>-->
+<!--                        <div class="text-left leading-tight">-->
+<!--                            <div class="text-[10px] uppercase text-emerald-500">Accepted</div>-->
+<!--                            <div class="text-xs font-mono">${toDDMMYYYY(c.finalized_date)}</div>-->
+<!--                            <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>-->
+<!--                        </div>-->
+<!--                    </div>`;-->
+<!--                } else if (c.valid_entries > 0) {-->
+<!--                    acceptanceHtml = `<button onclick="markClaimFinal('${c.claim_id}')" class="group flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 rounded text-slate-500 hover:border-blue-500 hover:text-blue-600 transition shadow-sm mx-auto"><i class="fa-regular fa-square group-hover:hidden text-lg"></i><i class="fa-regular fa-square-check hidden group-hover:inline-block text-lg"></i><span class="text-xs font-semibold">Mark Final</span></button>`;-->
+<!--                } else {-->
+<!--                    acceptanceHtml = `<span class="text-xs text-gray-300 italic">Voided</span>`;-->
+<!--                }-->
+
+<!--                let statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">APPROVED</span>`;-->
+<!--                if (isFinalized) statusBadge = `<span class="status-badge status-complete">COMPLETED</span>`;-->
+<!--                else if (c.voided_entries > 0 && c.valid_entries == 0) statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;-->
+<!--                else if (c.voided_entries > 0) statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;-->
+
+<!--                return `-->
+<!--                <tr class="border-b border-slate-50 hover:bg-purple-50 transition">-->
+<!--                     <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>-->
+
+<!--                    <td class="px-6 py-4 text-center whitespace-nowrap">-->
+<!--&lt;!&ndash;                        <button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 mr-3 transition" title="Download CSV">&ndash;&gt;-->
+<!--&lt;!&ndash;                            <i class="fa-solid fa-download text-lg"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </button>&ndash;&gt;-->
+<!--                        <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">-->
+<!--                            <i class="fa-solid fa-circle-info text-lg"></i>-->
+<!--                        </button>-->
+<!--                    </td>-->
+
+<!--                    <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>-->
+<!--                    <td class="px-6 py-4 text-center">${statusBadge}</td>-->
+<!--                    <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>-->
+<!--                    <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>-->
+<!--                    <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>-->
+<!--                    <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>-->
+<!--                    <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toDDMMYYYY(c.approved_date)}</td>-->
+<!--                </tr>-->
+<!--            `}).join('');-->
+<!--        } else {-->
+<!--            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No approved claims found.</td></tr>`;-->
+<!--        }-->
+<!--    } finally {-->
+<!--        toggleLoading(false);-->
+<!--    }-->
+<!--}-->
 
 
 
@@ -5228,6 +5317,138 @@ const VALID_UOMS = ['KG', 'PCS', 'PC', 'LBS', 'M', 'SQM', 'L', 'GR', 'SET', 'PAI
 // ==========================================
 // 1. BULLETPROOF VALIDATION (Ignores hidden backend fields)
 // ==========================================
+<!--function validateRow(row) {-->
+<!--    let messages = [];-->
+<!--    let fields = [];-->
+
+<!--    // ONLY validate fields that are currently visible on the screen-->
+<!--    const rawConfig = TABLE_CONFIG[currentView];-->
+<!--    const activeKeys = rawConfig ? rawConfig.map(c => c.k) : Object.keys(row);-->
+
+<!--    // 1. UOM Validation-->
+<!--    if (activeKeys.includes('uom')) {-->
+<!--        const uom = String(row.uom || '').toUpperCase();-->
+<!--        if (!uom) { messages.push("Missing UOM"); fields.push('uom'); }-->
+<!--        else if (!VALID_UOMS.includes(uom)) { messages.push(`Invalid UOM: ${uom}`); fields.push('uom'); }-->
+<!--    }-->
+
+<!--    if (activeKeys.includes('export_uom')) {-->
+<!--        const euom = String(row.export_uom || '').toUpperCase();-->
+<!--        if (!euom) { messages.push("Missing Export UOM"); fields.push('export_uom'); }-->
+<!--        else if (!VALID_UOMS.includes(euom)) { messages.push(`Invalid Export UOM: ${euom}`); fields.push('export_uom'); }-->
+<!--    }-->
+
+<!--    // 2. Entry Number-->
+<!--    if (activeKeys.includes('entry_number')) {-->
+<!--        const en = String(row.entry_number || '').trim();-->
+<!--        if (en.length < 3) { messages.push("Entry # too short"); fields.push('entry_number'); }-->
+<!--        else if (/^[A-Z]+$/i.test(en)) { messages.push("Entry # must be alphanumeric"); fields.push('entry_number'); }-->
+<!--    }-->
+
+<!--    // 3. Numerics (Strips out $ and commas securely)-->
+<!--// 3. Numerics (Strict Validation)-->
+
+
+<!--// 3. Numerics (Strict Validation)-->
+<!--    const numericFields = [-->
+<!--        { k: 'qty', l: 'Quantity' },-->
+<!--        { k: 'duty_paid', l: 'Duty Paid' },-->
+<!--        { k: 'duty_rate', l: 'Duty Rate' },-->
+<!--        { k: 'duty_rate_1', l: 'Duty Rate' },-->
+<!--        { k: 'conversion_factor', l: 'Conversion Factor' },-->
+<!--        { k: 'customs_value', l: 'Customs Value' }-->
+<!--    ];-->
+
+<!--    numericFields.forEach(f => {-->
+<!--        if (activeKeys.includes(f.k)) {-->
+<!--            const strVal = String(row[f.k] || '').trim();-->
+<!--            let val;-->
+
+<!--            // 🟢 PATCH: Explicitly added duty_paid so "FREE" is accepted across all duty columns-->
+<!--            if ((f.k === 'duty_rate' || f.k === 'duty_rate_1' || f.k === 'duty_paid') && strVal.toUpperCase() === 'FREE') {-->
+<!--                val = 0.0;-->
+<!--            } else {-->
+<!--                const cleanStr = strVal.replace(/[$,\s]/g, "");-->
+<!--                val = Number(cleanStr);-->
+<!--            }-->
+
+<!--            // Change: Allow 0 for duty_rate, duty_rate_1, and duty_paid-->
+<!--            if (f.k === 'duty_rate' || f.k === 'duty_rate_1' || f.k === 'duty_paid') {-->
+<!--                if (strVal === '' || isNaN(val) || val < 0) {-->
+<!--                    messages.push(`${f.l} must be a valid number or 'FREE' (>= 0)`);-->
+<!--                    fields.push(f.k);-->
+<!--                } else if ((f.k === 'duty_rate' || f.k === 'duty_rate_1') && val > 1.0) {-->
+<!--                    messages.push(`${f.l} must be <= 1.0`);-->
+<!--                    fields.push(f.k);-->
+<!--                }-->
+<!--            } else {-->
+<!--                // Keep strictly > 0 for Qty, Customs Value, and Conversion Factor-->
+<!--                if (strVal === '' || isNaN(val) || val <= 0) {-->
+<!--                    messages.push(`${f.l} must be a valid number > 0`);-->
+<!--                    fields.push(f.k);-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    });-->
+
+
+
+
+<!--    // 4. HTS Code-->
+<!--    if (activeKeys.includes('hts_code')) {-->
+<!--        const hts = String(row.hts_code || '').trim();-->
+<!--        if (!hts) { messages.push("HTS Code Required"); fields.push('hts_code'); }-->
+<!--        else if (!/^[\d\.]+$/.test(hts)) { messages.push("HTS: Invalid Chars"); fields.push('hts_code'); }-->
+<!--    }-->
+
+<!--    // 5. Dates-->
+<!--    ['import_date', 'export_date'].forEach(field => {-->
+<!--        if (activeKeys.includes(field)) {-->
+<!--            const dateStr = String(row[field] || '').trim();-->
+<!--            if (!dateStr) {-->
+<!--                messages.push("Date Required");-->
+<!--                fields.push(field);-->
+<!--            } else {-->
+<!--                // ✅ UPDATED: Strictly look for MM-DD-YYYY-->
+<!--                const strictDateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;-->
+
+<!--                // JavaScript's new Date() can be picky with dashes vs slashes.-->
+<!--                // Replacing with slashes purely for the Date object ensures it validates without throwing NaN.-->
+<!--                const safeDateStr = dateStr.replace(/-/g, '/');-->
+<!--                const d = new Date(safeDateStr);-->
+
+<!--                if (!strictDateRegex.test(dateStr) || isNaN(d.getTime())) {-->
+<!--                    messages.push("Format must be MM-DD-YYYY"); // ✅ UPDATED MESSAGE-->
+<!--                    fields.push(field);-->
+<!--                } else if (d > new Date()) {-->
+<!--                    messages.push("Future Date Not Allowed");-->
+<!--                    fields.push(field);-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    });-->
+
+<!--    // 6. Material #-->
+<!--    ['material_number', 'export_material_number', 'import_material_number'].forEach(field => {-->
+<!--        if (activeKeys.includes(field) && !String(row[field] || '').trim()) {-->
+<!--            messages.push("Material # Required");-->
+<!--            fields.push(field);-->
+<!--        }-->
+<!--    });-->
+
+<!--    // 7. Preservation of Backend-Only Errors-->
+<!--    if (row._backend_errors && row._backend_errors.length > 0) {-->
+<!--        row._backend_errors.forEach(err => {-->
+<!--            if (err.includes("Duplicate") || err.includes("Database")) messages.push(err);-->
+<!--        });-->
+<!--    }-->
+
+<!--    return { messages, fields };-->
+<!--}-->
+
+// ==========================================
+// 1. BULLETPROOF VALIDATION (Ignores hidden backend fields)
+// ==========================================
 function validateRow(row) {
     let messages = [];
     let fields = [];
@@ -5256,11 +5477,7 @@ function validateRow(row) {
         else if (/^[A-Z]+$/i.test(en)) { messages.push("Entry # must be alphanumeric"); fields.push('entry_number'); }
     }
 
-    // 3. Numerics (Strips out $ and commas securely)
-// 3. Numerics (Strict Validation)
-
-
-// 3. Numerics (Strict Validation)
+    // 3. Numerics (Strict Validation)
     const numericFields = [
         { k: 'qty', l: 'Quantity' },
         { k: 'duty_paid', l: 'Duty Paid' },
@@ -5302,9 +5519,6 @@ function validateRow(row) {
         }
     });
 
-
-
-
     // 4. HTS Code
     if (activeKeys.includes('hts_code')) {
         const hts = String(row.hts_code || '').trim();
@@ -5320,8 +5534,8 @@ function validateRow(row) {
                 messages.push("Date Required");
                 fields.push(field);
             } else {
-                // ✅ UPDATED: Strictly look for MM-DD-YYYY
-                const strictDateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+                // 🟢 FIXED: Accept BOTH MM-DD-YYYY and YYYY-MM-DD formats
+                const strictDateRegex = /^(\d{2})-(\d{2})-(\d{4})$|^(\d{4})-(\d{2})-(\d{2})$/;
 
                 // JavaScript's new Date() can be picky with dashes vs slashes.
                 // Replacing with slashes purely for the Date object ensures it validates without throwing NaN.
@@ -5329,7 +5543,7 @@ function validateRow(row) {
                 const d = new Date(safeDateStr);
 
                 if (!strictDateRegex.test(dateStr) || isNaN(d.getTime())) {
-                    messages.push("Format must be MM-DD-YYYY"); // ✅ UPDATED MESSAGE
+                    messages.push("Format must be MM-DD-YYYY or YYYY-MM-DD"); // 🟢 FIXED ERROR MESSAGE
                     fields.push(field);
                 } else if (d > new Date()) {
                     messages.push("Future Date Not Allowed");
@@ -5356,8 +5570,6 @@ function validateRow(row) {
 
     return { messages, fields };
 }
-
-
 
 
 
