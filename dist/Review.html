@@ -432,8 +432,8 @@ th {
         </div>
     </div>
 
-    <div><div class="detail-label">Declaration #</div><div id="det-imp-dec" class="font-mono"></div></div>
-    <div><div class="detail-label">Line Number</div><div id="det-imp-line"></div></div>
+    <div><div class="detail-label">Entry Line #</div><div id="det-imp-line" class="font-mono font-bold text-slate-800"></div></div>
+    <div></div>
 
     <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
     <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
@@ -447,6 +447,13 @@ th {
 
     <div><div class="detail-label">Customs Value (Total)</div><div id="det-imp-val"></div></div>
     <div><div class="detail-label">Duty Paid</div><div id="det-imp-paid"></div></div>
+
+    <div class="col-span-2 border-t border-dashed border-slate-100 mt-2"></div>
+    <div><div class="detail-label text-[9px] text-blue-500">Tariff # 1</div><div id="det-imp-t1"></div></div>
+    <div><div class="detail-label text-[9px] text-blue-500">Duty Rate 1</div><div id="det-imp-rate1" class="font-bold text-slate-900"></div></div>
+    <div><div class="detail-label text-[9px] text-purple-500">Tariff # 2</div><div id="det-imp-t2"></div></div>
+    <div><div class="detail-label text-[9px] text-purple-500">Duty Rate 2</div><div id="det-imp-rate2" class="font-bold text-slate-900"></div></div>
+
     <div class="col-span-2"><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
 </div>
 
@@ -1916,11 +1923,16 @@ const validationCounters = {};
                 { k: 'uom', l: 'UOM' },
                 { k: 'import_date', l: 'Date' },
                 { k: 'duty_paid', l: 'Duty Paid' },
-                { k: 'declaration_number', l: 'Declaration Number' },
-                { k: 'declaration_line_number', l: 'Declaration Line Number' },
+                { k: 'declaration_line_number', l: 'Entry Line Number' },
                 { k: 'hts_code', l: 'HTS Code' },
                 { k: 'duty_rate_1', l: 'Duty Rate' },
-                { k: 'customs_value', l: 'Customs Value' }
+                { k: 'customs_value', l: 'Customs Value' },
+                // 🆕 ADD THE NEW COLUMNS HERE:
+                { k: 'tariff_number_1', l: 'Tariff # 1' },
+                { k: 'tariff_value_1', l: 'Tariff Val 1' },
+                { k: 'duty_rate_2', l: 'Duty Rate 2' },
+                { k: 'tariff_number_2', l: 'Tariff # 2' },
+                { k: 'tariff_value_2', l: 'Tariff Val 2' }
             ],
 
             exports: [
@@ -3076,9 +3088,10 @@ function showMatchDetails(match) {
     document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
     document.getElementById('det-imp-date').innerText = match.import_date || '-';
     // Clean the timestamp off the declaration number if it exists
-    let rawDec = match.import_dec_number || '-';
-    document.getElementById('det-imp-dec').innerText = rawDec.split(' ')[0];
+
+
     document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';
+
     document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';
     document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';
     document.getElementById('det-imp-uom').innerText = match.import_uom || '-';
@@ -3086,6 +3099,13 @@ function showMatchDetails(match) {
     document.getElementById('det-imp-rate').innerText = match.import_duty_rate || '-';
     document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);
     document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);
+
+
+    // 🆕 ADD THESE LINES:
+    document.getElementById('det-imp-t1').innerText = match.tariff_number_1 || match.import_hts || '-';
+    document.getElementById('det-imp-rate1').innerText = match.import_duty_rate || '-';
+    document.getElementById('det-imp-t2').innerText = match.tariff_number_2 || '-';
+    document.getElementById('det-imp-rate2').innerText = match.duty_rate_2 || '-';
 
     document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;
 
