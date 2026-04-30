@@ -433,7 +433,7 @@ th {
     </div>
 
     <div><div class="detail-label">Entry Line #</div><div id="det-imp-line" class="font-mono font-bold text-slate-800"></div></div>
-    <div></div>
+    <div><div class="detail-label">Duty Rate</div><div id="det-imp-base-rate" class="font-bold text-slate-900"></div></div>
 
     <div><div class="detail-label">HTS Code</div><div id="det-imp-hts"></div></div>
     <div><div class="detail-label">UOM</div><div id="det-imp-uom"></div></div>
@@ -454,7 +454,6 @@ th {
     <div><div class="detail-label text-[9px] text-purple-500">Tariff # 2</div><div id="det-imp-t2"></div></div>
     <div><div class="detail-label text-[9px] text-purple-500">Duty Rate 2</div><div id="det-imp-rate2" class="font-bold text-slate-900"></div></div>
 
-    <div class="col-span-2"><div class="detail-label">Duty Rate</div><div id="det-imp-rate" class="font-bold text-slate-900"></div></div>
 </div>
 
 
@@ -473,7 +472,7 @@ th {
                 <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 border-b border-slate-100 pb-2">Match Logic & Calculation Breakdown</h4>
 
                 <div class="overflow-x-auto pb-2">
-                    <div class="grid grid-cols-7 gap-4 text-center min-w-[800px]">
+                    <div class="grid grid-cols-8 gap-4 text-center min-w-[850px]">
 
                         <div class="bg-slate-50 p-3 rounded border border-slate-100">
                             <div class="detail-label">Algorithm</div>
@@ -487,6 +486,13 @@ th {
                             <div class="detail-label">Entered Value</div>
                             <div id="det-entered-val" class="font-bold text-indigo-700 text-lg"></div>
                         </div>
+
+                        <!-- 🆕 NEW DUTY RATE BOX ADDED HERE -->
+                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
+                            <div class="detail-label">Duty Rate</div>
+                            <div id="det-calc-rate" class="font-bold text-indigo-700 text-lg"></div>
+                        </div>
+
                         <div class="bg-orange-50 p-3 rounded border border-orange-100">
                             <div class="detail-label">Export Duty (100%)</div>
                             <div id="det-export-duty" class="font-bold text-orange-700 text-lg"></div>
@@ -504,7 +510,9 @@ th {
                             <div id="det-status"></div>
                         </div>
 
-                    </div> </div> <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
+                    </div>
+                </div>
+                <div class="mt-4 text-xs text-slate-500 bg-yellow-50 p-3 rounded border border-yellow-100">
                     <i class="fa-solid fa-circle-info mr-1 text-yellow-600"></i> <span id="det-notes"></span>
                 </div>
             </div>
@@ -1925,7 +1933,9 @@ const validationCounters = {};
                 { k: 'duty_paid', l: 'Duty Paid' },
                 { k: 'declaration_line_number', l: 'Entry Line Number' },
                 { k: 'hts_code', l: 'HTS Code' },
-                { k: 'duty_rate_1', l: 'Duty Rate' },
+                { k: 'base_duty_rate', l: 'Duty Rate' },
+                { k: 'duty_rate_1', l: 'Duty Rate 1' },
+                { k: 'duty_rate_2', l: 'Duty Rate 2' },
                 { k: 'customs_value', l: 'Customs Value' },
                 // 🆕 ADD THE NEW COLUMNS HERE:
                 { k: 'tariff_number_1', l: 'Tariff # 1' },
@@ -2539,7 +2549,7 @@ function switchView(viewId) {
                     'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
                 ];
 
-<!--                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
+<!--                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
                 renderDynamicHeaders('matches-table', matchHeaders, 0);
             } else if(viewId === 'reviewer') {
                 document.getElementById('view-reviewer').classList.remove('hidden');
@@ -2610,7 +2620,7 @@ function switchView(viewId) {
 <!--                document.getElementById('view-matching').classList.remove('hidden');-->
 
 <!--                // 🆕 REORDERED HEADERS: Status, View moved to front. Refund remains at end.-->
-<!--                const matchHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
+<!--                const matchHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
 
 <!--                renderDynamicHeaders('matches-table', matchHeaders, 0); // No checkboxes-->
 <!--            } else if(viewId === 'reviewer') {-->
@@ -3055,28 +3065,25 @@ async function massArchiveCurrentTab() {
 
 
 // --- SHOW MATCH DETAILS MODAL (Premium UI + Full Email Visibility) ---
+// --- SHOW MATCH DETAILS MODAL (Premium UI + Full Email Visibility) ---
 function showMatchDetails(match) {
     document.getElementById('det-uuid').innerText = match.match_uuid || match.id;
 
-    // 🛠️ PATCH: Calculate Actual Allocated Export Qty using the applied Conversion Factor
+    // Calculate Actual Allocated Export Qty using the applied Conversion Factor
     let cf = parseFloat(match.conversion_factor_used) || 1.0;
     let allocatedExportQty = parseFloat(match.qty_matched) / cf;
 
-    // Export Side
     // Export Side (Claim Basis)
     document.getElementById('det-exp-entry').innerText = match.export_entry_number || '-';
     document.getElementById('det-exp-material').innerText = match.export_material_number || '-';
     document.getElementById('det-exp-date').innerText = match.export_date || '-';
 
-    // 🛠️ PATCH: Display Allocated Qty vs Total Qty to clear up CF confusion
     document.getElementById('det-exp-qty').innerText = allocatedExportQty.toFixed(2);
     document.getElementById('det-exp-uom').innerText = match.export_uom || '-';
     document.getElementById('det-exp-inv').innerText = match.export_invoice || '-';
-
-    // 🔄 UPDATED: Renamed field to match new Export Template label
     document.getElementById('det-exp-country').innerText = match.export_country || '-';
 
-    // 🆕 NEW: Added Customer information placeholders
+    // 🆕 Customer information
     document.getElementById('det-exp-customer-name').innerText = match.customer_name || '-';
     document.getElementById('det-exp-customer-id').innerText = match.customer_id || '-';
 
@@ -3087,25 +3094,23 @@ function showMatchDetails(match) {
     document.getElementById('det-imp-entry').innerText = match.import_entry_number || '-';
     document.getElementById('det-imp-material').innerText = match.import_material_number || '-';
     document.getElementById('det-imp-date').innerText = match.import_date || '-';
-    // Clean the timestamp off the declaration number if it exists
-
-
     document.getElementById('det-imp-line').innerText = match.import_dec_line || '-';
 
     document.getElementById('det-imp-orig').innerText = match.import_qty_original || '-';
     document.getElementById('det-imp-avail').innerText = match.import_qty_available || '-';
     document.getElementById('det-imp-uom').innerText = match.import_uom || '-';
     document.getElementById('det-imp-hts').innerText = match.import_hts || '-';
-    document.getElementById('det-imp-rate').innerText = match.import_duty_rate || '-';
+
+    // 🟢 FIXED: Safe mapping to the 3 new IDs
+    document.getElementById('det-imp-base-rate').innerText = match.import_base_duty_rate || '-';
     document.getElementById('det-imp-val').innerText = formatMoney(match.import_customs_val);
     document.getElementById('det-imp-paid').innerText = formatMoney(match.import_duty_paid);
 
-
-    // 🆕 ADD THESE LINES:
+    // 🆕 Tariff and Multi-Tier Rates
     document.getElementById('det-imp-t1').innerText = match.tariff_number_1 || match.import_hts || '-';
     document.getElementById('det-imp-rate1').innerText = match.import_duty_rate || '-';
     document.getElementById('det-imp-t2').innerText = match.tariff_number_2 || '-';
-    document.getElementById('det-imp-rate2').innerText = match.duty_rate_2 || '-';
+    document.getElementById('det-imp-rate2').innerText = match.import_duty_rate_2 || '-';
 
     document.getElementById('det-match-qty').innerText = `${match.qty_matched} ${match.import_uom || ''}`;
 
@@ -3115,7 +3120,10 @@ function showMatchDetails(match) {
     }
     document.getElementById('det-entered-val').innerText = formatMoney(enteredVal);
 
-    // UPDATED: Calculate Export Duty based on ACTUAL IMPORT DUTY PAID, NOT RATE
+    // 🟢 FIXED: Populating the new calculation box
+    document.getElementById('det-calc-rate').innerText = match.import_base_duty_rate || '-';
+
+    // Calculate Export Duty based on ACTUAL IMPORT DUTY PAID
     let exportDuty = 0;
     if(parseFloat(match.import_qty_original) > 0) {
         exportDuty = (parseFloat(match.qty_matched) / parseFloat(match.import_qty_original)) * parseFloat(match.import_duty_paid);
@@ -3186,8 +3194,6 @@ function showMatchDetails(match) {
 
     document.getElementById('details-modal').classList.remove('hidden');
 }
-
-
 
 
 
@@ -3405,7 +3411,7 @@ async function loadApproverQueue(claimId) {
                 ];
 
 
-<!--                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
+<!--                const approverHeaders = ['Status', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Import UOM', 'Export UOM', 'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];-->
 
                 renderDynamicHeaders('approver-table', approverHeaders, 1);
 
@@ -3437,7 +3443,7 @@ async function loadApproverQueue(claimId) {
 
 <!--            try {-->
 <!--                // Initialize Approver Table Headers dynamically if empty-->
-<!--                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];-->
+<!--                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];-->
 <!--                renderDynamicHeaders('approver-table', approverHeaders, 1);-->
 
 <!--                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);-->
@@ -3473,7 +3479,7 @@ async function loadApproverQueue(claimId) {
 
 <!--            try {-->
 <!--                // Initialize Approver Table Headers dynamically if empty-->
-<!--                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];-->
+<!--                const approverHeaders = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','View'];-->
 <!--                renderDynamicHeaders('approver-table', approverHeaders, 1);-->
 
 <!--                const json = await safeFetch(`/drawback/api/workflow/queue/REVIEWED?claim_id=${encodeURIComponent(claimId)}`);-->
@@ -4245,7 +4251,7 @@ function renderReviewerTable(data) {
 <!--            reviewerSelection.clear();-->
 
 <!--            // 🆕 Render Headers for Reviewer Table (Updated 'View' to 'Actions')-->
-<!--            const headers = ['Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount', 'Notes', 'Status','Actions'];-->
+<!--            const headers = ['Imp Entry No','Entry Line No','Import Material Number', 'Export Material Number', 'Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount', 'Notes', 'Status','Actions'];-->
 <!--            renderDynamicHeaders('reviewer-table', headers, 1); // Has Checkbox-->
 
 <!--            if (data.length === 0) {-->
@@ -4468,7 +4474,7 @@ function renderHistoryTable(data) {
 <!--            const tbody = document.getElementById('history-body');-->
 
 <!--            // 🆕 Render Headers for History Detail (Updated with Export Material)-->
-<!--            const headers = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','Approve Date','View','Actions'];-->
+<!--            const headers = ['Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit'Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Status','Approve Date','View','Actions'];-->
 <!--            renderDynamicHeaders('history-table', headers, 0);-->
 
 <!--            if (data.length === 0) {-->
