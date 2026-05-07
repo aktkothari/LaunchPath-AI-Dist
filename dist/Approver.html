@@ -559,24 +559,33 @@ th {
 
 
     <div id="edit-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
-        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn">
-            <h3 class="text-lg font-bold text-slate-800 mb-4">Edit Match Record</h3>
+        <div class="bg-white rounded-lg shadow-2xl w-96 p-6 animate-fadeIn border-t-4 border-blue-500">
+            <h3 class="text-lg font-bold text-slate-800 mb-1">Edit Match Dates</h3>
+
+            <p class="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 p-2 rounded mb-4 font-medium">
+                <i class="fa-solid fa-circle-info mr-1"></i> Changes made here are isolated to this specific match and will not alter your master inventory records. Leave blank to revert to original dates.
+            </p>
+
             <input type="hidden" id="edit-match-id">
 
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Matched Material Number</label>
             <input type="text" id="edit-material-number" disabled class="w-full bg-slate-100 border border-slate-300 rounded p-2 text-sm mb-3">
 
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Refund Amount ($)</label>
-            <input type="number" id="edit-refund" step="0.01" class="w-full border border-slate-300 rounded p-2 text-sm mb-3 focus:border-blue-500 outline-none">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Import Date (MM-DD-YYYY)</label>
+            <input type="text" id="edit-import-date" placeholder="MM-DD-YYYY" class="w-full border border-slate-300 rounded p-2 text-sm mb-3 focus:border-blue-500 outline-none">
 
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Reviewer Notes</label>
-            <textarea id="edit-notes" rows="3" class="w-full border border-slate-300 rounded p-2 text-sm mb-4 focus:border-blue-500 outline-none"></textarea>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Export Date (MM-DD-YYYY)</label>
+            <input type="text" id="edit-export-date" placeholder="MM-DD-YYYY" class="w-full border border-slate-300 rounded p-2 text-sm mb-4 focus:border-blue-500 outline-none">
 
             <div class="flex justify-end gap-2">
-                <button onclick="closeEditModal()" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancel</button>
-                <button onclick="saveMatchEdit()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold">Save Changes</button>
+                <button onclick="closeEditModal()" class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded transition">Cancel</button>
+                <button onclick="saveMatchEdit()" class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded font-bold shadow-sm transition">Save Row Dates</button>
             </div>
         </div>
+    </div>
+
+
+
     </div>
 
     <div id="reject-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center">
@@ -4720,8 +4729,11 @@ function renderHistoryTable(data) {
         function openEditModal(match) {
             document.getElementById('edit-match-id').value = match.match_id || match.id;
             document.getElementById('edit-material-number').value = match.matched_material_number;
-            document.getElementById('edit-refund').value = match.refund_amount;
-            document.getElementById('edit-notes').value = match.notes || "";
+
+            // Load existing dates into inputs (will naturally load overridden dates if they exist)
+            document.getElementById('edit-import-date').value = match.import_date || "";
+            document.getElementById('edit-export-date').value = match.export_date || "";
+
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
@@ -4729,26 +4741,44 @@ function renderHistoryTable(data) {
             document.getElementById('edit-modal').classList.add('hidden');
         }
 
+
+
+
         async function saveMatchEdit() {
             const id = document.getElementById('edit-match-id').value;
-            const refund = document.getElementById('edit-refund').value;
-            const notes = document.getElementById('edit-notes').value;
+            const importDate = document.getElementById('edit-import-date').value.trim();
+            const exportDate = document.getElementById('edit-export-date').value.trim();
 
-            toggleLoading(true, "Saving Changes...");
+            // Validate MM-DD-YYYY format visually (allows blanks to revert)
+            const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+            if ((importDate && !dateRegex.test(importDate)) || (exportDate && !dateRegex.test(exportDate))) {
+                showToast("Dates must be in MM-DD-YYYY format", "warning");
+                return;
+            }
+
+            toggleLoading(true, "Saving Isolated Row Dates...");
             try {
                 const res = await safeFetch('/drawback/api/workflow/edit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, refund, notes })
+                    body: JSON.stringify({
+                        id: id,
+                        import_date: importDate,
+                        export_date: exportDate,
+                        user: currentUserRole
+                    })
                 });
 
                 if(res.success) {
                     closeEditModal();
-                    showToast("Match Updated", "success");
-                    loadWorkflowData('reviewer');
+                    showToast("Row Dates Updated Successfully", "success");
+                    loadWorkflowData('reviewer'); // Refresh table to show new dates and clear red error states
                 } else {
-                    showToast("Update Failed", "error");
+                    showToast(res.message || "Update Failed", "error");
                 }
+            } catch (e) {
+                console.error("Date Edit Error:", e);
+                showToast("Network error occurred", "error");
             } finally {
                 toggleLoading(false);
             }
