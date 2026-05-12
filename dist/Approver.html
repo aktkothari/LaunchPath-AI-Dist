@@ -893,6 +893,35 @@ th {
 
 
 
+        <div id="maintenance-banner" class="hidden bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 text-white px-8 py-5 justify-between items-center shadow-lg border-b border-orange-700/30 z-50 relative overflow-hidden transition-all duration-500 ease-out">
+    <div class="absolute top-0 right-1/4 -mt-10 w-64 h-64 bg-white/20 rounded-full blur-[60px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-1/4 -mb-10 w-48 h-48 bg-red-500/20 rounded-full blur-[40px] pointer-events-none"></div>
+
+    <div class="flex items-center gap-6 relative z-10">
+        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shrink-0 shadow-inner backdrop-blur-md border border-white/30">
+            <i class="fa-solid fa-triangle-exclamation animate-pulse drop-shadow-md"></i>
+        </div>
+
+        <div class="flex flex-col justify-center">
+            <h3 class="font-extrabold text-xl tracking-tight flex items-center gap-3 drop-shadow-sm">
+                <span class="bg-red-500/90 text-white text-[10px] uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-red-400/50 shadow-sm backdrop-blur-sm">Attention Required</span>
+                Scheduled Maintenance Notice
+
+            </h3>
+            <p class="text-sm opacity-100 mt-1.5 font-medium text-amber-50 max-w-4xl leading-relaxed drop-shadow-sm" id="maintenance-message">...</p>
+        </div>
+    </div>
+
+    <button onclick="document.getElementById('maintenance-banner').classList.add('hidden')" class="relative z-10 text-white hover:text-amber-50 bg-black/20 hover:bg-black/40 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm backdrop-blur-md border border-white/20 active:scale-95 shrink-0 flex items-center gap-2">
+        <span>Dismiss Notice</span>
+        <i class="fa-solid fa-xmark opacity-70"></i>
+    </button>
+</div>
+
+
+
+
+
 <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-30 sticky top-0">
             <div class="flex items-center gap-4">
                  <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
@@ -1867,6 +1896,9 @@ const validationCounters = {};
                                 window.PROJECT_LOGIN_URL = data.user.projectLoginUrl;
                             }
 
+
+
+
                             if (data.user.project_id) window.CURRENT_PROJECT_ID = data.user.project_id;
                             if (data.user.workspace_id) window.CURRENT_WORKSPACE_ID = data.user.workspace_id;
 
@@ -1883,6 +1915,12 @@ const validationCounters = {};
                                     updateRoleUI(); // Re-trigger UI update
                                 }
                             }
+
+
+                            // 📢 CHECK MAINTENANCE BANNER
+                            checkMaintenanceStatus();
+                            // Optional: Poll every 5 minutes (300000 ms) to show banner dynamically to active users
+                            setInterval(checkMaintenanceStatus, 300000);
 
                             // 🚀 [PATCH FIX] REFRESH DASHBOARD NOW
                             // Only load stats AFTER we have the correct Workspace ID
@@ -2019,6 +2057,66 @@ const validationCounters = {};
             if(val === undefined || val === null) return "$0.00";
             return "$" + parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
+
+
+
+
+
+        // --- 📢 MAINTENANCE BANNER LOGIC ---
+// --- 📢 MAINTENANCE BANNER LOGIC ---
+// --- 📢 MAINTENANCE BANNER LOGIC ---
+
+
+async function checkMaintenanceStatus() {
+    // 1. Safety check: Don't ping the backend if context isn't loaded yet
+    if (!window.CURRENT_WORKSPACE_ID || !window.CURRENT_PROJECT_ID) {
+        return;
+    }
+
+    try {
+        const params = new URLSearchParams({
+            workspace_id: window.CURRENT_WORKSPACE_ID,
+            project_id: window.CURRENT_PROJECT_ID
+        });
+
+        const res = await safeFetch(`/drawback/api/config/banner?${params.toString()}`, { method: 'GET' });
+
+        const banner = document.getElementById('maintenance-banner');
+
+        if (res && res.success && res.data && res.data.active) {
+            // 👇 UPDATED DEFAULT MESSAGE 👇
+            let msg = res.data.message || "Scheduled Maintenance: The system will be unavailable on {date} due to maintenance.";
+
+            // 2. Smart String Replacement
+            if (res.data.date && res.data.date.trim() !== "") {
+                // If a date is provided, wrap it in a bolder, pill-shaped highlight
+                msg = msg.replace('{date}', `<strong class="font-black text-white bg-black/25 px-2.5 py-0.5 rounded-lg shadow-inner border border-black/20 mx-1 tracking-wide">${res.data.date}</strong>`);
+            } else {
+                // Clean up the text if no date is provided
+                msg = msg.replace(' on {date}', '').replace('{date}', 'shortly');
+            }
+
+            document.getElementById('maintenance-message').innerHTML = msg;
+
+            // Show the banner
+            banner.classList.remove('hidden');
+            banner.classList.add('flex');
+        } else {
+            // Hide the banner if active is false
+            banner.classList.add('hidden');
+            banner.classList.remove('flex');
+        }
+    } catch (e) {
+        console.error("Failed to check maintenance status:", e);
+    }
+}
+
+
+
+
+
+
+
 
         // --- 🆕 EXCEL-LIKE SORTING & FILTERING LOGIC ---
         function getHeaderHTML(title, tableId, colIdx) {
@@ -2913,6 +3011,20 @@ async function loadTableData(target) {
                 toggleLoading(false);
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4167,18 +4279,26 @@ function exportAllMatches() {
 
 
 
+// --- RENDER FUNCTIONS & HELPERS ---
+const calcUnitValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
+const calcEnteredValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);
 
-        // --- RENDER FUNCTIONS (Separated for clarity) ---
-        const calcUnitValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
-        const calcEnteredValue = (m) => (!m.import_qty_original || parseFloat(m.import_qty_original) === 0) ? 0 : (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);
+const calcExportDuty = (m) => {
+    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
+    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_duty_paid);
+}
 
-        // UPDATED: Use import_duty_paid instead of duty rate for accuracy
-        const calcExportDuty = (m) => {
-            if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
-            return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_duty_paid);
-        }
+const calc99Duty = (m) => calcExportDuty(m) * 0.99;
 
-        const calc99Duty = (m) => calcExportDuty(m) * 0.99;
+const calcTotalDutyRate = (m) => {
+    const base = parseFloat(m.import_base_duty_rate) || 0;
+    const rate1 = parseFloat(m.import_duty_rate) || 0;
+    const rate2 = parseFloat(m.import_duty_rate_2) || 0;
+    return Number((base + rate1 + rate2).toFixed(4));
+};
+
+// ... function renderReviewerTable(data) { starts right below here ...
+
 
 
 function renderReviewerTable(data) {
@@ -4246,7 +4366,7 @@ function renderReviewerTable(data) {
             <td>${m.export_country}</td>
             <td>HTS</td>
             <td>${m.import_hts}</td>
-            <td>${m.import_duty_rate}</td>
+            <td>${calcTotalDutyRate(m)}</td>
             <td>${formatMoney(calcUnitValue(m))}</td>
             <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
             <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
@@ -6285,6 +6405,12 @@ async function runMatching() {
         setTimeout(() => {
             if (window.CURRENT_USER_EMAIL === "system_fallback@launchpath.ai") {
                 console.warn("⚠️ No Parent Context received. Loading Default/Demo Mode.");
+
+                    // 👇 ADD THESE TWO LINES HERE 👇
+                checkMaintenanceStatus();
+                setInterval(checkMaintenanceStatus, 300000);
+                // 👆 ======================= 👆
+
                 if(currentView === 'dashboard') {
                      loadStats().then(() => {
                         loadInventory(true);
