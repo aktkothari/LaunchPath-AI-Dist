@@ -5702,7 +5702,7 @@ function validateRow(row) {
         { k: 'qty', l: 'Quantity' },
         { k: 'duty_paid', l: 'Duty Paid' },
         { k: 'duty_rate', l: 'Duty Rate' },
-        { k: 'duty_rate_1', l: 'Duty Rate' },
+        { k: 'base_duty_rate', l: 'Duty Rate' },
         { k: 'conversion_factor', l: 'Conversion Factor' },
         { k: 'customs_value', l: 'Customs Value' }
     ];
@@ -5713,7 +5713,7 @@ function validateRow(row) {
             let val;
 
             // 🟢 PATCH: Explicitly added duty_paid so "FREE" is accepted across all duty columns
-            if ((f.k === 'duty_rate' || f.k === 'duty_rate_1' || f.k === 'duty_paid') && strVal.toUpperCase() === 'FREE') {
+            if ((f.k === 'duty_rate' || f.k === 'base_duty_rate' || f.k === 'duty_paid') && strVal.toUpperCase() === 'FREE') {
                 val = 0.0;
             } else {
                 const cleanStr = strVal.replace(/[$,\s]/g, "");
@@ -5721,11 +5721,11 @@ function validateRow(row) {
             }
 
             // Change: Allow 0 for duty_rate, duty_rate_1, and duty_paid
-            if (f.k === 'duty_rate' || f.k === 'duty_rate_1' || f.k === 'duty_paid') {
+            if (f.k === 'duty_rate' || f.k === 'base_duty_rate' || f.k === 'duty_paid') {
                 if (strVal === '' || isNaN(val) || val < 0) {
                     messages.push(`${f.l} must be a valid number or 'FREE' (>= 0)`);
                     fields.push(f.k);
-                } else if ((f.k === 'duty_rate' || f.k === 'duty_rate_1') && val > 1.0) {
+                } else if ((f.k === 'duty_rate' || f.k === 'base_duty_rate') && val > 1.0) {
                     messages.push(`${f.l} must be <= 1.0`);
                     fields.push(f.k);
                 }
@@ -6168,7 +6168,7 @@ async function runMatching() {
                         <td>${m.export_country}</td>
                         <td>HTS</td>
                         <td>${m.import_hts}</td>
-                        <td>${calcTotalDutyRate(m)}</td>
+                        <td>${m.import_duty_rate}</td>
                         <td>${formatMoney(calcUnitValue(m))}</td>
 
                         <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">
