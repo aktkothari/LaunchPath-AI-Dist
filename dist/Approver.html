@@ -4469,7 +4469,7 @@ function renderApproverTable(data) {
             <td>${m.export_country}</td>
             <td>HTS</td>
             <td>${m.import_hts}</td>
-            <td>${m.import_duty_rate}</td>
+            <td>${calcTotalDutyRate(m)}</td>
             <td>${formatMoney(calcUnitValue(m))}</td>
             <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
             <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
@@ -4585,7 +4585,7 @@ function renderHistoryTable(data) {
             <td>${m.export_country}</td>
             <td>HTS</td>
             <td>${m.import_hts}</td>
-            <td>${m.import_duty_rate}</td>
+            <td>${calcTotalDutyRate(m)}</td>
             <td>${formatMoney(calcUnitValue(m))}</td>
             <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
             <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
@@ -6181,7 +6181,7 @@ async function runMatching() {
                         <td>${m.export_country}</td>
                         <td>HTS</td>
                         <td>${m.import_hts}</td>
-                        <td>${m.import_duty_rate}</td>
+                        <td>${calcTotalDutyRate(m)}</td>
                         <td>${formatMoney(calcUnitValue(m))}</td>
 
                         <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">
