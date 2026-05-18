@@ -5781,6 +5781,19 @@ function validateRow(row) {
         }
     });
 
+
+    // 🆕 ADD THIS NEW VALIDATION: Prevent self-mapping in Material Mappings
+    if (activeKeys.includes('export_material_number') && activeKeys.includes('import_material_number')) {
+        const expMat = String(row.export_material_number || '').trim().toLowerCase();
+        const impMat = String(row.import_material_number || '').trim().toLowerCase();
+
+        if (expMat && impMat && expMat === impMat) {
+            messages.push("Export and Import materials cannot be the same");
+            if (!fields.includes('export_material_number')) fields.push('export_material_number');
+            if (!fields.includes('import_material_number')) fields.push('import_material_number');
+        }
+    }
+
     // 7. Preservation of Backend-Only Errors
     if (row._backend_errors && row._backend_errors.length > 0) {
         row._backend_errors.forEach(err => {
