@@ -1020,75 +1020,75 @@ th {
 
                 <section>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-l-4 border-purple-500 pl-3">Approval Summary</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-                        <div id="card-drafted-claims" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[120px] group transition-all">
-                            <div class="flex justify-between items-start w-full">
-                                <div class="text-left">
-                                    <p class="text-xs font-semibold text-slate-500 uppercase">Drafted Claims</p>
-                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-drafted-count">0</h4>
+                    <div class="grid grid-cols-5 gap-2 lg:gap-3">
+                        <div id="card-drafted-claims" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[96px] min-w-0 group transition-all">
+                            <div class="flex justify-between items-start w-full gap-2">
+                                <div class="text-left min-w-0">
+                                    <p class="text-[10px] leading-tight font-semibold text-slate-500 uppercase break-words">Drafted Claims</p>
+                                    <h4 class="text-xl font-bold text-slate-800 mt-1.5" id="stat-drafted-count">0</h4>
                                 </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <div id="icon-drafted-claims" class="h-10 w-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 text-lg group-hover:bg-blue-100 transition">
+                                <div class="flex flex-col items-center gap-1 shrink-0">
+                                    <div id="icon-drafted-claims" class="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 text-base group-hover:bg-blue-100 transition">
                                         <i class="fa-solid fa-file-lines"></i>
                                     </div>
-                                    <i id="arrow-drafted-claims" class="fa-solid fa-arrow-right text-xl text-blue-400 mt-1 hidden"></i>
+                                    <i id="arrow-drafted-claims" class="fa-solid fa-arrow-right text-lg text-blue-400 mt-1 hidden"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="card-pending-approval" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[120px] group transition-all">
-                            <div class="flex justify-between items-start w-full">
-                                <div class="text-left">
-                                    <p class="text-xs font-semibold text-slate-500 uppercase">Pending Approval Claims</p>
-                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-pending-approval-count">0</h4>
+                        <div id="card-pending-approval" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[96px] min-w-0 group transition-all">
+                            <div class="flex justify-between items-start w-full gap-2">
+                                <div class="text-left min-w-0">
+                                    <p class="text-[10px] leading-tight font-semibold text-slate-500 uppercase break-words">Pending Approval Claims</p>
+                                    <h4 class="text-xl font-bold text-slate-800 mt-1.5" id="stat-pending-approval-count">0</h4>
                                 </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <div id="icon-pending-approval" class="h-10 w-10 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500 text-lg group-hover:bg-orange-100 transition">
+                                <div class="flex flex-col items-center gap-1 shrink-0">
+                                    <div id="icon-pending-approval" class="h-8 w-8 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500 text-base group-hover:bg-orange-100 transition">
                                         <i class="fa-solid fa-hourglass-half"></i>
                                     </div>
-                                    <i id="arrow-pending-approval" class="fa-solid fa-arrow-right text-xl text-orange-400 mt-1 hidden"></i>
+                                    <i id="arrow-pending-approval" class="fa-solid fa-arrow-right text-lg text-orange-400 mt-1 hidden"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="card-rejected-claims" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[120px] group transition-all">
-                            <div class="flex justify-between items-start w-full">
-                                <div>
-                                    <p class="text-xs font-semibold text-slate-500 uppercase">Rejected Claims</p>
-                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-rejected-count">0</h4>
+                        <div id="card-rejected-claims" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[96px] min-w-0 group transition-all">
+                            <div class="flex justify-between items-start w-full gap-2">
+                                <div class="min-w-0">
+                                    <p class="text-[10px] leading-tight font-semibold text-slate-500 uppercase break-words">Rejected Claims</p>
+                                    <h4 class="text-xl font-bold text-slate-800 mt-1.5" id="stat-rejected-count">0</h4>
                                 </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <div id="icon-rejected-claims" class="h-10 w-10 bg-red-50 rounded-lg flex items-center justify-center text-red-500 text-lg group-hover:bg-red-100 transition">
+                                <div class="flex flex-col items-center gap-1 shrink-0">
+                                    <div id="icon-rejected-claims" class="h-8 w-8 bg-red-50 rounded-lg flex items-center justify-center text-red-500 text-base group-hover:bg-red-100 transition">
                                         <i class="fa-solid fa-rotate-left"></i>
                                     </div>
-                                    <i id="arrow-rejected-claims" class="fa-solid fa-arrow-right text-xl text-red-400 mt-1 hidden"></i>
+                                    <i id="arrow-rejected-claims" class="fa-solid fa-arrow-right text-lg text-red-400 mt-1 hidden"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[120px]">
-                            <div class="flex justify-between items-start w-full">
-                                <div>
-                                    <p class="text-xs font-semibold text-slate-500 uppercase">Pending Broker Finalization</p>
-                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-approved-count">0</h4>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[96px] min-w-0">
+                            <div class="flex justify-between items-start w-full gap-2">
+                                <div class="min-w-0">
+                                    <p class="text-[10px] leading-tight font-semibold text-slate-500 uppercase break-words">Pending Broker Finalization</p>
+                                    <h4 class="text-xl font-bold text-slate-800 mt-1.5" id="stat-approved-count">0</h4>
                                 </div>
-                                <div class="h-10 w-10 bg-amber-50 rounded-lg flex items-center justify-center text-amber-500 text-lg shadow-sm border border-amber-100">
+                                <div class="h-8 w-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-500 text-base shadow-sm border border-amber-100 shrink-0">
                                     <i class="fa-solid fa-file-signature"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="card-total-completed" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[120px] group transition-all">
-                            <div class="flex justify-between items-start w-full">
-                                <div>
-                                    <p class="text-xs font-semibold text-slate-500 uppercase">Total Completed Claims</p>
-                                    <h4 class="text-2xl font-bold text-slate-800 mt-2" id="stat-pending-claims-count">0</h4>
+                        <div id="card-total-completed" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm dash-card flex flex-col justify-between min-h-[96px] min-w-0 group transition-all">
+                            <div class="flex justify-between items-start w-full gap-2">
+                                <div class="min-w-0">
+                                    <p class="text-[10px] leading-tight font-semibold text-slate-500 uppercase break-words">Total Completed Claims</p>
+                                    <h4 class="text-xl font-bold text-slate-800 mt-1.5" id="stat-pending-claims-count">0</h4>
                                 </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <div id="icon-total-completed" class="h-10 w-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-500 text-lg group-hover:bg-purple-100 transition">
+                                <div class="flex flex-col items-center gap-1 shrink-0">
+                                    <div id="icon-total-completed" class="h-8 w-8 bg-purple-50 rounded-lg flex items-center justify-center text-purple-500 text-base group-hover:bg-purple-100 transition">
                                         <i class="fa-solid fa-folder-open"></i>
                                     </div>
-                                    <i id="arrow-total-completed" class="fa-solid fa-arrow-right text-xl text-purple-400 mt-1 hidden"></i>
+                                    <i id="arrow-total-completed" class="fa-solid fa-arrow-right text-lg text-purple-400 mt-1 hidden"></i>
                                 </div>
                             </div>
                         </div>
