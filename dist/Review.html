@@ -84,6 +84,94 @@
             border-right: 3px solid #2563EB;
         }
 
+        #app-sidebar {
+            position: relative;
+            width: 16rem;
+            min-width: 16rem;
+            overflow: visible;
+            transition: width 0.2s ease, min-width 0.2s ease;
+        }
+
+        #app-sidebar.sidebar-collapsed {
+            width: 4.75rem;
+            min-width: 4.75rem;
+        }
+
+        .sidebar-label,
+        .sidebar-footer-text,
+        .nav-header {
+            transition: opacity 0.15s ease, max-width 0.2s ease, margin 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar-label,
+        .sidebar-footer-text {
+            display: inline-block;
+            max-width: 12rem;
+            overflow: hidden;
+        }
+
+        #sidebar-toggle-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-toggle-wrap {
+            position: absolute;
+            top: 50%;
+            right: -1rem;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-50%);
+        }
+
+        #app-sidebar.sidebar-collapsed #sidebar-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        #app-sidebar.sidebar-collapsed .nav-item {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        #app-sidebar.sidebar-collapsed .nav-item i {
+            margin-right: 0;
+            text-align: center;
+        }
+
+        #app-sidebar.sidebar-collapsed .sidebar-label,
+        #app-sidebar.sidebar-collapsed .sidebar-footer-text {
+            opacity: 0;
+            max-width: 0;
+            margin: 0;
+        }
+
+        #app-sidebar.sidebar-collapsed .nav-header {
+            opacity: 0;
+            height: 0;
+            max-height: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        #app-sidebar.sidebar-collapsed .sidebar-toggle-wrap,
+        #app-sidebar.sidebar-collapsed .sidebar-footer {
+            justify-content: center;
+        }
+
+        #app-sidebar.sidebar-collapsed .sidebar-footer {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        #app-sidebar.sidebar-collapsed #server-status > i,
+        #app-sidebar.sidebar-collapsed #server-status > span:first-child {
+            margin-right: 0 !important;
+        }
+
         /* Robust Full-Screen Loader */
         #loading-overlay {
             position: fixed;
@@ -347,6 +435,30 @@ th {
     z-index: 30; /* Reduced from 50 to 30 */
     background-color: #F8FAFC; /* Slate-50: Must be opaque to hide scrolling data */
     box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Optional: Adds a subtle border shadow */
+}
+
+.freeze-cell {
+    position: sticky !important;
+    z-index: 20;
+    background-color: #fff;
+    background-clip: padding-box;
+}
+
+.freeze-head {
+    z-index: 60 !important;
+    background-color: #f8fafc !important;
+}
+
+.freeze-last {
+    box-shadow: 6px 0 10px -8px rgba(15, 23, 42, 0.55);
+}
+
+.freeze-menu {
+    position: fixed;
+    z-index: 1000;
+    width: 260px;
+    max-height: min(320px, calc(100vh - 24px));
+    overflow-y: auto;
 }
 
     </style>
@@ -834,8 +946,11 @@ th {
         <button onclick="document.getElementById('demo-banner').classList.add('hidden')" class="text-white hover:text-amber-100 bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded text-xs transition">Dismiss</button>
     </div>
 
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg z-20">
-        <div class="h-4 flex items-center">
+    <aside id="app-sidebar" class="bg-white border-r border-gray-200 flex flex-col shadow-lg z-20">
+        <div class="sidebar-toggle-wrap">
+            <button type="button" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Collapse sidebar" aria-expanded="true" class="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition flex items-center justify-center shadow-sm">
+                <i id="sidebar-toggle-icon" class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
 <!--            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-3">-->
 <!--                <i class="fa-solid fa-layer-group"></i>-->
 <!--            </div>-->
@@ -847,51 +962,51 @@ th {
 
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
             <div id="header-analytics" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 nav-header">Analytics</div>
-            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="font-medium">Dashboard</span>
+            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" title="Dashboard" class="nav-item active flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-chart-pie w-5 mr-2"></i> <span class="sidebar-label font-medium">Dashboard</span>
             </a>
 
             <div id="header-data" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Data Management</div>
-            <a href="#" onclick="switchView('products')" id="nav-products" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-box w-5 mr-2"></i> <span class="font-medium">Product Master</span>
+            <a href="#" onclick="switchView('products')" id="nav-products" title="Product Master" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-box w-5 mr-2"></i> <span class="sidebar-label font-medium">Product Master</span>
             </a>
-            <a href="#" onclick="switchView('material_mappings')" id="nav-material_mappings" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-link w-5 mr-2"></i> <span class="font-medium">Material Mappings</span>
+            <a href="#" onclick="switchView('material_mappings')" id="nav-material_mappings" title="Material Mappings" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-link w-5 mr-2"></i> <span class="sidebar-label font-medium">Material Mappings</span>
             </a>
-            <a href="#" onclick="switchView('imports')" id="nav-imports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-ship w-5 mr-2"></i> <span class="font-medium">Imports</span>
+            <a href="#" onclick="switchView('imports')" id="nav-imports" title="Imports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-ship w-5 mr-2"></i> <span class="sidebar-label font-medium">Imports</span>
             </a>
-            <a href="#" onclick="switchView('exports')" id="nav-exports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-plane-departure w-5 mr-2"></i> <span class="font-medium">Exports</span>
+            <a href="#" onclick="switchView('exports')" id="nav-exports" title="Exports" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-plane-departure w-5 mr-2"></i> <span class="sidebar-label font-medium">Exports</span>
             </a>
 
             <div id="header-process" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Core Process</div>
-            <a href="#" onclick="switchView('matching')" id="nav-matching" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-wand-magic-sparkles w-5 mr-2"></i> <span class="font-medium">Matching Engine</span>
+            <a href="#" onclick="switchView('matching')" id="nav-matching" title="Matching Engine" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-wand-magic-sparkles w-5 mr-2"></i> <span class="sidebar-label font-medium">Matching Engine</span>
             </a>
 
             <div id="header-workflow" class="px-6 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 nav-header">Workflow / Approval</div>
-            <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="font-medium">Reviewer Console</span>
+            <a href="#" onclick="switchView('reviewer')" id="nav-reviewer" title="Reviewer Console" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-magnifying-glass w-5 mr-2"></i> <span class="sidebar-label font-medium">Reviewer Console</span>
             </a>
-            <a href="#" onclick="switchView('approver')" id="nav-approver" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-stamp w-5 mr-2"></i> <span class="font-medium">Approver Portal</span>
+            <a href="#" onclick="switchView('approver')" id="nav-approver" title="Approver Portal" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-stamp w-5 mr-2"></i> <span class="sidebar-label font-medium">Approver Portal</span>
             </a>
-             <a href="#" onclick="switchView('history')" id="nav-history" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
-                <i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="font-medium">Claims History</span>
+             <a href="#" onclick="switchView('history')" id="nav-history" title="Claims History" class="nav-item flex items-center px-6 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer border-r-4 border-transparent">
+                <i class="fa-solid fa-clock-rotate-left w-5 mr-2"></i> <span class="sidebar-label font-medium">Claims History</span>
             </a>
 
             <div class="mt-8 border-t border-slate-100 pt-2">
-                <a href="#" onclick="switchView('help')" id="nav-help" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
-                    <i class="fa-solid fa-circle-question w-5 mr-2"></i> <span class="font-medium">Help / User Guide</span>
+                <a href="#" onclick="switchView('help')" id="nav-help" title="Help / User Guide" class="nav-item flex items-center px-6 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer border-r-4 border-transparent">
+                    <i class="fa-solid fa-circle-question w-5 mr-2"></i> <span class="sidebar-label font-medium">Help / User Guide</span>
                 </a>
             </div>
         </nav>
 
-        <div class="p-4 border-t border-gray-100 bg-gray-50 text-xs flex justify-between items-center">
-            <span class="text-slate-500">DB Status:</span>
+        <div class="sidebar-footer p-4 border-t border-gray-100 bg-gray-50 text-xs flex justify-between items-center">
+            <span class="sidebar-footer-text text-slate-500">DB Status:</span>
             <span id="server-status" class="flex items-center font-bold text-slate-500">
-                <span class="w-2 h-2 bg-slate-300 rounded-full mr-2"></span> Checking...
+                <span class="w-2 h-2 bg-slate-300 rounded-full mr-2"></span><span class="sidebar-footer-text">Checking...</span>
             </span>
         </div>
     </aside>
@@ -1303,6 +1418,12 @@ th {
                  <button id="export-tab-btn" onclick="exportCurrentTab()" class="text-xs bg-white border border-slate-300 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1.5 font-medium">
                      <i class="fa-solid fa-file-export"></i> Download Data
                  </button>
+                 <div id="freeze-columns-control" class="relative hidden">
+                     <button onclick="toggleFreezeMenu(event)" class="text-xs bg-white border border-slate-300 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1.5 font-medium">
+                         <i class="fa-solid fa-thumbtack"></i> Freeze Columns <span id="freeze-columns-count" class="hidden text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">0</span>
+                     </button>
+                     <div id="freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div>
+                 </div>
                  <div class="h-4 w-px bg-slate-300"></div>
 
 
@@ -1340,7 +1461,7 @@ th {
                     <p class="text-xs text-center text-slate-400 mt-2"><i class="fa-solid fa-arrow-down mr-1"></i> After matching, proceed to <b>Reviewer Console</b> below.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold flex justify-between"><span>Transaction Results</span><span class="text-xs font-normal text-slate-500 self-center">Showing latest matches from DB</span></div>
+                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 font-bold flex justify-between items-center gap-3"><span>Transaction Results</span><div class="flex items-center gap-3"><span class="text-xs font-normal text-slate-500 self-center">Showing latest matches from DB</span><div id="matches-freeze-columns-control" class="relative hidden"><button onclick="toggleFreezeMenu(event, 'matches-freeze-columns-menu')" class="text-sm bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded hover:bg-slate-100 transition"><i class="fa-solid fa-thumbtack mr-1"></i>Freeze Columns <span id="matches-freeze-columns-count" class="hidden text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-full">0</span></button><div id="matches-freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div></div></div></div>
                     <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="matches-table"><thead class="bg-white text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="matches-body"><tr><td colspan="23" class="p-8 text-center text-slate-400">No matches run yet.</td></tr></tbody></table></div>
                 </div>
             </div>
@@ -1360,7 +1481,7 @@ th {
                                 </span>
                             </p>
                         </div>
-                        <div class="flex items-center gap-3"><button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition"><i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim</button><button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div>
+                        <div class="flex items-center gap-3"><button onclick="openClaimModal()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-bold shadow-sm mr-2 transition"><i class="fa-solid fa-folder-plus mr-1"></i> Create/Add to Claim</button><div id="reviewer-freeze-columns-control" class="relative hidden"><button onclick="toggleFreezeMenu(event, 'reviewer-freeze-columns-menu')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-thumbtack mr-1"></i>Freeze Columns <span id="reviewer-freeze-columns-count" class="hidden text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">0</span></button><div id="reviewer-freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div></div><button onclick="loadWorkflowData('reviewer')" class="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div>
                     </div>
 
 
@@ -1434,6 +1555,7 @@ th {
                       <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
                         <div><h3 class="font-bold text-purple-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Claims History</h3><p class="text-xs text-purple-600 mt-1">Select a Claim ID to view details or download specific reports.</p></div>
                         <div class="flex gap-2">
+                            <div id="history-summary-freeze-columns-control" class="relative hidden"><button onclick="toggleFreezeMenu(event, 'history-summary-freeze-columns-menu')" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium transition shadow-sm"><i class="fa-solid fa-thumbtack mr-1"></i> Freeze Columns <span id="history-summary-freeze-columns-count" class="hidden text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">0</span></button><div id="history-summary-freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div></div>
 <!--                            <button onclick="exportAllMatches()" class="text-sm bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-medium transition shadow-sm">-->
 <!--                                <i class="fa-solid fa-file-csv mr-1"></i> Export All-->
 <!--                            </button>-->
@@ -1443,7 +1565,7 @@ th {
                 </div>
                 <div id="history-detail-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
-                        <div class="flex items-center gap-4"><button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back to List</button><div class="h-6 w-px bg-purple-200"></div><div><h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3></div></div>
+                        <div class="flex items-center gap-4"><button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back to List</button><div id="history-detail-freeze-columns-control" class="relative hidden"><button onclick="toggleFreezeMenu(event, 'history-detail-freeze-columns-menu')" class="text-xs bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-bold transition"><i class="fa-solid fa-thumbtack mr-1"></i>Freeze Columns <span id="history-detail-freeze-columns-count" class="hidden text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">0</span></button><div id="history-detail-freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div></div><div class="h-6 w-px bg-purple-200"></div><div><h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3></div></div>
                     </div>
                     <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="history-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="history-body"><tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Claim Data...</td></tr></tbody></table></div>
                 </div>
@@ -1813,6 +1935,14 @@ th {
         let currentView = 'dashboard';
         let stagedData = [];
         let previewSelection = new Set(); // ðŸ†• Tracks cherry-picked rows
+        const frozenColumnsByTarget = {
+            imports: new Set(),
+            exports: new Set(),
+            'matches-table': new Set(),
+            'reviewer-table': new Set(),
+            'history-summary-table': new Set(),
+            'history-table': new Set()
+        };
 
 
 
@@ -2024,6 +2154,342 @@ const validationCounters = {};
             return "$" + parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[char]));
+        }
+
+        function getFreezeableColumns(target, config = []) {
+            const freezeTargets = ['imports', 'exports', 'matches-table', 'reviewer-table', 'history-summary-table', 'history-table'];
+            return freezeTargets.includes(target) ? config : [];
+        }
+
+        function getColumnWidth(col) {
+            if (!col) return 140;
+            if (col.w) return col.w;
+
+            const widthByKey = {
+                entry_number: 210,
+                material_number: 180,
+                description: 260,
+                qty: 110,
+                qty_consumed: 120,
+                pct_consumed: 100,
+                uom: 90,
+                import_date: 130,
+                export_date: 130,
+                duty_paid: 130,
+                declaration_line_number: 190,
+                hts_code: 140,
+                base_duty_rate: 130,
+                duty_rate_1: 120,
+                duty_rate_2: 120,
+                customs_value: 150,
+                tariff_number_1: 130,
+                tariff_value_1: 130,
+                tariff_number_2: 130,
+                tariff_value_2: 130,
+                customer_name: 180,
+                customer_id: 130,
+                country: 150,
+                invoice_no: 140,
+                origin_plant: 130
+            };
+
+            const widthByLabel = {
+                'Final Acceptance': 190,
+                'Actions': 120,
+                'Claim ID': 150,
+                'Goods Description': 240,
+                'Import Material Number': 190,
+                'Export Material Number': 190,
+                'Goods Value per Unit': 170,
+                'Refund Amount': 150,
+                'Approve Date': 150
+            };
+
+            return widthByKey[col.k] || widthByLabel[col.l] || 140;
+        }
+
+        function getFrozenSet(target) {
+            return frozenColumnsByTarget[target] || new Set();
+        }
+
+        function getFrozenColumnsInOrder(target, config = []) {
+            const selected = getFrozenSet(target);
+            return getFreezeableColumns(target, config).filter(col => selected.has(col.k));
+        }
+
+        function getRenderColumns(target, config = []) {
+            if (!getFreezeableColumns(target, config).length) return config;
+            const frozenColumns = getFrozenColumnsInOrder(target, config);
+            const frozenKeys = new Set(frozenColumns.map(col => col.k));
+            const remainingColumns = config.filter(col => !frozenKeys.has(col.k));
+            return [...frozenColumns, ...remainingColumns];
+        }
+
+        function getFrozenLeftOffset(target, config, key) {
+            let left = 0;
+            for (const col of getFreezeableColumns(target, config)) {
+                if (col.k === key) break;
+                if (getFrozenSet(target).has(col.k)) left += getColumnWidth(col);
+            }
+            return left;
+        }
+
+        function resolveFrozenBackgroundColor(className) {
+            if (className.includes('bg-red-50')) return '#fef2f2';
+            if (className.includes('bg-red-100')) return '#fee2e2';
+            if (className.includes('bg-blue-50')) return '#eff6ff';
+            if (className.includes('bg-blue-100')) return '#dbeafe';
+            if (className.includes('bg-indigo-50')) return '#eef2ff';
+            if (className.includes('bg-orange-50')) return '#fff7ed';
+            if (className.includes('bg-purple-50')) return '#faf5ff';
+            if (className.includes('bg-slate-50')) return '#f8fafc';
+            if (className.includes('bg-gray-100')) return '#f3f4f6';
+            if (className.includes('bg-gray-200')) return '#e5e7eb';
+            if (className.includes('bg-emerald-50')) return '#ecfdf5';
+            if (className.includes('bg-emerald-100')) return '#d1fae5';
+            if (className.includes('bg-green-100')) return '#dcfce7';
+            if (className.includes('bg-yellow-100')) return '#fef9c3';
+            return '';
+        }
+
+        function getFrozenBackgroundColor(className, isHeader, rowClass = '') {
+            if (isHeader) return '#f8fafc';
+            return resolveFrozenBackgroundColor(className) || resolveFrozenBackgroundColor(rowClass) || '#ffffff';
+        }
+
+        function getFrozenCellAttrs(config, col, target, className, isHeader = false, leftBase = 0, rowClass = '') {
+            const selected = getFrozenSet(target);
+            const isFrozen = col && selected.has(col.k) && getFreezeableColumns(target, config).length;
+            if (!isFrozen) return `class="${className}"`;
+
+            const frozenColumns = getFrozenColumnsInOrder(target, config);
+            const isLastFrozen = frozenColumns.length && frozenColumns[frozenColumns.length - 1].k === col.k;
+            const width = getColumnWidth(col);
+            const left = leftBase + getFrozenLeftOffset(target, config, col.k);
+            const stickyClasses = `${className} freeze-cell ${isHeader ? 'freeze-head' : ''} ${isLastFrozen ? 'freeze-last' : ''}`.trim();
+            const backgroundColor = getFrozenBackgroundColor(className, isHeader, rowClass);
+            return `class="${stickyClasses}" style="left:${left}px; min-width:${width}px; width:${width}px; background-color:${backgroundColor};"`;
+        }
+
+        function getWorkflowColumns(tableId, headers) {
+            return headers.map((label, index) => ({ k: `${tableId}:${label}`, l: label, index }));
+        }
+
+        function renderWorkflowCells(tableId, columns, cells, leftBase = 0, rowClass = '') {
+            return columns.map(col => {
+                const cell = cells[col.index] || {};
+                const className = cell.className || '';
+                const html = cell.html !== undefined && cell.html !== null ? cell.html : '';
+                return `<td ${getFrozenCellAttrs(columns, col, tableId, className, false, leftBase, rowClass)}>${html}</td>`;
+            }).join('');
+        }
+
+        function getMatchingHeaders() {
+            return [
+                'Status', 'Notes', 'View', 'Imp Entry No','Entry Line No',
+                'Import Material Number','Export Material Number','Imp Date',
+                'Goods Description','Line Duty','HTSUS No',
+                'Export Qty', 'Export UOM', 'Conv. Factor', 'Import Qty', 'Import UOM',
+                'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
+                'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
+            ];
+        }
+
+        function getMatchingColumns() {
+            return getWorkflowColumns('matches-table', getMatchingHeaders());
+        }
+
+        function renderMatchingTableHeaders() {
+            const matchColumns = getMatchingColumns();
+            const renderColumns = getRenderColumns('matches-table', matchColumns);
+            renderFreezeColumnControl('matches-table', matchColumns, {
+                controlId: 'matches-freeze-columns-control',
+                menuId: 'matches-freeze-columns-menu',
+                countId: 'matches-freeze-columns-count'
+            });
+            renderDynamicHeaders('matches-table', renderColumns.map(col => col.l), 0, { target: 'matches-table', config: renderColumns });
+        }
+
+        function rememberBaseCellPresentation(cell) {
+            if (cell.dataset.freezeBaseReady === '1') return;
+            cell.dataset.freezeBaseReady = '1';
+            cell.dataset.freezeBaseClass = cell.getAttribute('class') || '';
+            cell.dataset.freezeBaseStyle = cell.getAttribute('style') || '';
+        }
+
+        function applyFrozenPresentationToCell(cell, config, col, target, className, leftBase = 0, rowClass = '') {
+            const baseStyle = cell.dataset.freezeBaseStyle || '';
+            cell.className = className;
+            if (baseStyle) {
+                cell.setAttribute('style', baseStyle);
+            } else {
+                cell.removeAttribute('style');
+            }
+
+            const selected = getFrozenSet(target);
+            const isFrozen = col && selected.has(col.k) && getFreezeableColumns(target, config).length;
+            if (!isFrozen) return;
+
+            const frozenColumns = getFrozenColumnsInOrder(target, config);
+            const isLastFrozen = frozenColumns.length && frozenColumns[frozenColumns.length - 1].k === col.k;
+            const width = getColumnWidth(col);
+            const left = leftBase + getFrozenLeftOffset(target, config, col.k);
+            cell.className = `${className} freeze-cell ${isLastFrozen ? 'freeze-last' : ''}`.trim();
+            cell.style.left = `${left}px`;
+            cell.style.minWidth = `${width}px`;
+            cell.style.width = `${width}px`;
+            cell.style.backgroundColor = getFrozenBackgroundColor(className, false, rowClass);
+        }
+
+        function refreshMatchingTableFreeze() {
+            renderMatchingTableHeaders();
+            const tbody = document.getElementById('matches-body');
+            if (!tbody) return;
+
+            const matchColumns = getMatchingColumns();
+            const renderColumns = getRenderColumns('matches-table', matchColumns);
+
+            Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+                const cells = Array.from(row.children).filter(cell => cell.tagName === 'TD');
+                if (cells.length !== matchColumns.length) return;
+
+                const cellsByOriginalIndex = [];
+                cells.forEach((cell, currentIndex) => {
+                    rememberBaseCellPresentation(cell);
+                    const storedIndex = Number(cell.dataset.matchColumnIndex);
+                    const originalIndex = Number.isInteger(storedIndex) ? storedIndex : currentIndex;
+                    cell.dataset.matchColumnIndex = String(originalIndex);
+                    cellsByOriginalIndex[originalIndex] = cell;
+                });
+
+                renderColumns.forEach(col => {
+                    const cell = cellsByOriginalIndex[col.index];
+                    if (!cell) return;
+                    applyFrozenPresentationToCell(cell, renderColumns, col, 'matches-table', cell.dataset.freezeBaseClass || '', 0, row.className || '');
+                    row.appendChild(cell);
+                });
+            });
+        }
+
+        function refreshFrozenTable(target) {
+            if (target === 'imports' || target === 'exports') {
+                loadTableData(target);
+            } else if (target === 'matches-table') {
+                refreshMatchingTableFreeze();
+            } else if (target === 'reviewer-table') {
+                loadWorkflowData('reviewer');
+            } else if (target === 'history-summary-table') {
+                loadHistorySummary();
+            } else if (target === 'history-table') {
+                const titleEl = document.getElementById('history-active-claim');
+                loadWorkflowData('history', titleEl?.innerText || null, titleEl?.dataset?.brokerId || null);
+            }
+        }
+
+        function toggleFreezeMenu(event, menuId = 'freeze-columns-menu') {
+            event.stopPropagation();
+            const menu = document.getElementById(menuId);
+            if (!menu) return;
+
+            const willOpen = menu.classList.contains('hidden');
+            document.querySelectorAll('.freeze-menu').forEach(otherMenu => {
+                if (otherMenu !== menu) otherMenu.classList.add('hidden');
+            });
+
+            menu.classList.toggle('hidden', !willOpen);
+            if (willOpen) positionFreezeMenu(menu, event.currentTarget);
+        }
+
+        function positionFreezeMenu(menu, anchor) {
+            const gap = 6;
+            const margin = 12;
+            const anchorRect = anchor.getBoundingClientRect();
+            menu.style.visibility = 'hidden';
+            menu.style.left = '0px';
+            menu.style.top = '0px';
+
+            requestAnimationFrame(() => {
+                const menuRect = menu.getBoundingClientRect();
+                let left = anchorRect.right - menuRect.width;
+                left = Math.max(margin, Math.min(left, window.innerWidth - menuRect.width - margin));
+
+                let top = anchorRect.bottom + gap;
+                const bottomSpace = window.innerHeight - top - margin;
+                if (bottomSpace < menuRect.height && anchorRect.top > menuRect.height + gap + margin) {
+                    top = anchorRect.top - menuRect.height - gap;
+                }
+                top = Math.max(margin, Math.min(top, window.innerHeight - menuRect.height - margin));
+
+                menu.style.left = `${left}px`;
+                menu.style.top = `${top}px`;
+                menu.style.visibility = '';
+            });
+        }
+
+        function closeFreezeMenuOnOutsideInteraction(event) {
+            document.querySelectorAll('.freeze-menu').forEach(menu => {
+                const control = menu.parentElement;
+                if (!control || menu.classList.contains('hidden')) return;
+                if (!control.contains(event.target) && !menu.contains(event.target)) menu.classList.add('hidden');
+            });
+        }
+
+        document.addEventListener('pointerdown', closeFreezeMenuOnOutsideInteraction);
+
+        function toggleFrozenColumn(event, target, key) {
+            event.stopPropagation();
+            const selected = getFrozenSet(target);
+            selected.has(key) ? selected.delete(key) : selected.add(key);
+            refreshFrozenTable(target);
+        }
+
+        function clearFrozenColumns(event, target) {
+            event.stopPropagation();
+            getFrozenSet(target).clear();
+            refreshFrozenTable(target);
+        }
+
+        function renderFreezeColumnControl(target, config, ids = {}) {
+            const control = document.getElementById(ids.controlId || 'freeze-columns-control');
+            const menu = document.getElementById(ids.menuId || 'freeze-columns-menu');
+            const count = document.getElementById(ids.countId || 'freeze-columns-count');
+            if (!control || !menu || !count) return;
+
+            const columns = getFreezeableColumns(target, config);
+            if (!columns.length) {
+                control.classList.add('hidden');
+                menu.classList.add('hidden');
+                menu.innerHTML = '';
+                count.classList.add('hidden');
+                return;
+            }
+
+            const selected = getFrozenSet(target);
+            control.classList.remove('hidden');
+            count.textContent = selected.size;
+            count.classList.toggle('hidden', selected.size === 0);
+            menu.innerHTML = `
+                <div class="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 mb-1">
+                    <span class="text-xs font-bold text-slate-600 uppercase">Freeze Columns</span>
+                    <button type="button" onclick="clearFrozenColumns(event, '${target}')" class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold">Clear</button>
+                </div>
+                ${columns.map(col => `
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-50 cursor-pointer text-xs text-slate-700">
+                        <input type="checkbox" class="accent-blue-600" ${selected.has(col.k) ? 'checked' : ''} onchange="toggleFrozenColumn(event, '${target}', '${col.k}')">
+                        <span>${escapeHtml(col.l)}</span>
+                    </label>
+                `).join('')}
+            `;
+        }
+
 
 
 
@@ -2100,7 +2566,6 @@ async function checkMaintenanceStatus() {
                 <div class="resizer" onmousedown="initResize(event, this)" onclick="event.stopPropagation()"></div>
             </div>`;
         }
-
         // --- Issue 3: Column Resizing Logic ---
         let startX, startWidth, resizingColumn;
 
@@ -2572,16 +3037,37 @@ function updateServerStatus(isOnline) {
             const statusEl = document.getElementById('server-status');
             const banner = document.getElementById('demo-banner');
             if(isOnline) {
-                statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> Connected (RDS)';
+                statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span><span class="sidebar-footer-text">Connected (RDS)</span>';
                 statusEl.classList.remove('text-amber-600', 'text-red-600');
                 statusEl.classList.add('text-green-600');
                 banner.classList.add('hidden');
             } else {
-                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Connection Lost';
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i><span class="sidebar-footer-text">Connection Lost</span>';
                 statusEl.classList.remove('text-green-600');
                 statusEl.classList.add('text-red-600');
             }
         }
+
+function applySidebarState(isCollapsed) {
+            const sidebar = document.getElementById('app-sidebar');
+            const toggleButton = document.getElementById('sidebar-toggle');
+            if (!sidebar || !toggleButton) return;
+
+            sidebar.classList.toggle('sidebar-collapsed', isCollapsed);
+            toggleButton.setAttribute('aria-expanded', String(!isCollapsed));
+            toggleButton.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        }
+
+function toggleSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            if (!sidebar) return;
+
+            const isCollapsed = !sidebar.classList.contains('sidebar-collapsed');
+            applySidebarState(isCollapsed);
+            localStorage.setItem('drawbackflowSidebarCollapsed', String(isCollapsed));
+        }
+
+applySidebarState(localStorage.getItem('drawbackflowSidebarCollapsed') === 'true');
 
 
 function switchView(viewId) {
@@ -2622,19 +3108,8 @@ function switchView(viewId) {
                 loadStats();
             } else if(viewId === 'matching') {
                 document.getElementById('view-matching').classList.remove('hidden');
-                // ðŸ†• REORDERED HEADERS: [Status, Notes, View] moved to front.
-
-                const matchHeaders = [
-                    'Status', 'Notes', 'View', 'Imp Entry No','Entry Line No',
-                    'Import Material Number','Export Material Number','Imp Date',
-                    'Goods Description','Line Duty','HTSUS No',
-                    'Export Qty', 'Export UOM', 'Conv. Factor', 'Import Qty', 'Import UOM',
-                    'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
-                    'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
-                ];
-
 //                const matchHeaders = ['Status', 'Notes', 'View', 'Imp Entry No','Entry Line No','Import Material Number','Export Material Number','Imp Date','Goods Description','Line Duty','HTSUS No','Export Qty','Export UQ','Unique ID','Export Dte','Dest Country','Tariff Type','Tariff','Base Rate','Duty Rate 1','Duty Rate 2','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'];
-                renderDynamicHeaders('matches-table', matchHeaders, 0);
+                renderMatchingTableHeaders();
             } else if(viewId === 'reviewer') {
                 document.getElementById('view-reviewer').classList.remove('hidden');
                 loadWorkflowData('reviewer');
@@ -2848,17 +3323,23 @@ async function loadStats() {
 
 
         // --- ðŸ†• TABLE HEADER GENERATOR (FIXED) ---
-        function renderDynamicHeaders(tableId, labels, hasCheckbox = 0) {
+        function renderDynamicHeaders(tableId, labels, hasCheckbox = 0, options = {}) {
             const thead = document.querySelector(`#${tableId} thead`);
             let html = '<tr>';
             let offset = 0;
+            const config = options.config || [];
+            const target = options.target || '';
+            const leftBase = options.leftBase || 0;
 
             if (hasCheckbox === 1) {
                 let toggleFn = 'toggleSelectAll';
                 if (tableId === 'reviewer-table') {
                     toggleFn = 'toggleReviewerSelectAll';
                 }
-                html += `<th class="w-8 text-center bg-slate-50 th-static"><input type="checkbox" onchange="${toggleFn}(this)" class="accent-blue-600"></th>`;
+                const checkboxAttrs = tableId === 'reviewer-table'
+                    ? 'class="w-8 text-center bg-slate-50 th-static freeze-cell freeze-head" style="position:sticky; left:0; min-width:32px; width:32px; z-index:45;"'
+                    : 'class="w-8 text-center bg-slate-50 th-static"';
+                html += `<th ${checkboxAttrs}><input type="checkbox" onchange="${toggleFn}(this)" class="accent-blue-600"></th>`;
                 offset = 1;
             } else if (hasCheckbox === 2) {
                 html += `<th class="w-16 text-center bg-slate-50 th-static">Action</th>`;
@@ -2871,7 +3352,9 @@ async function loadStats() {
             }
 
             labels.forEach((l, i) => {
-                html += `<th class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200">${getHeaderHTML(l, tableId, i + offset)}</th>`;
+                const col = config[i];
+                const thAttrs = getFrozenCellAttrs(config, col, target, 'sticky top-0 z-30 bg-slate-50 border-b border-slate-200', true, leftBase);
+                html += `<th ${thAttrs}>${getHeaderHTML(l, tableId, i + offset)}</th>`;
             });
             html += '</tr>';
             thead.innerHTML = html;
@@ -2899,6 +3382,7 @@ async function loadTableData(target) {
 
         const config = TABLE_CONFIG[target];
         if (!config) return;
+        const renderConfig = getRenderColumns(target, config);
 
         if (target === 'imports' || target === 'exports') {
             rows.forEach(row => {
@@ -2930,7 +3414,8 @@ async function loadTableData(target) {
             return (b.id || 0) - (a.id || 0);
         });
 
-        const labels = config.map(c => c.l);
+        const labels = renderConfig.map(c => c.l);
+        renderFreezeColumnControl(target, config);
 
         // ðŸŸ¢ NEW: Clear state when loading new data
         if (typeof managementSelection !== 'undefined') {
@@ -2940,7 +3425,7 @@ async function loadTableData(target) {
 
         // ðŸŸ¢ NEW: Use hasActionColumn = 3 for bulk checkboxes
         const hasActionColumn = (target === 'products' || target === 'material_mappings') ? 3 : 0;
-        renderDynamicHeaders('data-table', labels, hasActionColumn);
+        renderDynamicHeaders('data-table', labels, hasActionColumn, { target, config: renderConfig });
 
         if(rows.length === 0) {
             tableContainer.classList.add('hidden');
@@ -2974,7 +3459,7 @@ async function loadTableData(target) {
                     usageStyle = "text-emerald-600 font-bold bg-emerald-50";
                 }
 
-                config.forEach(col => {
+                renderConfig.forEach(col => {
                     let val = row[col.k] !== undefined && row[col.k] !== null ? row[col.k] : "";
                     let cellClasses = "px-6 py-3 whitespace-nowrap text-center";
 
@@ -3004,7 +3489,7 @@ async function loadTableData(target) {
                     }
 
                     if (isArchived && col.k !== 'is_default') cellClasses += " opacity-60";
-                    bRows += `<td class="${cellClasses}">${val}</td>`;
+                    bRows += `<td ${getFrozenCellAttrs(renderConfig, col, target, cellClasses, false, 0, rowClass)}>${val}</td>`;
                 });
                 bRows += `</tr>`;
             });
@@ -3833,7 +4318,15 @@ async function loadHistorySummary() {
         // ðŸŸ¢ FIX 2: Added json.success check to ensure the response is valid
         if (json.success && json.data && json.data.length > 0) {
             const headers = ['Final Acceptance', 'Actions', 'Claim ID', 'Status', 'Total Entries', 'Valid Entries', 'Voided Entries', 'Claims Value', 'Approved Date'];
-            renderDynamicHeaders('history-summary-table', headers, 0);
+            const columns = getWorkflowColumns('history-summary-table', headers);
+            const renderColumns = getRenderColumns('history-summary-table', columns);
+            const renderHeaders = renderColumns.map(col => col.l);
+            renderFreezeColumnControl('history-summary-table', columns, {
+                controlId: 'history-summary-freeze-columns-control',
+                menuId: 'history-summary-freeze-columns-menu',
+                countId: 'history-summary-freeze-columns-count'
+            });
+            renderDynamicHeaders('history-summary-table', renderHeaders, 0, { target: 'history-summary-table', config: renderColumns });
 
             const toMMDDYYYY = (isoStr) => {
                 if(!isoStr) return '-';
@@ -3870,24 +4363,20 @@ async function loadHistorySummary() {
                 else if (c.voided_entries > 0 && c.valid_entries == 0) statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">VOIDED</span>`;
                 else if (c.voided_entries > 0) statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
 
-                return `
-                <tr class="border-b border-slate-50 hover:bg-purple-50 transition">
-                     <td class="px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50">${acceptanceHtml}</td>
+                const cells = [
+                    { html: acceptanceHtml, className: 'px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50' },
+                    { html: `<button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 transition" title="Download CSV"><i class="fa-solid fa-download text-lg"></i></button><button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details"><i class="fa-solid fa-circle-info text-lg"></i></button>`, className: 'px-6 py-4 text-center whitespace-nowrap flex items-center justify-center gap-3' },
+                    { html: displayId, className: 'px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center' },
+                    { html: statusBadge, className: 'px-6 py-4 text-center' },
+                    { html: c.total_entries, className: 'px-6 py-4 text-center font-mono text-slate-600' },
+                    { html: c.valid_entries, className: 'px-6 py-4 text-center font-mono text-emerald-600 font-bold' },
+                    { html: c.voided_entries, className: 'px-6 py-4 text-center font-mono text-red-500' },
+                    { html: formatMoney(c.claim_value), className: 'px-6 py-4 font-bold text-emerald-700 text-lg text-center' },
+                    { html: toMMDDYYYY(c.approved_date), className: 'px-6 py-4 text-xs text-slate-500 text-center font-mono' }
+                ];
 
-                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details">
-                            <i class="fa-solid fa-circle-info text-lg"></i>
-                        </button>
-                    </td>
-
-                    <td class="px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center">${displayId}</td>
-                    <td class="px-6 py-4 text-center">${statusBadge}</td>
-                    <td class="px-6 py-4 text-center font-mono text-slate-600">${c.total_entries}</td>
-                    <td class="px-6 py-4 text-center font-mono text-emerald-600 font-bold">${c.valid_entries}</td>
-                    <td class="px-6 py-4 text-center font-mono text-red-500">${c.voided_entries}</td>
-                    <td class="px-6 py-4 font-bold text-emerald-700 text-lg text-center">${formatMoney(c.claim_value)}</td>
-                    <td class="px-6 py-4 text-xs text-slate-500 text-center font-mono">${toMMDDYYYY(c.approved_date)}</td>
-                </tr>`;
+                const rowClass = 'border-b border-slate-50 hover:bg-purple-50 transition';
+                return `<tr class="${rowClass}">${renderWorkflowCells('history-summary-table', renderColumns, cells, 0, rowClass)}</tr>`;
             }).join('');
         } else {
             // ðŸŸ¢ FIX 3: Clear the "Fetching..." row if no data is returned
@@ -4358,8 +4847,16 @@ function renderReviewerTable(data) {
         'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
         'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount'
     ];
+    const columns = getWorkflowColumns('reviewer-table', headers);
+    const renderColumns = getRenderColumns('reviewer-table', columns);
+    const renderHeaders = renderColumns.map(col => col.l);
+    renderFreezeColumnControl('reviewer-table', columns, {
+        controlId: 'reviewer-freeze-columns-control',
+        menuId: 'reviewer-freeze-columns-menu',
+        countId: 'reviewer-freeze-columns-count'
+    });
 
-    renderDynamicHeaders('reviewer-table', headers, 1);
+    renderDynamicHeaders('reviewer-table', renderHeaders, 1, { target: 'reviewer-table', config: renderColumns, leftBase: 32 });
 
     if (data.length === 0) {
         tbody.innerHTML = `<tr><td colspan="27" class="p-8 text-center text-slate-400 italic">No matches pending review.</td></tr>`;
@@ -4378,45 +4875,18 @@ function renderReviewerTable(data) {
         let importQtyConsumed = parseFloat(m.qty_matched) || 0;
         let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
-        return `
-        <tr class="${rowClass}" id="reviewer-row-${m.match_id}">
-            <td class="w-8"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>
+        const cells = [
+            { html: 'DRAFT', className: 'text-xs text-slate-500 font-bold' },
+            { html: noteHtml, className: 'text-xs text-slate-500 max-w-xs truncate' },
+            { html: `<button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button><button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button><button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>`, className: 'text-center flex items-center justify-center gap-2 py-3' },
+            { html: m.import_entry_number }, { html: m.import_dec_line }, { html: m.import_material_number }, { html: m.export_material_number || m.matched_material_number }, { html: m.import_date }, { html: m.export_desc }, { html: formatMoney(calcExportDuty(m)) }, { html: m.import_hts },
+            { html: actualExportQty, className: 'font-mono font-bold text-blue-700 bg-blue-50' }, { html: m.export_uom, className: 'text-slate-500' }, { html: `× ${cf}`, className: 'font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50' }, { html: importQtyConsumed, className: 'font-mono text-slate-700' }, { html: m.import_uom, className: 'text-slate-500' },
+            { html: m.export_entry_number }, { html: m.export_date }, { html: m.export_country }, { html: 'HTS' }, { html: m.import_hts }, { html: calcTotalDutyRate(m) }, { html: formatMoney(calcUnitValue(m)) },
+            { html: formatMoney(calcEnteredValue(m)), className: 'bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center' }, { html: formatMoney(calcExportDuty(m)), className: 'bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center' }, { html: formatMoney(calc99Duty(m)), className: 'bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center' }, { html: formatMoney(m.refund_amount), className: 'font-bold text-slate-700 text-center' }
+        ];
 
-            <td class="text-xs text-slate-500 font-bold">DRAFT</td>
-            <td class="text-xs text-slate-500 max-w-xs truncate">${noteHtml}</td>
-            <td class="text-center flex items-center justify-center gap-2 py-3">
-                <button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button>
-                <button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>
-            </td>
-
-            <td>${m.import_entry_number}</td>
-            <td>${m.import_dec_line}</td>
-            <td>${m.import_material_number}</td>
-            <td>${m.export_material_number || m.matched_material_number}</td>
-            <td>${m.import_date}</td>
-            <td>${m.export_desc}</td>
-            <td>${formatMoney(calcExportDuty(m))}</td>
-            <td>${m.import_hts}</td>
-
-            <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
-            <td class="text-slate-500">${m.export_uom}</td>
-            <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">Ã— ${cf}</td>
-            <td class="font-mono text-slate-700">${importQtyConsumed}</td>
-            <td class="text-slate-500">${m.import_uom}</td>
-
-            <td>${m.export_entry_number}</td>
-            <td>${m.export_date}</td>
-            <td>${m.export_country}</td>
-            <td>HTS</td>
-            <td>${m.import_hts}</td>
-            <td>${calcTotalDutyRate(m)}</td>
-            <td>${formatMoney(calcUnitValue(m))}</td>
-            <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
-            <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
-            <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
-            <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
-        </tr>`}).join('');
+        const checkboxBackgroundColor = getFrozenBackgroundColor('', false, rowClass);
+        return `<tr class="${rowClass}" id="reviewer-row-${m.match_id}"><td class="w-8 freeze-cell" style="position:sticky; left:0; min-width:32px; width:32px; z-index:35; background-color:${checkboxBackgroundColor};"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>${renderWorkflowCells('reviewer-table', renderColumns, cells, 32, rowClass)}</tr>`}).join('');
 }
 
 //function renderReviewerTable(data) {
@@ -4574,7 +5044,15 @@ function renderHistoryTable(data) {
         'Unique ID','Export Dte','Dest Country','Tariff Type','Tariff',
         'Duty Rate','Goods Value per Unit','Entered Value','Export Duty','99% Duty','Refund Amount','Approve Date'
     ];
-    renderDynamicHeaders('history-table', headers, 0);
+    const columns = getWorkflowColumns('history-table', headers);
+    const renderColumns = getRenderColumns('history-table', columns);
+    const renderHeaders = renderColumns.map(col => col.l);
+    renderFreezeColumnControl('history-table', columns, {
+        controlId: 'history-detail-freeze-columns-control',
+        menuId: 'history-detail-freeze-columns-menu',
+        countId: 'history-detail-freeze-columns-count'
+    });
+    renderDynamicHeaders('history-table', renderHeaders, 0, { target: 'history-table', config: renderColumns });
 
     if (data.length === 0) {
         tbody.innerHTML = `<tr><td colspan="28" class="p-8 text-center text-slate-400 italic">No approved history found.</td></tr>`;
@@ -4603,43 +5081,18 @@ function renderHistoryTable(data) {
         let importQtyConsumed = parseFloat(m.qty_matched) || 0;
         let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
-        return `
-        <tr class="${rowClass}">
-            <td class="text-center">${statusBadge}</td>
-            <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button></td>
-            <td class="text-center bg-red-50">${actionBtn}</td>
+        const cells = [
+            { html: statusBadge, className: 'text-center' },
+            { html: `<button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-purple-600"><i class="fa-solid fa-eye"></i></button>`, className: 'text-center' },
+            { html: actionBtn, className: 'text-center bg-red-50' },
+            { html: m.import_entry_number }, { html: m.import_dec_line }, { html: m.import_material_number }, { html: m.export_material_number || m.matched_material_number }, { html: m.import_date }, { html: m.export_desc }, { html: formatMoney(calcExportDuty(m)) }, { html: m.import_hts },
+            { html: actualExportQty, className: 'font-mono font-bold text-blue-700 bg-blue-50' }, { html: m.export_uom, className: 'text-slate-500' }, { html: `× ${cf}`, className: 'font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50' }, { html: importQtyConsumed, className: 'font-mono text-slate-700' }, { html: m.import_uom, className: 'text-slate-500' },
+            { html: m.export_entry_number }, { html: m.export_date }, { html: m.export_country }, { html: 'HTS' }, { html: m.import_hts }, { html: calcTotalDutyRate(m) }, { html: formatMoney(calcUnitValue(m)) },
+            { html: formatMoney(calcEnteredValue(m)), className: 'bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center' }, { html: formatMoney(calcExportDuty(m)), className: 'bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center' }, { html: formatMoney(calc99Duty(m)), className: 'bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center' }, { html: formatMoney(m.refund_amount), className: 'font-bold text-emerald-700 text-center' },
+            { html: `<span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>`, className: 'bg-purple-50 border-l border-purple-100 text-center' }
+        ];
 
-            <td>${m.import_entry_number}</td>
-            <td>${m.import_dec_line}</td>
-            <td>${m.import_material_number}</td>
-            <td>${m.export_material_number || m.matched_material_number}</td>
-            <td>${m.import_date}</td>
-            <td>${m.export_desc}</td>
-            <td>${formatMoney(calcExportDuty(m))}</td>
-            <td>${m.import_hts}</td>
-
-            <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
-            <td class="text-slate-500">${m.export_uom}</td>
-            <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">Ã— ${cf}</td>
-            <td class="font-mono text-slate-700">${importQtyConsumed}</td>
-            <td class="text-slate-500">${m.import_uom}</td>
-
-            <td>${m.export_entry_number}</td>
-            <td>${m.export_date}</td>
-            <td>${m.export_country}</td>
-            <td>HTS</td>
-            <td>${m.import_hts}</td>
-            <td>${calcTotalDutyRate(m)}</td>
-            <td>${formatMoney(calcUnitValue(m))}</td>
-            <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">${formatMoney(calcEnteredValue(m))}</td>
-            <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">${formatMoney(calcExportDuty(m))}</td>
-            <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">${formatMoney(calc99Duty(m))}</td>
-            <td class="font-bold text-emerald-700 text-center">${formatMoney(m.refund_amount)}</td>
-
-            <td class="bg-purple-50 border-l border-purple-100 text-center">
-                <span class="font-mono text-xs text-purple-900">${m.approved_at || '-'}</span>
-            </td>
-        </tr>`
+        return `<tr class="${rowClass}">${renderWorkflowCells('history-table', renderColumns, cells, 0, rowClass)}</tr>`
     }).join('');
 }
 
@@ -5101,12 +5554,12 @@ function updateServerStatus(isOnline) {
             const statusEl = document.getElementById('server-status');
             const banner = document.getElementById('demo-banner');
             if(isOnline) {
-                statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> Connected (RDS)';
+                statusEl.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span><span class="sidebar-footer-text">Connected (RDS)</span>';
                 statusEl.classList.remove('text-amber-600', 'text-red-600');
                 statusEl.classList.add('text-green-600');
                 banner.classList.add('hidden');
             } else {
-                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Connection Lost';
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i><span class="sidebar-footer-text">Connection Lost</span>';
                 statusEl.classList.remove('text-green-600');
                 statusEl.classList.add('text-red-600');
             }
@@ -6240,6 +6693,7 @@ async function runMatching() {
                         <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
                     </tr>`
                 }).join('');
+                refreshMatchingTableFreeze();
 
 //                tbody.innerHTML = json.data.map(m => `
 //                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">
