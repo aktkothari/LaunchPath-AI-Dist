@@ -1565,7 +1565,8 @@ th {
                 </div>
                 <div id="history-detail-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-100 bg-purple-50 flex justify-between items-center">
-                        <div class="flex items-center gap-4"><button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back to List</button><div id="history-detail-freeze-columns-control" class="relative hidden"><button onclick="toggleFreezeMenu(event, 'history-detail-freeze-columns-menu')" class="text-xs bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-bold transition"><i class="fa-solid fa-thumbtack mr-1"></i>Freeze Columns <span id="history-detail-freeze-columns-count" class="hidden text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">0</span></button><div id="history-detail-freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div></div><div class="h-6 w-px bg-purple-200"></div><div><h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3></div></div>
+                        <div class="flex items-center gap-4"><button onclick="showHistorySummary()" class="text-purple-600 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back to List</button><div class="h-6 w-px bg-purple-200"></div><div><h3 class="font-bold text-purple-800">Claim Details: <span id="history-active-claim" class="font-mono bg-purple-100 px-2 rounded"></span></h3></div></div>
+                        <div class="flex items-center gap-2"><div id="history-detail-freeze-columns-control" class="relative hidden"><button onclick="toggleFreezeMenu(event, 'history-detail-freeze-columns-menu')" class="text-xs bg-white border border-purple-200 text-purple-600 px-3 py-1 rounded hover:bg-purple-100 font-bold transition"><i class="fa-solid fa-thumbtack mr-1"></i>Freeze Columns <span id="history-detail-freeze-columns-count" class="hidden text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">0</span></button><div id="history-detail-freeze-columns-menu" class="freeze-menu hidden bg-white rounded-lg border border-slate-200 shadow-xl p-2"></div></div></div>
                     </div>
                     <div class="overflow-auto h-[calc(100vh-175px)] relative shadow-md"><table class="min-w-full text-xs text-left" id="history-table"><thead class="bg-slate-50 text-slate-500 border-b sticky top-0 z-10"></thead><tbody class="divide-y divide-slate-50 text-[11px]" id="history-body"><tr><td colspan="25" class="p-8 text-center text-slate-400">Loading Claim Data...</td></tr></tbody></table></div>
                 </div>
@@ -2140,6 +2141,39 @@ const validationCounters = {};
             document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
         }
 
+        function getTableLoadingContainer(target) {
+            if (target === 'imports' || target === 'exports') return document.getElementById('data-table-container');
+
+            const table = document.getElementById(target);
+            return table?.parentElement || table;
+        }
+
+        function toggleTableLoading(target, show, text="Loading...") {
+            const container = getTableLoadingContainer(target);
+            if (!container) return;
+
+            let overlay = Array.from(container.children).find(child => child.classList.contains('table-loading-overlay'));
+            if (show) {
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.className = 'table-loading-overlay absolute inset-0 z-40 flex items-center justify-center bg-white/70 backdrop-blur-[1px]';
+                    overlay.innerHTML = `<div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white shadow-sm border border-slate-200 text-slate-600 text-sm font-semibold"><i class="fa-solid fa-spinner fa-spin text-blue-500"></i><span></span></div>`;
+                    if (window.getComputedStyle(container).position === 'static') container.style.position = 'relative';
+                    container.appendChild(overlay);
+                }
+
+                const label = overlay.querySelector('span');
+                if (label) label.innerText = text;
+            } else if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function setScopedLoading(scope, target, show, text="Processing...") {
+            if (scope === 'table') toggleTableLoading(target, show, text);
+            else toggleLoading(show, text);
+        }
+
         function forceCloseLoader() { toggleLoading(false); }
 
         function showToast(msg, type="normal") {
@@ -2251,6 +2285,7 @@ const validationCounters = {};
             if (className.includes('bg-orange-50')) return '#fff7ed';
             if (className.includes('bg-purple-50')) return '#faf5ff';
             if (className.includes('bg-slate-50')) return '#f8fafc';
+            if (className.includes('bg-slate-100')) return '#f1f5f9';
             if (className.includes('bg-gray-100')) return '#f3f4f6';
             if (className.includes('bg-gray-200')) return '#e5e7eb';
             if (className.includes('bg-emerald-50')) return '#ecfdf5';
@@ -2288,7 +2323,8 @@ const validationCounters = {};
                 const cell = cells[col.index] || {};
                 const className = cell.className || '';
                 const html = cell.html !== undefined && cell.html !== null ? cell.html : '';
-                return `<td ${getFrozenCellAttrs(columns, col, tableId, className, false, leftBase, rowClass)}>${html}</td>`;
+                const searchAttr = cell.searchText !== undefined && cell.searchText !== null ? ` data-search="${escapeHtml(cell.searchText)}"` : '';
+                return `<td ${getFrozenCellAttrs(columns, col, tableId, className, false, leftBase, rowClass)}${searchAttr}>${html}</td>`;
             }).join('');
         }
 
@@ -2381,16 +2417,16 @@ const validationCounters = {};
 
         function refreshFrozenTable(target) {
             if (target === 'imports' || target === 'exports') {
-                loadTableData(target);
+                loadTableData(target, 'table');
             } else if (target === 'matches-table') {
                 refreshMatchingTableFreeze();
             } else if (target === 'reviewer-table') {
-                loadWorkflowData('reviewer');
+                loadWorkflowData('reviewer', null, null, 'table');
             } else if (target === 'history-summary-table') {
-                loadHistorySummary();
+                loadHistorySummary('table');
             } else if (target === 'history-table') {
                 const titleEl = document.getElementById('history-active-claim');
-                loadWorkflowData('history', titleEl?.innerText || null, titleEl?.dataset?.brokerId || null);
+                loadWorkflowData('history', titleEl?.innerText || null, titleEl?.dataset?.brokerId || null, 'table');
             }
         }
 
@@ -2553,7 +2589,7 @@ async function checkMaintenanceStatus() {
         // --- ðŸ†• EXCEL-LIKE SORTING & FILTERING LOGIC ---
         function getHeaderHTML(title, tableId, colIdx) {
             // FIX: Removed 'Default' from the exclusion list
-            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || title === 'Final Acceptance') {
+            if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || (title === 'Final Acceptance' && tableId !== 'history-summary-table')) {
                 return `<div class="th-static font-bold text-xs uppercase">${title}</div>`;
             }
             return `
@@ -2731,9 +2767,11 @@ function filterMulti(tableId) {
                     const cell = row.cells[filter.idx];
                     let cellText = "";
 
-                    // ðŸš€ PATCH: Support reading from inputs/selects inside the cell
+                    // ðŸš€ PATCH: Support custom search text, then inputs/selects inside the cell
                     const inputEl = cell.querySelector('input, select');
-                    if (inputEl) {
+                    if (cell.dataset.search !== undefined) {
+                        cellText = cell.dataset.search || "";
+                    } else if (inputEl) {
                         cellText = inputEl.value || "";
                     } else {
                         cellText = cell.textContent || "";
@@ -3370,8 +3408,8 @@ async function loadStats() {
 
 
 
-async function loadTableData(target) {
-    toggleLoading(true, "Loading Data...");
+async function loadTableData(target, loadingScope = 'global') {
+    setScopedLoading(loadingScope, target, true, "Loading Data...");
     const tbody = document.querySelector('#data-table tbody');
     const tableContainer = document.getElementById('data-table-container');
     tbody.innerHTML = "";
@@ -3496,7 +3534,7 @@ async function loadTableData(target) {
             tbody.innerHTML = bRows;
         }
     } finally {
-        toggleLoading(false);
+        setScopedLoading(loadingScope, target, false);
     }
 }
 
@@ -4298,8 +4336,8 @@ function exportCurrentTab() {
 }
 
 
-async function loadHistorySummary() {
-    toggleLoading(true, "Loading Claim History...");
+async function loadHistorySummary(loadingScope = 'global') {
+    setScopedLoading(loadingScope, 'history-summary-table', true, "Loading Claim History...");
     const tbody = document.getElementById('history-summary-body');
 
     // Set initial loading state (This matches your current HTML)
@@ -4338,18 +4376,20 @@ async function loadHistorySummary() {
             tbody.innerHTML = json.data.map(c => {
                 let displayId = c.claim_id;
                 if (!displayId.startsWith('X')) displayId = 'X' + displayId;
+                const brokerClaimId = String(c.broker_claim_id || '').trim();
+                const hasBrokerClaimId = brokerClaimId !== '' && brokerClaimId.toUpperCase() !== 'PENDING';
                 let safeBrokerId = c.broker_claim_id || 'PENDING';
 
                 let acceptanceHtml = '';
                 let isFinalized = !!c.finalized_date;
 
-                if (c.finalized_date) {
+                if (isFinalized) {
                     acceptanceHtml = `<div class="flex items-center justify-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm w-fit mx-auto">
                         <i class="fa-solid fa-circle-check text-lg"></i>
                         <div class="text-left leading-tight">
-                            <div class="text-[10px] uppercase text-emerald-500">Accepted</div>
+                            <div class="text-[9px] text-emerald-600 font-bold">Broker ID: ${escapeHtml(c.broker_claim_id || 'N/A')}</div>
+                            <div class="text-[10px] uppercase text-emerald-500 mt-1 border-t border-emerald-200 pt-1">Accepted</div>
                             <div class="text-xs font-mono">${toMMDDYYYY(c.finalized_date)}</div>
-                            <div class="text-[9px] text-emerald-600 mt-1 font-bold border-t border-emerald-200 pt-1">Broker ID: ${c.broker_claim_id || 'N/A'}</div>
                         </div>
                     </div>`;
                 } else if (c.valid_entries > 0) {
@@ -4364,7 +4404,7 @@ async function loadHistorySummary() {
                 else if (c.voided_entries > 0) statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold">PARTIAL</span>`;
 
                 const cells = [
-                    { html: acceptanceHtml, className: 'px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50' },
+                    { html: acceptanceHtml, className: 'px-6 py-4 text-center border-r border-slate-100 bg-slate-50/50', searchText: c.finalized_date && hasBrokerClaimId ? brokerClaimId : '' },
                     { html: `<button onclick="exportClaimLocal('${c.claim_id}')" class="text-slate-500 hover:text-blue-600 transition" title="Download CSV"><i class="fa-solid fa-download text-lg"></i></button><button onclick="viewClaimDetails('${c.claim_id}', '${safeBrokerId}')" class="text-slate-500 hover:text-purple-600 transition" title="View Details"><i class="fa-solid fa-circle-info text-lg"></i></button>`, className: 'px-6 py-4 text-center whitespace-nowrap flex items-center justify-center gap-3' },
                     { html: displayId, className: 'px-6 py-4 font-bold text-slate-700 bg-slate-50 border-r border-slate-100 font-mono text-center' },
                     { html: statusBadge, className: 'px-6 py-4 text-center' },
@@ -4386,7 +4426,7 @@ async function loadHistorySummary() {
         console.error("History Summary error:", e);
         tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-red-400 italic">Error loading claim history.</td></tr>`;
     } finally {
-        toggleLoading(false);
+        setScopedLoading(loadingScope, 'history-summary-table', false);
     }
 }
 
@@ -4546,19 +4586,16 @@ async function loadHistorySummary() {
         // ðŸš€ PATCH: Updated to accept filterBrokerId as the 3rd argument
 
 // --- SHARED WORKFLOW LOADER (FIXED: GET Method + Explicit Context IDs) ---
-        async function loadWorkflowData(role, filterClaimId = null, filterBrokerId = null) {
+        async function loadWorkflowData(role, filterClaimId = null, filterBrokerId = null, loadingScope = 'global') {
             if(role === 'approver') return;
 
-            toggleLoading(true, `Loading ${role} queue...`);
+            const loadingTarget = role === 'history' ? 'history-table' : 'reviewer-table';
+            setScopedLoading(loadingScope, loadingTarget, true, `Loading ${role} queue...`);
 
             try {
                 const statusMap = { 'reviewer': 'DRAFT', 'history': 'APPROVED' };
-                const reqStatus = statusMap[role];
 
-                // 1. Base URL
-                let url = `/drawback/api/workflow/queue/${reqStatus}`;
-
-                // 2. Construct Query Params
+                // 1. Construct Query Params
                 const params = new URLSearchParams();
 
                 // ðŸš€ CRITICAL FIX: Explicitly add Context IDs to the URL
@@ -4576,21 +4613,28 @@ async function loadHistorySummary() {
                      }
                 }
 
-                // 4. Append params to URL
-                url += `?${params.toString()}`;
-
-                // 5. Send Request (Explicitly GET)
-                const json = await safeFetch(url, { method: 'GET' });
-                const data = json.data || [];
-
-                if (role === 'reviewer') renderReviewerTable(data);
-                else if (role === 'history') renderHistoryTable(data);
+                if (role === 'reviewer') {
+                    const responses = await Promise.all(['DRAFT', 'REVIEWED'].map(status => {
+                        const url = `/drawback/api/workflow/queue/${status}?${params.toString()}`;
+                        return safeFetch(url, { method: 'GET' });
+                    }));
+                    const data = responses
+                        .flatMap(json => json.data || [])
+                        .sort((a, b) => (Number(b.match_id) || 0) - (Number(a.match_id) || 0));
+                    renderReviewerTable(data);
+                } else if (role === 'history') {
+                    const reqStatus = statusMap[role];
+                    const url = `/drawback/api/workflow/queue/${reqStatus}?${params.toString()}`;
+                    const json = await safeFetch(url, { method: 'GET' });
+                    const data = json.data || [];
+                    renderHistoryTable(data);
+                }
 
             } catch (e) {
                 console.error("Workflow Load Error:", e);
                 showToast("Failed to load data", "error");
             } finally {
-                toggleLoading(false);
+                setScopedLoading(loadingScope, loadingTarget, false);
             }
         }
 
@@ -4864,29 +4908,35 @@ function renderReviewerTable(data) {
     }
 
     tbody.innerHTML = data.map(m => {
+        const isPendingApproval = m.status === 'REVIEWED';
         let noteHtml = m.notes || '-';
-        let rowClass = "border-b border-slate-50 hover:bg-blue-50 transition";
-        if(m.rejection_reason) {
+        let rowClass = isPendingApproval ? "border-b border-slate-100 bg-slate-100 text-slate-400" : "border-b border-slate-50 hover:bg-blue-50 transition";
+        if(m.rejection_reason && !isPendingApproval) {
             rowClass = "border-l-4 border-red-500 bg-red-50 hover:bg-red-100 transition";
             noteHtml = `<div class="text-red-600 font-bold text-xs mb-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Returned: ${m.rejection_reason}</div>` + noteHtml;
         }
+
+        const statusHtml = isPendingApproval ? 'PENDING APPROVAL' : 'DRAFT';
+        const actionHtml = isPendingApproval
+            ? `<button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-400 hover:text-slate-600" title="View Details"><i class="fa-solid fa-eye"></i></button>`
+            : `<button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button><button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button><button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>`;
 
         let cf = parseFloat(m.conversion_factor_used) || 1.0;
         let importQtyConsumed = parseFloat(m.qty_matched) || 0;
         let actualExportQty = (importQtyConsumed / cf).toFixed(2);
 
         const cells = [
-            { html: 'DRAFT', className: 'text-xs text-slate-500 font-bold' },
-            { html: noteHtml, className: 'text-xs text-slate-500 max-w-xs truncate' },
-            { html: `<button onclick='showMatchDetails(${escapeJSON(m)})' class="text-slate-500 hover:text-blue-600" title="View Details"><i class="fa-solid fa-eye"></i></button><button onclick='openEditModal(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800" title="Edit Refund"><i class="fa-solid fa-pen-to-square"></i></button><button onclick='discardMatch("${m.match_id}")' class="text-red-400 hover:text-red-600" title="Discard Match & Restore Inventory"><i class="fa-solid fa-trash"></i></button>`, className: 'text-center flex items-center justify-center gap-2 py-3' },
+            { html: statusHtml, className: 'text-xs text-slate-500 font-bold' },
+            { html: noteHtml, className: `text-xs max-w-xs truncate ${isPendingApproval ? 'text-slate-400' : 'text-slate-500'}` },
+            { html: actionHtml, className: 'text-center flex items-center justify-center gap-2 py-3' },
             { html: m.import_entry_number }, { html: m.import_dec_line }, { html: m.import_material_number }, { html: m.export_material_number || m.matched_material_number }, { html: m.import_date }, { html: m.export_desc }, { html: formatMoney(calcExportDuty(m)) }, { html: m.import_hts },
-            { html: actualExportQty, className: 'font-mono font-bold text-blue-700 bg-blue-50' }, { html: m.export_uom, className: 'text-slate-500' }, { html: `× ${cf}`, className: 'font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50' }, { html: importQtyConsumed, className: 'font-mono text-slate-700' }, { html: m.import_uom, className: 'text-slate-500' },
+            { html: actualExportQty, className: isPendingApproval ? 'font-mono font-bold bg-slate-100 text-slate-400' : 'font-mono font-bold text-blue-700 bg-blue-50' }, { html: m.export_uom, className: isPendingApproval ? 'text-slate-400' : 'text-slate-500' }, { html: `× ${cf}`, className: isPendingApproval ? 'font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-100' : 'font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50' }, { html: importQtyConsumed, className: isPendingApproval ? 'font-mono text-slate-400' : 'font-mono text-slate-700' }, { html: m.import_uom, className: isPendingApproval ? 'text-slate-400' : 'text-slate-500' },
             { html: m.export_entry_number }, { html: m.export_date }, { html: m.export_country }, { html: 'HTS' }, { html: m.import_hts }, { html: calcTotalDutyRate(m) }, { html: formatMoney(calcUnitValue(m)) },
-            { html: formatMoney(calcEnteredValue(m)), className: 'bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center' }, { html: formatMoney(calcExportDuty(m)), className: 'bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center' }, { html: formatMoney(calc99Duty(m)), className: 'bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center' }, { html: formatMoney(m.refund_amount), className: 'font-bold text-slate-700 text-center' }
+            { html: formatMoney(calcEnteredValue(m)), className: isPendingApproval ? 'bg-slate-100 text-slate-400 border-l border-slate-200 font-bold text-center' : 'bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center' }, { html: formatMoney(calcExportDuty(m)), className: isPendingApproval ? 'bg-slate-100 text-slate-400 border-l border-slate-200 font-bold text-center' : 'bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center' }, { html: formatMoney(calc99Duty(m)), className: isPendingApproval ? 'bg-slate-100 text-slate-400 border-l border-slate-200 font-bold text-center' : 'bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center' }, { html: formatMoney(m.refund_amount), className: isPendingApproval ? 'font-bold text-slate-400 text-center' : 'font-bold text-slate-700 text-center' }
         ];
 
         const checkboxBackgroundColor = getFrozenBackgroundColor('', false, rowClass);
-        return `<tr class="${rowClass}" id="reviewer-row-${m.match_id}"><td class="w-8 freeze-cell" style="position:sticky; left:0; min-width:32px; width:32px; z-index:35; background-color:${checkboxBackgroundColor};"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4"></td>${renderWorkflowCells('reviewer-table', renderColumns, cells, 32, rowClass)}</tr>`}).join('');
+        return `<tr class="${rowClass}" id="reviewer-row-${m.match_id}"><td class="w-8 freeze-cell" style="position:sticky; left:0; min-width:32px; width:32px; z-index:35; background-color:${checkboxBackgroundColor};"><input type="checkbox" value="${m.match_id}" onchange="toggleReviewerSelection('${m.match_id}')" class="accent-blue-600 w-4 h-4 disabled:opacity-40 disabled:cursor-not-allowed" ${isPendingApproval ? 'disabled' : ''}></td>${renderWorkflowCells('reviewer-table', renderColumns, cells, 32, rowClass)}</tr>`}).join('');
 }
 
 //function renderReviewerTable(data) {
@@ -5175,6 +5225,9 @@ function renderHistoryTable(data) {
 
         // --- NEW REVIEWER BULK LOGIC ---
         function toggleReviewerSelection(id) {
+            const checkbox = document.querySelector(`#reviewer-body input[type="checkbox"][value="${id}"]`);
+            if (checkbox && checkbox.disabled) return;
+
             const row = document.getElementById(`reviewer-row-${id}`);
             if (reviewerSelection.has(id)) {
                 reviewerSelection.delete(id);
@@ -5188,10 +5241,17 @@ function renderHistoryTable(data) {
         function toggleReviewerSelectAll(source) {
             const checkboxes = document.querySelectorAll('#reviewer-body input[type="checkbox"]');
             checkboxes.forEach(cb => {
-                cb.checked = source.checked;
                 const id = cb.value;
                 const row = document.getElementById(`reviewer-row-${id}`);
 
+                if(cb.disabled) {
+                    cb.checked = false;
+                    reviewerSelection.delete(id);
+                    if(row) row.classList.remove('bg-blue-100');
+                    return;
+                }
+
+                cb.checked = source.checked;
                 if(source.checked) {
                     reviewerSelection.add(id);
                     if(row) row.classList.add('bg-blue-100');
