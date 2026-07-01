@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice History</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f4f7f6;
+        }
+        .navbar {
+            background-color: #0f172a;
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin: -20px -20px 25px -20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0.5px; }
+        .navbar a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .navbar a:hover { color: white; }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .filter-group { display: flex; align-items: center; gap: 10px; }
+        select, input[type="date"] {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-primary { background: #1a73e8; color: white; }
+        .btn-export  { background: #fbbc04; color: #333; }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .kpi-card h4 { margin: 0 0 10px 0; color: #555; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-card h2 { margin: 0; font-size: 26px; }
+
+        /* Table */
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .table-card h3 {
+            margin: 0 0 15px 0;
+            color: #0f172a;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            font-size: 16px;
+        }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            padding: 14px 15px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        td {
+            padding: 13px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            font-size: 14px;
+        }
+        tbody tr:hover { background: #f8fafc; }
+        .link-btn {
+            background: #e8f0fe;
+            color: #1a73e8;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .link-btn:hover { background: #d2e3fc; }
+        .empty-msg { text-align: center; color: #999; font-style: italic; padding: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>Invoice History</h1>
+    <a href="/billing/">← Back to Dashboard</a>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+    <div class="filter-group">
+        <label><strong>Workspace:</strong></label>
+        <select id="ws-filter">
+            <option value="all">All Workspaces</option>
+            {% for ws in workspaces %}
+            <option value="{{ ws.workspace_id }}">{{ ws.workspace_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label><strong>From:</strong></label>
+        <input type="date" id="date-from">
+        <label><strong>To:</strong></label>
+        <input type="date" id="date-to">
+    </div>
+    <button class="btn btn-primary" onclick="fetchHistory()">Apply Filters</button>
+    <button class="btn btn-export"  onclick="exportCSV()">Export CSV</button>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+    <div class="kpi-card" style="border-bottom: 4px solid #1a73e8;">
+        <h4>Total Invoices Generated</h4>
+        <h2 style="color:#1a73e8;" id="kpi-total-invoices">--</h2>
+    </div>
+    <div class="kpi-card" style="border-bottom: 4px solid #7c3aed;">
+        <h4>Total MoonSlate Fees (10%)</h4>
+        <h2 style="color:#7c3aed;" id="kpi-total-fees">--</h2>
+    </div>
+    <div class="kpi-card" style="border-bottom: 4px solid #34a853;">
+        <h4>Total Gross Drawback</h4>
+        <h2 style="color:#34a853;" id="kpi-total-gross">--</h2>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-card">
+    <h3>Invoice History</h3>
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Invoice Number</th>
+                    <th>Workspace</th>
+                    <th>Generated On</th>
+                    <th>Total Gross Drawback</th>
+                    <th>MoonSlate Fee (10%)</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody id="history-tbody">
+                <tr><td colspan="6" class="empty-msg">Apply filters to load invoice history.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+    async function fetchHistory() {
+        const wsId     = document.getElementById('ws-filter').value;
+        const dateFrom = document.getElementById('date-from').value;
+        const dateTo   = document.getElementById('date-to').value;
+
+        let url = `/billing/api/invoice-history?workspace_id=${wsId}`;
+        if (dateFrom) url += `&date_from=${dateFrom}`;
+        if (dateTo)   url += `&date_to=${dateTo}`;
+
+        try {
+            const res  = await fetch(url);
+            const data = await res.json();
+
+            // KPIs
+            document.getElementById('kpi-total-invoices').innerText = data.total_invoices;
+            document.getElementById('kpi-total-fees').innerText     = formatter.format(data.total_ms_fees);
+            document.getElementById('kpi-total-gross').innerText    = formatter.format(data.total_gross_all);
+
+            // Table
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '';
+
+            if (!data.invoices || data.invoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No invoices found.</td></tr>';
+                return;
+            }
+
+            data.invoices.forEach(inv => {
+                const viewUrl = `/billing/invoice?workspace_id=${inv.workspace_id}&invoice_number=${inv.invoice_number}`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600; color:#0f172a;">${inv.invoice_number}</td>
+                        <td>${inv.workspace_name || inv.workspace_id}</td>
+                        <td>${inv.generated_on}</td>
+                        <td style="font-family:monospace;">${formatter.format(inv.total_gross)}</td>
+                        <td style="font-family:monospace; color:#7c3aed; font-weight:600;">${formatter.format(inv.moonslate_fee)}</td>
+                        <td><a class="link-btn" href="${viewUrl}" target="_blank">↗ Open</a></td>
+                    </tr>
+                `;
+            });
+
+        } catch(e) {
+            console.error("Error fetching invoice history:", e);
+        }
+    }
+
+    function exportCSV() {
+        const table = document.getElementById('history-table');
+        const rows  = table.querySelectorAll('tr');
+        const csv   = [];
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td, th');
+            const data = Array.from(cols).map(c => '"' + c.innerText.replace(/"/g, '""') + '"');
+            csv.push(data.join(','));
+        });
+        const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+        const a    = document.createElement('a');
+        a.href     = URL.createObjectURL(blob);
+        a.download = 'Invoice_History.csv';
+        a.click();
+    }
+
+    // Auto-load on page open
+    fetchHistory();
+</script>
+
+</body>
+</html>
