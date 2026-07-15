@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <div class="page-header">
+
+            <div>
+                <h1>Template Management</h1>
+                <p>Create and manage custom download templates</p>
+            </div>
+
+           
+
+        </div>
+
+        <!-- Template Details -->
+
+        <div class="card">
+
+    <div class="template-details-header">
+
+        <h2>Template Details</h2>
+
+        <div class="template-actions">
+
+            <button id="addTemplateBtn" class="header-action-btn">
+                + Add
+            </button>
+
+            <button id="editTemplateBtn" class="header-action-btn">
+                ✏ Edit
+            </button>
+
+            <button id="deleteTemplateBtn" class="header-action-btn delete-action">
+                🗑 Delete
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="template-form">
+
+                <div>
+                    <label>Template Name</label>
+<input
+    type="text"
+    id="templateName"
+    placeholder="Broker Report">
+
+    <small
+    id="templateNameWarning"
+    class="validation-warning">
+
+    Only letters, numbers, spaces, "_" and "-" are allowed.
+
+</small>
+
+                </div>
+
+                <div>
+                    <label>Description</label>
+<input
+    type="text"
+    id="templateDescription"
+    placeholder="Custom Export Template">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Columns -->
+
+        <div class="columns-grid">
+
+
+            <!-- Optional Columns -->
+
+            <div class="card">
+
+                <h2>Additional Columns</h2>
+
+                <div class="column-list">
+
+    <div class="column-item">
+        <span>Inv. Line#</span>
+        <button class="add-column-btn" data-column="Inv. Line#">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Destination Country</span>
+        <button class="add-column-btn" data-column="Destination Country">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Export UQ</span>
+        <button class="add-column-btn" data-column="Export UQ">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Duty Rate</span>
+        <button class="add-column-btn" data-column="Duty Rate">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Tariff Type</span>
+        <button class="add-column-btn" data-column="Tariff Type">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Tariff</span>
+        <button class="add-column-btn" data-column="Tariff">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Goods Value per Unit</span>
+        <button class="add-column-btn" data-column="Goods Value per Unit">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Entered Value</span>
+        <button class="add-column-btn" data-column="Entered Value">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Port</span>
+        <button class="add-column-btn" data-column="Port">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>UOM</span>
+        <button class="add-column-btn" data-column="UOM">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Unit Of</span>
+        <button class="add-column-btn" data-column="Unit Of">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Description of Merchandise</span>
+        <button class="add-column-btn" data-column="Description of Merchandise">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Description of Articles</span>
+        <button class="add-column-btn" data-column="Description of Articles">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Action</span>
+        <button class="add-column-btn" data-column="Action">+</button>
+    </div>
+
+    <div class="column-item">
+        <span>Name Of</span>
+        <button class="add-column-btn" data-column="Name Of">+</button>
+    </div>
+
+</div> <!-- column-list -->
+
+</div> <!-- Available Columns card -->
+
+<!-- Output Columns -->
+
+
+
+            <!-- Output Columns -->
+
+            <div class="card">
+
+                <h2>Output Columns</h2>
+
+                <ul id="selectedColumns">
+
+                </ul>
+
+            </div>
+
+        </div>
+
+        <!-- Rename Columns -->
+
+        <div class="card">
+
+            <h2>Rename Columns</h2>
+
+            <div class="rename-header">
+
+                <div>Original Name</div>
+                <div>Display Name</div>
+
+            </div>
+
+            <div id="renameContainer">
+
+            </div>
+
+            <div class="rename-actions">
+
+    <button id="addRenameRow" class="add-btn">
+        + Add Row
+    </button>
+
+</div>
+
+        </div>
+
+        
+
+<!-- Template Preview -->
+
+<div class="card">
+
+    <div class="preview-header">
+
+        <h2>Template Preview</h2>
+
+    </div>
+
+    <div class="preview-table-container">
+
+        <table>
+
+            <thead>
+                <tr id="previewHeader"></tr>
+            </thead>
+
+            <tbody>
+                <tr id="previewRow"></tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div class="save-template-container">
+
+   <button
+    id="saveTemplateBtn"
+    class="save-btn">
+    Save Template
+</button>
+
+</div>
+
+
+<!-- Save Confirmation Modal -->
+
+<div id="saveModal" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Save Template</h2>
+
+        <p>
+            Are you sure you want to save this template?
+        </p>
+
+        <div class="modal-buttons">
+
+            <button
+                id="cancelSaveBtn"
+                class="cancel-btn">
+                No
+            </button>
+
+            <button
+                id="confirmSaveBtn"
+                class="confirm-btn">
+                Yes
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+ <!-- JavaScript -->
+  <!-- ================= EDIT TEMPLATE MODAL ================= -->
+
+<div id="editTemplateModal" class="modal">
+
+    <div class="modal-content edit-template-modal">
+
+        <h2>Edit Template</h2>
+
+        <div class="modal-field">
+
+            <label for="editTemplateDropdown">
+                Select Template
+            </label>
+
+            <select id="editTemplateDropdown">
+                <option value="">Choose Template</option>
+            </select>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                id="cancelEditBtn"
+                class="cancel-btn">
+                Cancel
+            </button>
+
+            <button
+                id="openEditBtn"
+                class="confirm-btn">
+                Open
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- DELETE TEMPLATE MODAL -->
+
+<div id="deleteTemplateModal" class="modal">
+
+    <div class="modal-content edit-template-modal">
+
+        <h2>Delete Template</h2>
+
+        <div class="modal-field">
+
+            <label>Select Template</label>
+
+            <select id="deleteTemplateDropdown">
+
+                <option value="">Choose Template</option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-buttons">
+
+    <button
+        id="cancelDeleteBtn"
+        class="cancel-btn">
+        Cancel
+    </button>
+
+    <button
+        id="confirmDeleteBtn"
+        class="confirm-btn">
+        Delete
+    </button>
+
+</div>
+
+    </div>
+
+</div>   
+<script src="script.js"></script>
+
+<div id="successModal" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Success</h2>
+
+        <p>Your template has been saved successfully.</p>
+
+        <button
+            id="closeSuccessBtn"
+            class="confirm-btn">
+            OK
+        </button>
+
+    </div>
+
+</div>
+
+</body>
+</html>>
