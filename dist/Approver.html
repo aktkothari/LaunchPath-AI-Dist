@@ -7039,79 +7039,46 @@ async function runMatching() {
             const matchCount = json && json.data ? json.data.length : 0;
 
             if (matchCount === 0) {
-                 tbody.innerHTML = `<tr><td colspan="32" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="35" class="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">No matches found.</td></tr>`;
                  showToast("Matching Complete: No successful matches found.", "warning");
             } else {
-                const calcUnitValue = (m) => {
-                     if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
-                     return parseFloat(m.import_customs_val) / parseFloat(m.import_qty_original);
-                }
-                const calcEnteredValue = (m) => {
-                    if(!m.import_qty_original || parseFloat(m.import_qty_original) === 0) return 0;
-                    return (parseFloat(m.qty_matched) / parseFloat(m.import_qty_original)) * parseFloat(m.import_customs_val);
-                };
-
-                const calcExportDuty = (m) => {
-                    return calcEnteredValue(m) * (parseFloat(m.import_duty_rate) || 0);
-                }
-
-                const calc99Duty = (m) => {
-                    return calcExportDuty(m) * 0.99;
-                }
+                // FIX: Use the SAME global calcUnitValue / calcEnteredValue / calcExportDuty / calc99Duty
+                // as Reviewer/Approver/History (duty_paid_total based), instead of local rate-based shadows.
+                // FIX: Build cells via the freeze-aware column system so header order
+                // (which reorders frozen columns) always matches row data order.
+                const matchColumns = getMatchingColumns();
+                const renderColumns = getRenderColumns('matches-table', matchColumns);
 
                 tbody.innerHTML = json.data.map(m => {
                     let cf = parseFloat(m.conversion_factor_used) || 1.0;
                     let importQtyConsumed = parseFloat(m.qty_matched) || 0;
                     let actualExportQty = (importQtyConsumed / cf).toFixed(2);
+                    let rowClass = "border-b border-slate-50 hover:bg-blue-50 transition";
 
-                    return `
-                    <tr class="border-b border-slate-50 hover:bg-blue-50 transition">
-                        <td class="text-center"><span class="status-badge status-draft">DRAFT</span></td>
-                        <td class="text-xs text-slate-500 max-w-xs truncate text-center"><span class="smart-note">${m.notes || ''}</span></td>
-                        <td class="text-center"><button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button></td>
+                    const cells = [
+                        { html: '<span class="status-badge status-draft">DRAFT</span>', className: 'text-center' },
+                        { html: `<span class="smart-note">${m.notes || ''}</span>`, className: 'text-xs text-slate-500 max-w-xs truncate text-center' },
+                        { html: `<button onclick='showMatchDetails(${escapeJSON(m)})' class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></button>`, className: 'text-center' },
+                        { html: m.import_entry_number }, { html: m.import_dec_line }, { html: m.import_material_number }, { html: m.export_material_number || m.matched_material_number }, { html: m.import_date }, { html: m.export_desc }, { html: formatMoney(calcExportDuty(m)) }, { html: m.import_hts },
+                        { html: actualExportQty, className: 'font-mono font-bold text-blue-700 bg-blue-50' }, { html: m.export_uom, className: 'text-slate-500' }, { html: `× ${cf}`, className: 'font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50' }, { html: importQtyConsumed, className: 'font-mono text-slate-700' }, { html: m.import_uom, className: 'text-slate-500' },
+                        { html: m.export_entry_number }, { html: m.export_date }, { html: m.export_country }, { html: 'HTS' }, { html: m.import_hts },
+                        { html: m.import_base_duty_rate || '-' },
+                        { html: formatMoney(calcStandardDutyAmount(m)), className: 'font-mono text-slate-600' },
+                        { html: m.tariff_number_1 || '-', className: 'font-mono text-blue-700' },
+                        { html: m.import_duty_rate || '-' },
+                        { html: formatMoney(calcTariffValue1(m)), className: 'font-mono text-slate-600' },
+                        { html: m.tariff_number_2 || '-', className: 'font-mono text-purple-700' },
+                        { html: m.import_duty_rate_2 || '-' },
+                        { html: formatMoney(calcTariffValue2(m)), className: 'font-mono text-slate-600' },
+                        { html: calcTotalDutyRate(m), className: 'font-bold text-slate-800 bg-slate-100' },
+                        { html: formatMoney(calcUnitValue(m)) },
+                        { html: formatMoney(calcEnteredValue(m)), className: 'bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center' },
+                        { html: formatMoney(calcExportDuty(m)), className: 'bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center' },
+                        { html: formatMoney(calc99Duty(m)), className: 'bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center' },
+                        { html: formatMoney(m.refund_amount), className: 'font-bold text-slate-700 text-center' }
+                    ];
 
-                        <td>${m.import_entry_number}</td>
-                        <td>${m.import_dec_line}</td>
-                        <td>${m.import_material_number}</td>
-                        <td>${m.export_material_number || m.matched_material_number}</td>
-                        <td>${m.import_date}</td>
-                        <td>${m.export_desc}</td>
-                        <td>${formatMoney(calcExportDuty(m))}</td>
-                        <td>${m.import_hts}</td>
-
-                        <td class="font-mono font-bold text-blue-700 bg-blue-50">${actualExportQty}</td>
-                        <td class="text-slate-500">${m.export_uom}</td>
-                        <td class="font-mono text-slate-400 text-center border-x border-slate-100 bg-slate-50/50">Ã— ${cf}</td>
-                        <td class="font-mono text-slate-700">${importQtyConsumed}</td>
-                        <td class="text-slate-500">${m.import_uom}</td>
-
-                        <td>${m.export_entry_number}</td>
-                        <td>${m.export_date}</td>
-                        <td>${m.export_country}</td>
-                        <td>HTS</td>
-                        <td>${m.import_hts}</td>
-                        <td>${m.import_base_duty_rate || '-'}</td>
-                        <td class="font-mono text-slate-600">${formatMoney(calcStandardDutyAmount(m))}</td>
-                        <td class="font-mono text-blue-700">${m.tariff_number_1 || '-'}</td>
-                        <td>${m.import_duty_rate || '-'}</td>
-                        <td class="font-mono text-slate-600">${formatMoney(calcTariffValue1(m))}</td>
-                        <td class="font-mono text-purple-700">${m.tariff_number_2 || '-'}</td>
-                        <td>${m.import_duty_rate_2 || '-'}</td>
-                        <td class="font-mono text-slate-600">${formatMoney(calcTariffValue2(m))}</td>
-                        <td class="font-bold text-slate-800 bg-slate-100">${calcTotalDutyRate(m)}</td>
-                        <td>${formatMoney(calcUnitValue(m))}</td>
-
-                        <td class="bg-indigo-50 text-indigo-900 border-l border-indigo-100 font-bold text-center">
-                            ${formatMoney(calcEnteredValue(m))}
-                        </td>
-                        <td class="bg-orange-50 text-orange-900 border-l border-orange-100 font-bold text-center">
-                            ${formatMoney(calcExportDuty(m))}
-                        </td>
-                        <td class="bg-emerald-50 text-emerald-900 border-l border-emerald-100 font-bold text-center">
-                            ${formatMoney(calc99Duty(m))}
-                        </td>
-                        <td class="font-bold text-slate-700 text-center">${formatMoney(m.refund_amount)}</td>
-                    </tr>`
+                    return `<tr class="${rowClass}">${renderWorkflowCells('matches-table', renderColumns, cells, 0, rowClass)}</tr>`;
                 }).join('');
                 refreshMatchingTableFreeze();
 
