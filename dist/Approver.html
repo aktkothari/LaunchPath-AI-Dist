@@ -471,8 +471,12 @@ thead.sticky {
 .column-filter-menu {
     position: fixed;
     z-index: 1300;
-    width: 300px;
+    width: min(300px, calc(100vw - 16px));
     max-height: min(430px, calc(100vh - 24px));
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: #fff;
     border: 1px solid #d1d5db;
     border-radius: 8px;
@@ -511,6 +515,8 @@ thead.sticky {
 }
 
 .column-filter-options {
+    flex: 1 1 auto;
+    min-height: 0;
     max-height: 220px;
     overflow-y: auto;
     padding: 2px 0 12px;
@@ -542,6 +548,7 @@ thead.sticky {
 }
 
 .column-filter-actions {
+    flex: 0 0 auto;
     border-top: 1px solid #d1d5db;
     display: flex;
     justify-content: flex-end;
@@ -578,6 +585,134 @@ thead.sticky {
 .column-filter-trigger.active i {
     color: #22c55e !important;
     font-weight: 900;
+}
+
+.combined-column-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    margin-left: 4px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.combined-column-menu-trigger:hover,
+.combined-column-menu-trigger:focus-visible {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.column-filter-sort-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.column-filter-sort-button {
+    width: 100%;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    padding: 7px 6px;
+    color: #1f2937;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.column-filter-sort-button:hover {
+    background: #f1f5f9;
+    color: #2563eb;
+}
+
+.column-filter-section-divider {
+    height: 1px;
+    margin: 8px 0 10px;
+    background: #d1d5db;
+}
+
+.column-filter-selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.column-filter-selection-button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.column-filter-selection-button:hover {
+    text-decoration: underline;
+}
+
+.column-filter-displaying-count {
+    margin: -4px 0 8px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.column-filter-menu[data-combined-menu="true"] {
+    padding: 12px;
+    font-size: 11px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-sort-button,
+.column-filter-menu[data-combined-menu="true"] .column-filter-selection-button,
+.column-filter-menu[data-combined-menu="true"] .column-filter-search input,
+.column-filter-menu[data-combined-menu="true"] .column-filter-option,
+.column-filter-menu[data-combined-menu="true"] .column-filter-btn {
+    font-size: 11px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-sort-button {
+    padding: 5px 6px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-section-divider {
+    margin: 6px 0 8px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-selection-toolbar,
+.column-filter-menu[data-combined-menu="true"] .column-filter-search {
+    margin-bottom: 8px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-search {
+    padding: 6px 8px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-option {
+    gap: 8px;
+    padding: 5px 4px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-check {
+    width: 16px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-actions {
+    gap: 8px;
+    padding-top: 10px;
+}
+
+.column-filter-menu[data-combined-menu="true"] .column-filter-btn {
+    min-width: 72px;
+    padding: 6px 12px;
 }
 
     </style>
@@ -2744,11 +2879,17 @@ async function checkMaintenanceStatus() {
         function positionColumnFilterMenu(menu, anchor) {
             const rect = anchor.getBoundingClientRect();
             const margin = 8;
-            const width = 300;
+            const width = menu.getBoundingClientRect().width || 300;
+            const height = menu.getBoundingClientRect().height;
+            const spaceBelow = window.innerHeight - rect.bottom - margin;
+            const spaceAbove = rect.top - margin;
             let left = rect.right - width;
-            let top = rect.bottom + margin;
+            let top = spaceBelow >= height || spaceBelow >= spaceAbove
+                ? rect.bottom + margin
+                : rect.top - height - margin;
 
             left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+            top = Math.max(margin, Math.min(top, window.innerHeight - height - margin));
             menu.style.left = `${left}px`;
             menu.style.top = `${top}px`;
         }
@@ -2778,6 +2919,20 @@ async function checkMaintenanceStatus() {
             if (activeColumnFilterMenu) closeColumnFilterMenu();
         }
 
+        function updateColumnFilterCounts(menu, values, visibleValues, selected) {
+            const selectAllButton = menu.querySelector('[data-action="select-all"]');
+            if (selectAllButton && menu.dataset.combinedMenu === 'true') {
+                selectAllButton.textContent = `Select All (${visibleValues.length})`;
+            }
+            const displayingCount = menu.querySelector('.column-filter-displaying-count');
+            if (displayingCount) {
+                displayingCount.textContent = (
+                    `Displaying ${visibleValues.length} of ${values.length}`
+                    + ` • ${selected.size} selected`
+                );
+            }
+        }
+
         function renderColumnFilterOptions(menu, tableId, colIdx) {
             const search = menu.querySelector('.column-filter-search-input').value.trim().toUpperCase();
             const list = menu.querySelector('.column-filter-options');
@@ -2790,6 +2945,7 @@ async function checkMaintenanceStatus() {
                 if (aSelected === bSelected) return 0;
                 return aSelected ? -1 : 1;
             });
+            updateColumnFilterCounts(menu, values, visibleValues, selected);
 
             if (visibleValues.length === 0) {
                 list.innerHTML = `<div class="text-sm text-slate-400 px-1 py-4 text-center">No matching values</div>`;
@@ -2814,6 +2970,7 @@ async function checkMaintenanceStatus() {
                     if (checkbox.checked) selected.add(value);
                     else selected.delete(value);
                     option.querySelector('.column-filter-check').innerHTML = checkbox.checked ? '<i class="fa-solid fa-check"></i>' : '';
+                    updateColumnFilterCounts(menu, values, visibleValues, selected);
                 });
             });
         }
@@ -2834,7 +2991,7 @@ async function checkMaintenanceStatus() {
             renderColumnFilterOptions(menu, tableId, colIdx);
         }
 
-        function openColumnFilter(event, tableId, colIdx) {
+        function openColumnFilter(event, tableId, colIdx, isCombinedMenu = false) {
             event.stopPropagation();
             closeColumnFilterMenu();
 
@@ -2844,7 +3001,28 @@ async function checkMaintenanceStatus() {
             const selected = activeFilter ? new Set(activeFilter) : new Set(values);
             const menu = document.createElement('div');
             menu.className = 'column-filter-menu';
-            menu.innerHTML = `
+            menu.dataset.combinedMenu = isCombinedMenu ? 'true' : 'false';
+            menu.innerHTML = isCombinedMenu ? `
+                <div class="column-filter-sort-actions">
+                    <button type="button" class="column-filter-sort-button" data-action="sort-ascending">Sort Ascending</button>
+                    <button type="button" class="column-filter-sort-button" data-action="sort-descending">Sort Descending</button>
+                </div>
+                <div class="column-filter-section-divider"></div>
+                <div class="column-filter-selection-toolbar">
+                    <button type="button" class="column-filter-selection-button" data-action="select-all">Select All (0)</button>
+                    <button type="button" class="column-filter-selection-button" data-action="clear">Clear</button>
+                </div>
+                <div class="column-filter-search">
+                    <input type="text" class="column-filter-search-input" placeholder="Search">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500"></i>
+                </div>
+                <div class="column-filter-displaying-count"></div>
+                <div class="column-filter-options"></div>
+                <div class="column-filter-actions">
+                    <button type="button" class="column-filter-btn" data-action="cancel">Cancel</button>
+                    <button type="button" class="column-filter-btn primary" data-action="ok">OK</button>
+                </div>
+            ` : `
                 <div class="column-filter-search">
                     <input type="text" class="column-filter-search-input" placeholder="Search">
                     <i class="fa-solid fa-magnifying-glass text-slate-500"></i>
@@ -2860,13 +3038,23 @@ async function checkMaintenanceStatus() {
             menu._selectedValues = selected;
             document.body.appendChild(menu);
             activeColumnFilterMenu = menu;
-            positionColumnFilterMenu(menu, event.currentTarget);
             renderColumnFilterOptions(menu, tableId, colIdx);
+            positionColumnFilterMenu(menu, event.currentTarget);
 
             const searchInput = menu.querySelector('.column-filter-search-input');
             searchInput.focus();
             searchInput.addEventListener('input', () => renderColumnFilterOptions(menu, tableId, colIdx));
 
+            if (isCombinedMenu) {
+                menu.querySelector('[data-action="sort-ascending"]').addEventListener('click', () => {
+                    sortTable(tableId, colIdx, 'asc');
+                    closeColumnFilterMenu();
+                });
+                menu.querySelector('[data-action="sort-descending"]').addEventListener('click', () => {
+                    sortTable(tableId, colIdx, 'desc');
+                    closeColumnFilterMenu();
+                });
+            }
             menu.querySelector('[data-action="cancel"]').addEventListener('click', closeColumnFilterMenu);
             menu.querySelector('[data-action="clear"]').addEventListener('click', () => {
                 updateVisibleColumnFilterSelection(menu, tableId, colIdx, false);
@@ -2887,13 +3075,38 @@ async function checkMaintenanceStatus() {
             });
         }
 
-        function getHeaderHTML(title, tableId, colIdx) {
+        function getHeaderHTML(title, tableId, colIdx, options = {}) {
             // FIX: Removed 'Default' from the exclusion list
             if (title === '' || title === 'Action' || title === 'Actions' || title === 'View' || (title === 'Final Acceptance' && tableId !== 'history-summary-table')) {
                 return `<div class="th-static font-bold text-xs uppercase">${title}</div>`;
             }
             const filterKey = getColumnFilterKey(tableId, colIdx);
             const filterActiveClass = columnValueFilters[filterKey] ? 'active' : '';
+            const combinedMenuTargets = [
+                'imports',
+                'products',
+                'material_mappings',
+                'exports',
+                'matches-table',
+                'reviewer-table',
+                'history-summary-table',
+                'history-table'
+            ];
+            const usesCombinedColumnMenu = combinedMenuTargets.includes(options.target || tableId);
+            if (usesCombinedColumnMenu) {
+                return `
+                <div class="th-container">
+                    <div class="th-container-inner">
+                        <span>${escapeHtml(title)}</span>
+                        <button type="button" class="column-filter-trigger combined-column-menu-trigger ${filterActiveClass}"
+                            onclick="openColumnFilter(event, '${tableId}', ${colIdx}, true)"
+                            title="Sort and filter ${escapeHtml(title)}" aria-label="Sort and filter ${escapeHtml(title)}">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                    </div>
+                    <div class="resizer" onmousedown="initResize(event, this)" onclick="event.stopPropagation()"></div>
+                </div>`;
+            }
             return `
             <div class="th-container" onclick="sortTable('${tableId}', ${colIdx})">
                 <div class="th-container-inner">
@@ -2969,16 +3182,18 @@ async function discardMatch(matchId) {
 
 
 
-function sortTable(tableId, colIndex) {
+function sortTable(tableId, colIndex, requestedDirection = null) {
     const table = document.getElementById(tableId);
     const tbody = table.tBodies[0];
     const rows = Array.from(tbody.rows);
     // Skip sort if no data
     if(rows.length === 0 || rows[0].cells.length <= 1) return;
 
-    // Toggle Direction
+    // Use an explicit direction from the Imports menu; otherwise toggle.
     const key = tableId + '-' + colIndex;
-    const dir = sortDirections[key] === 'asc' ? 'desc' : 'asc';
+    const dir = requestedDirection === 'asc' || requestedDirection === 'desc'
+        ? requestedDirection
+        : (sortDirections[key] === 'asc' ? 'desc' : 'asc');
     sortDirections[key] = dir;
 
     // Update Icon UI
@@ -3317,7 +3532,7 @@ async function safeFetch(endpoint, options={}) {
 
 
 
-//        
+//
 //        async function safeFetch(endpoint, options={}) {
 //            try {
 //                const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
@@ -3703,7 +3918,7 @@ async function loadStats() {
             labels.forEach((l, i) => {
                 const col = config[i];
                 const thAttrs = getFrozenCellAttrs(config, col, target, 'sticky top-0 z-30 bg-slate-50 border-b border-slate-200', true, leftBase);
-                html += `<th ${thAttrs}>${getHeaderHTML(l, tableId, i + offset)}</th>`;
+                html += `<th ${thAttrs}>${getHeaderHTML(l, tableId, i + offset, { target })}</th>`;
             });
             html += '</tr>';
             thead.innerHTML = html;
