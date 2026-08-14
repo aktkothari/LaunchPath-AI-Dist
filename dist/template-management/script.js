@@ -1,69 +1,102 @@
 // ======================================
+// TEMPLATE MANAGEMENT - SCRIPT.JS
+// ======================================
+
+// ======================================
 // ELEMENTS
 // ======================================
 
-const TEMPLATE_BASE_API = new URLSearchParams(window.location.search)
+const API_BASE = new URLSearchParams(window.location.search)
     .get("templateBaseApi")
     ?.replace(/\/+$/, "");
 
-function getTemplateApiUrl(path) {
-
-    if (!TEMPLATE_BASE_API) {
-
-        throw new Error("VITE_TEMPLATE_BASE_API is not configured.");
-
-    }
-
-    return `${TEMPLATE_BASE_API}${path}`;
-
-}
-
 const addColumnButtons =
-document.querySelectorAll(".add-column-btn");
+    document.querySelectorAll(".add-column-btn");
 
 const selectedColumnsList =
-document.getElementById("selectedColumns");
+    document.getElementById("selectedColumns");
 
 const previewHeader =
-document.getElementById("previewHeader");
+    document.getElementById("previewHeader");
 
 const previewRow =
-document.getElementById("previewRow");
+    document.getElementById("previewRow");
 
 const renameContainer =
-document.getElementById("renameContainer");
+    document.getElementById("renameContainer");
 
 const addRenameRowBtn =
-document.getElementById("addRenameRow");
+    document.getElementById("addRenameRow");
 
 const saveTemplateBtn =
-document.getElementById("saveTemplateBtn");
+    document.getElementById("saveTemplateBtn");
 
 const templateName =
-document.getElementById("templateName");
+    document.getElementById("templateName");
 
 const templateDescription =
-document.getElementById("templateDescription");
+    document.getElementById("templateDescription");
 
 const saveModal =
-document.getElementById("saveModal");
+    document.getElementById("saveModal");
 
 const cancelSaveBtn =
-document.getElementById("cancelSaveBtn");
+    document.getElementById("cancelSaveBtn");
 
 const confirmSaveBtn =
-document.getElementById("confirmSaveBtn");
+    document.getElementById("confirmSaveBtn");
 
 const templateNameWarning =
-document.getElementById("templateNameWarning");
+    document.getElementById("templateNameWarning");
 
+const editBtn =
+    document.getElementById("editTemplateBtn");
+
+const deleteTemplateBtn =
+    document.getElementById("deleteTemplateBtn");
+
+const editModal =
+    document.getElementById("editTemplateModal");
+
+const deleteModal =
+    document.getElementById("deleteTemplateModal");
+
+const editTemplateDropdown =
+    document.getElementById("editTemplateDropdown");
+
+const deleteTemplateDropdown =
+    document.getElementById("deleteTemplateDropdown");
+
+const openEditBtn =
+    document.getElementById("openEditBtn");
+
+const cancelEditBtn =
+    document.getElementById("cancelEditBtn");
+
+const confirmDeleteBtn =
+    document.getElementById("confirmDeleteBtn");
+
+const cancelDeleteBtn =
+    document.getElementById("cancelDeleteBtn");
 
 
 // ======================================
-// MANDATORY COLUMNS
+// STATE
+// ======================================
+
+let columnOrder = [];
+
+let selectedOptionalColumns = [];
+
+let currentTemplateId = null;
+
+
+// ======================================
+// 16 COMPULSORY COLUMNS
 // ======================================
 
 const mandatoryColumns = [
+
     "IMP ENTRY NO",
     "ENTRY LINE NO",
     "IMPORT MATERIAL NUMBER",
@@ -80,6 +113,34 @@ const mandatoryColumns = [
     "TARIFF",
     "DUTY RATE",
     "HTSUS NO"
+
+];
+
+
+// ======================================
+// OPTIONAL COLUMNS
+// ======================================
+
+const optionalColumns = [
+
+    "LINE DUTY",
+    "CONV. FACTOR",
+    "EXPORT DTE",
+    "STANDARD DUTY AMOUNT",
+    "TARIFF # 1",
+    "DUTY RATE 1",
+    "TARIFF VALUE 1",
+    "TARIFF # 2",
+    "DUTY RATE 2",
+    "TARIFF VALUE 2",
+    "NET DUTY RATE",
+    "GOODS VALUE PER UNIT",
+    "ENTERED VALUE",
+    "EXPORT DUTY",
+    "99% DUTY",
+    "REFUND AMOUNT",
+    "APPROVE DATE"
+
 ];
 
 
@@ -89,243 +150,365 @@ const mandatoryColumns = [
 
 const sampleData = {
 
-    "Tracking ID":"TRK001",
-    "Import Entry No":"IMP-1001",
-    "Entry Line No":"LINE-01",
-    "Product Code":"PROD-001",
-    "Unique ID":"UID-001",
-    "Import Date":"01-Jun-2026",
-    "Export Date":"15-Jun-2026",
-    "HTSUS No":"847130",
-    "Goods Description":"Laptop",
-    "Export Qty":"50",
-    "Line Duty":"1200",
-    "Export Duty":"900",
-    "99% Duty":"891",
+    "IMP ENTRY NO": "IMP-1001",
 
-    "Inv. Line#":"INV-100",
-    "Destination Country":"USA",
-    "Export UQ":"PCS",
-    "Duty Rate":"5%",
-    "Tariff Type":"General",
-    "Tariff":"A",
-    "Goods Value per Unit":"500",
-    "Entered Value":"25000",
-    "Port":"Houston",
-    "UOM":"PCS",
-    "Unit Of":"Pieces",
-    "Description of Merchandise":"Electronic Device",
-    "Description of Articles":"Finished Product",
-    "Action":"Approved",
-    "Name Of":"ABC Corp"
+    "ENTRY LINE NO": "LINE-01",
+
+    "IMPORT MATERIAL NUMBER": "MAT-001",
+
+    "EXPORT MATERIAL NUMBER": "MAT-002",
+
+    "IMP DATE": "01-Jun-2026",
+
+    "GOODS DESCRIPTION": "Laptop",
+
+    "IMPORT QTY": "50",
+
+    "IMPORT UOM": "PCS",
+
+    "EXPORT QTY": "50",
+
+    "EXPORT UOM": "PCS",
+
+    "UNIQUE ID": "UID-001",
+
+    "DEST COUNTRY": "USA",
+
+    "TARIFF TYPE": "General",
+
+    "TARIFF": "A",
+
+    "DUTY RATE": "5%",
+
+    "HTSUS NO": "847130",
+
+    "LINE DUTY": "1200",
+
+    "CONV. FACTOR": "1",
+
+    "EXPORT DTE": "15-Jun-2026",
+
+    "STANDARD DUTY AMOUNT": "1200",
+
+    "TARIFF # 1": "847130",
+
+    "DUTY RATE 1": "5%",
+
+    "TARIFF VALUE 1": "25000",
+
+    "TARIFF # 2": "847130",
+
+    "DUTY RATE 2": "2%",
+
+    "TARIFF VALUE 2": "10000",
+
+    "NET DUTY RATE": "3%",
+
+    "GOODS VALUE PER UNIT": "500",
+
+    "ENTERED VALUE": "25000",
+
+    "EXPORT DUTY": "900",
+
+    "99% DUTY": "891",
+
+    "REFUND AMOUNT": "309",
+
+    "APPROVE DATE": "20-Jun-2026"
 
 };
 
-// ======================================
-// COLUMN ORDER STORAGE
-// ======================================
-
-let columnOrder = [];
-let selectedOptionalColumns = [];
 
 // ======================================
-// INIT
+// VALIDATION
+// ======================================
+
+const validPattern =
+    /^[A-Za-z0-9 _-]+$/;
+
+
+// ======================================
+// INITIALIZE
 // ======================================
 
 initialize();
 
-function initialize(){
 
-    addRenameRow();
+function initialize() {
 
-    addColumnButtons.forEach(button => {
+    // Add first rename row
+    if (renameContainer) {
 
-    button.addEventListener(
-        "click",
-        addColumn
-    );
-
-});
-
-    addRenameRowBtn.addEventListener(
-        "click",
-        addRenameRow
-    );
-
-saveTemplateBtn.addEventListener("click", saveTemplate);
-
-cancelSaveBtn.addEventListener(
-    "click",
-    closeSaveModal
-);
-
-confirmSaveBtn.addEventListener(
-    "click",
-    confirmSaveTemplate
-);
-
-
-templateName.addEventListener(
-    "input",
-    function(){
-
-        const validPattern =
-        /^[A-Za-z0-9 _-]*$/;
-
-        if(
-            validPattern.test(this.value)
-        ){
-
-            this.style.borderColor =
-            "#d1d5db";
-
-            templateNameWarning.style.display =
-            "none";
-
-        }
-        else{
-
-            this.style.borderColor =
-            "red";
-
-            templateNameWarning.style.display =
-            "block";
-
-        }
+        addRenameRow();
 
     }
-);
+
+
+    // Optional column buttons
+    addColumnButtons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            addColumn
+        );
+
+    });
+
+
+    // Add rename row
+    if (addRenameRowBtn) {
+
+        addRenameRowBtn.addEventListener(
+            "click",
+            () => addRenameRow()
+        );
+
+    }
+
+
+    // Save
+    if (saveTemplateBtn) {
+
+        saveTemplateBtn.addEventListener(
+            "click",
+            saveTemplate
+        );
+
+    }
+
+
+    // Save modal
+    if (cancelSaveBtn) {
+
+        cancelSaveBtn.addEventListener(
+            "click",
+            closeSaveModal
+        );
+
+    }
+
+    if (confirmSaveBtn) {
+
+        confirmSaveBtn.addEventListener(
+            "click",
+            confirmSaveTemplate
+        );
+
+    }
+
+
+    // Template name validation
+    if (templateName) {
+
+        templateName.addEventListener(
+            "input",
+            validateTemplateName
+        );
+
+    }
+
+
+    // Edit
+    if (editBtn) {
+
+        editBtn.addEventListener(
+            "click",
+            openEditModal
+        );
+
+    }
+
+
+    if (cancelEditBtn) {
+
+        cancelEditBtn.addEventListener(
+            "click",
+            closeEditModal
+        );
+
+    }
+
+
+    if (openEditBtn) {
+
+        openEditBtn.addEventListener(
+            "click",
+            openSelectedTemplate
+        );
+
+    }
+
+
+    // Delete
+    if (deleteTemplateBtn) {
+
+        deleteTemplateBtn.addEventListener(
+            "click",
+            openDeleteModal
+        );
+
+    }
+
+
+    if (cancelDeleteBtn) {
+
+        cancelDeleteBtn.addEventListener(
+            "click",
+            closeDeleteModal
+        );
+
+    }
+
+
+    if (confirmDeleteBtn) {
+
+        confirmDeleteBtn.addEventListener(
+            "click",
+            deleteSelectedTemplate
+        );
+
+    }
+
+
+    // Close modals by clicking outside
+    window.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                editModal &&
+                event.target === editModal
+            ) {
+
+                closeEditModal();
+
+            }
+
+
+            if (
+                deleteModal &&
+                event.target === deleteModal
+            ) {
+
+                closeDeleteModal();
+
+            }
+
+
+            if (
+                saveModal &&
+                event.target === saveModal
+            ) {
+
+                closeSaveModal();
+
+            }
+
+        }
+    );
+
+
     updateUI();
 
 }
 
 
-/// ======================================
-// ADD RENAME ROW
+// ======================================
+// TEMPLATE NAME VALIDATION
 // ======================================
 
-function addRenameRow(){
+function validateTemplateName() {
 
- const row =
- document.createElement("div");
-
- row.classList.add("rename-row");
-
- row.innerHTML = `
-
-
- <select class="original-name">
- </select>
-
-<div class="display-name-container">
-
-    <input
-    type="text"
-    class="display-name"
-    placeholder="Display Name">
-
-    <small
-    class="displayNameWarning validation-warning">
-
-        Only letters, numbers, spaces, "_" and "-" are allowed.
-
-    </small>
-
-</div>
-
-<button
-class="delete-rename-row">
-✕
-</button>
-
- `;
-
- renameContainer.appendChild(row);
-
-const deleteBtn =
-row.querySelector(
-    ".delete-rename-row"
-);
-
-deleteBtn.addEventListener(
-    "click",
-    function(){
-
-        const totalRows =
-        document.querySelectorAll(
-            ".rename-row"
-        ).length;
-
-        if(totalRows > 1){
-
-            row.remove();
-
-        }
-
+    if (!templateName) {
+        return;
     }
-);
 
-const originalInput =
-row.querySelector(".original-name");
+    if (
+        this.value === "" ||
+        validPattern.test(this.value)
+    ) {
 
-const displayInput =
-row.querySelector(".display-name");
-
-const displayNameWarning =
-row.querySelector(".displayNameWarning");
-
-originalInput.addEventListener(
-    "change",
-    updateUI
-);
-
-displayInput.addEventListener(
-    "input",
-    function(){
-
-        updateUI();
-
-        const validPattern =
-        /^[A-Za-z0-9 _-]*$/;
-
-        if(
-            validPattern.test(this.value)
-        ){
-
-            this.style.borderColor =
+        this.style.borderColor =
             "#d1d5db";
 
-            displayNameWarning.style.display =
-            "none";
+        if (templateNameWarning) {
+
+            templateNameWarning.style.display =
+                "none";
 
         }
-        else{
 
-            this.style.borderColor =
-            "red";
+    } else {
 
-            displayNameWarning.style.display =
-            "block";
+        this.style.borderColor =
+            "#dc2626";
+
+        if (templateNameWarning) {
+
+            templateNameWarning.style.display =
+                "block";
 
         }
 
     }
-);
-
-populateColumnDropdown(
-    originalInput
-);
 
 }
+
+
+// ======================================
+// ADD OPTIONAL COLUMN
+// ======================================
+
+function addColumn() {
+
+    const column =
+        this.dataset.column;
+
+    if (!column) {
+        return;
+    }
+
+
+    if (
+        !selectedOptionalColumns.includes(column)
+    ) {
+
+        selectedOptionalColumns.push(column);
+
+    }
+
+
+    // Hide from available columns
+    const item =
+        this.closest(".column-item");
+
+    if (item) {
+
+        item.style.display = "none";
+
+    }
+
+
+    // Add to output order
+    if (
+        !columnOrder.includes(column)
+    ) {
+
+        columnOrder.push(column);
+
+    }
+
+
+    updateUI();
+
+}
+
 
 // ======================================
 // GET SELECTED COLUMNS
 // ======================================
-// ======================================
-// CONFIRM COLUMN ORDER
-// ======================================
 
-function getSelectedColumns(){
+function getSelectedColumns() {
 
     return [
 
@@ -336,93 +519,430 @@ function getSelectedColumns(){
     ];
 
 }
-function addColumn(){
-
-    const column =
-    this.dataset.column;
-
-    if(
-        !selectedOptionalColumns.includes(column)
-    ){
-
-        selectedOptionalColumns.push(column);
-
-        const row =
-        this.closest(".column-item");
-
-        row.style.display = "none";
-
-        updateUI();
-    }
-
-}
 
 
 // ======================================
 // GET DISPLAY NAME
 // ======================================
 
-function getDisplayName(column){
+function getDisplayName(column) {
 
- const rows =
- document.querySelectorAll(
- ".rename-row"
- );
+    const rows =
+        document.querySelectorAll(
+            ".rename-row"
+        );
 
- for(let row of rows){
 
-  const original =
-  row.querySelector(
-  ".original-name"
-  ).value.trim();
+    for (const row of rows) {
 
-  const display =
-  row.querySelector(
-  ".display-name"
-  ).value.trim();
+        const original =
+            row.querySelector(
+                ".original-name"
+            )?.value.trim();
 
-  if(
-   original.toLowerCase()
-   ===
-   column.toLowerCase()
-   &&
-   display !== ""
-  ){
 
-   return display;
+        const confirmedDisplay =
+            row.dataset.confirmedDisplayName ||
+            "";
 
-  }
 
- }
+        if (
+            original &&
+            original.toLowerCase() ===
+            column.toLowerCase() &&
+            confirmedDisplay !== ""
+        ) {
 
- return column;
+            return confirmedDisplay;
+
+        }
+
+    }
+
+
+    return column;
 
 }
-function populateColumnDropdown(dropdown){
 
-    dropdown.innerHTML = "";
+
+function addRenameRow() {
+
+    const row = document.createElement("div");
+
+    row.classList.add("rename-row");
+
+    row.innerHTML = `
+
+        <select class="original-name">
+            <option value="">Select Column</option>
+        </select>
+
+        <div class="display-name-container">
+
+            <input
+                type="text"
+                class="display-name"
+                placeholder="Display Name">
+
+            <small class="displayNameWarning validation-warning">
+                Only letters, numbers, spaces, "_" and "-" are allowed.
+            </small>
+
+        </div>
+
+        <div class="rename-actions-row">
+
+            <button
+                type="button"
+                class="confirm-rename-row"
+                title="Confirm Rename">
+                ✓
+            </button>
+
+            <button
+                type="button"
+                class="delete-rename-row"
+                title="Remove Row">
+                ✕
+            </button>
+
+        </div>
+    `;
+
+    renameContainer.appendChild(row);
+
+
+    /* ===========================
+       DELETE ROW
+    =========================== */
+
+    const deleteBtn =
+        row.querySelector(".delete-rename-row");
+
+    deleteBtn.addEventListener("click", function () {
+
+        const totalRows =
+            document.querySelectorAll(".rename-row").length;
+
+        if (totalRows > 1) {
+
+            row.remove();
+
+            updateUI();
+
+        }
+
+    });
+
+
+    /* ===========================
+       CONFIRM RENAME
+    =========================== */
+
+    const confirmBtn =
+        row.querySelector(".confirm-rename-row");
+
+    confirmBtn.addEventListener("click", function () {
+
+        const originalInput =
+            row.querySelector(".original-name");
+
+        const displayInput =
+            row.querySelector(".display-name");
+
+        const original =
+            originalInput.value.trim();
+
+        const display =
+            displayInput.value.trim();
+
+
+        if (original === "") {
+
+            alert("Please select an Original Name.");
+
+            originalInput.focus();
+
+            return;
+
+        }
+
+
+        if (display === "") {
+
+            alert("Please enter a Display Name.");
+
+            displayInput.focus();
+
+            return;
+
+        }
+
+
+        const validPattern =
+            /^[A-Za-z0-9 _-]+$/;
+
+
+        if (!validPattern.test(display)) {
+
+            alert(
+                'Display Name can contain only letters, numbers, spaces, "_" and "-".'
+            );
+
+            displayInput.focus();
+
+            return;
+
+        }
+
+
+        /* Store the confirmed rename */
+
+        row.dataset.confirmed = "true";
+
+        displayInput.dataset.confirmedName = display;
+
+        updateUI();
+
+    });
+
+
+    /* ===========================
+       ORIGINAL COLUMN CHANGE
+    =========================== */
+
+    const originalInput =
+        row.querySelector(".original-name");
+
+    originalInput.addEventListener(
+        "change",
+        updateUI
+    );
+
+
+    /* ===========================
+       DISPLAY NAME VALIDATION
+    =========================== */
+
+    const displayInput =
+        row.querySelector(".display-name");
+
+    const displayNameWarning =
+        row.querySelector(".displayNameWarning");
+
+
+    displayInput.addEventListener(
+        "input",
+        function () {
+
+            const validPattern =
+                /^[A-Za-z0-9 _-]*$/;
+
+
+            if (validPattern.test(this.value)) {
+
+                this.style.borderColor =
+                    "#d1d5db";
+
+                displayNameWarning.style.display =
+                    "none";
+
+            } else {
+
+                this.style.borderColor =
+                    "#ef4444";
+
+                displayNameWarning.style.display =
+                    "block";
+
+            }
+
+        }
+    );
+
+
+    /* Populate dropdown */
+
+    populateColumnDropdown(originalInput);
+
+}
+
+    // CONFIRM RENAME
+    confirmBtn.addEventListener(
+        "click",
+        function () {
+
+            const original =
+                originalInput.value.trim();
+
+
+            const display =
+                displayInput.value.trim();
+
+
+            if (original === "") {
+
+                alert(
+                    "Please select an Original Name."
+                );
+
+                originalInput.focus();
+
+                return;
+
+            }
+
+
+            if (display === "") {
+
+                alert(
+                    "Please enter a Display Name."
+                );
+
+                displayInput.focus();
+
+                return;
+
+            }
+
+
+            if (
+                !validPattern.test(display)
+            ) {
+
+                displayInput.style.borderColor =
+                    "#dc2626";
+
+                warning.style.display =
+                    "block";
+
+                displayInput.focus();
+
+                return;
+
+            }
+
+
+            // Store confirmed name
+            row.dataset.confirmedDisplayName =
+                display;
+
+
+            // Update UI ONLY now
+            updateUI();
+
+
+            // Small animation
+            confirmBtn.style.transform =
+                "scale(0.9)";
+
+
+            setTimeout(
+                () => {
+
+                    confirmBtn.style.transform =
+                        "scale(1)";
+
+                },
+                120
+            );
+
+        }
+    );
+
+
+    // DELETE / CANCEL RENAME ROW
+    deleteBtn.addEventListener(
+        "click",
+        function () {
+
+            const totalRows =
+                document.querySelectorAll(
+                    ".rename-row"
+                ).length;
+
+
+            if (totalRows > 1) {
+
+                row.remove();
+
+            } else {
+
+                originalInput.value =
+                    "";
+
+                displayInput.value =
+                    "";
+
+                row.dataset.confirmedDisplayName =
+                    "";
+
+            }
+
+
+            updateUI();
+
+        }
+    );
+
+
+// ======================================
+// POPULATE RENAME DROPDOWN
+// ======================================
+
+function populateColumnDropdown(
+    dropdown
+) {
+
+    if (!dropdown) {
+        return;
+    }
+
+
+    const currentValue =
+        dropdown.value;
+
+
+    dropdown.innerHTML =
+        "";
+
 
     const defaultOption =
-    document.createElement("option");
+        document.createElement("option");
 
-    defaultOption.value = "";
+
+    defaultOption.value =
+        "";
+
+
     defaultOption.textContent =
-    "Select Column";
+        "Select Column";
+
 
     dropdown.appendChild(
         defaultOption
     );
 
-    columnOrder.forEach(column => {
+
+    const allColumns =
+        getSelectedColumns();
+
+
+    allColumns.forEach(column => {
 
         const option =
-        document.createElement("option");
+            document.createElement(
+                "option"
+            );
+
 
         option.value =
-        column;
+            column;
+
 
         option.textContent =
-        column;
+            column;
+
 
         dropdown.appendChild(
             option
@@ -430,358 +950,520 @@ function populateColumnDropdown(dropdown){
 
     });
 
+
+    if (
+        allColumns.includes(
+            currentValue
+        )
+    ) {
+
+        dropdown.value =
+            currentValue;
+
+    }
+
 }
+
 
 // ======================================
 // UPDATE UI
 // ======================================
 
-function updateUI(){
+function updateUI() {
 
- const selectedColumns =
- getSelectedColumns();
+    const selectedColumns =
+        getSelectedColumns();
 
- if(
- columnOrder.length === 0
-){
 
- columnOrder =
- [...selectedColumns];
+    // Mandatory columns always come first
+    const validColumns =
+        columnOrder.filter(
+            column =>
+                selectedColumns.includes(
+                    column
+                )
+        );
 
-}
 
- columnOrder =
- columnOrder.filter(col =>
- selectedColumns.includes(col)
- );
+    // Add missing columns
+    selectedColumns.forEach(
+        column => {
 
- selectedColumns.forEach(col => {
+            if (
+                !validColumns.includes(
+                    column
+                )
+            ) {
 
-  if(
-   !columnOrder.includes(col)
-  ){
+                validColumns.push(
+                    column
+                );
 
-   columnOrder.push(col);
+            }
 
-  }
-
- });
-
- updateSelectedColumns(
- columnOrder
-);
-
- updatePreview(
- columnOrder
- );
- const dropdowns =
-document.querySelectorAll(
-    ".original-name"
-);
-
-dropdowns.forEach(dropdown => {
-
-    const currentValue =
-    dropdown.value;
-
-    populateColumnDropdown(
-        dropdown
+        }
     );
 
-    dropdown.value =
-    currentValue;
 
-});
- 
+    columnOrder =
+        validColumns;
+
+
+    updateSelectedColumns(
+        columnOrder
+    );
+
+
+    updatePreview(
+        columnOrder
+    );
+
+
+    // Refresh rename dropdowns
+    document
+        .querySelectorAll(
+            ".original-name"
+        )
+        .forEach(dropdown => {
+
+            const currentValue =
+                dropdown.value;
+
+
+            populateColumnDropdown(
+                dropdown
+            );
+
+
+            dropdown.value =
+                currentValue;
+
+        });
 
 }
+
 
 // ======================================
 // OUTPUT COLUMNS
 // ======================================
 
-function updateSelectedColumns(columns){
+function updateSelectedColumns(
+    columns
+) {
 
- selectedColumnsList.innerHTML = "";
+    if (!selectedColumnsList) {
+        return;
+    }
 
- columns.forEach((column,index)=>{
 
-  const li =
-  document.createElement("li");
+    selectedColumnsList.innerHTML =
+        "";
 
-  if(
-    selectedOptionalColumns.includes(column)
-){
-    li.classList.add(
-        "optional-column-output"
-    );
-}
 
- if(
-    selectedOptionalColumns.includes(column)
-){
+    columns.forEach(
+        (column, index) => {
 
-    li.innerHTML = `
+            const li =
+                document.createElement(
+                    "li"
+                );
 
-        <strong>
-        ${index + 1}.
-        </strong>
 
-        ${getDisplayName(column)}
+            li.draggable = true;
 
-        <button
-            class="remove-column-btn"
-            data-column="${column}">
-            ✕
-        </button>
+            li.dataset.column =
+                column;
 
-    `;
 
-}
-else{
+            const isOptional =
+                selectedOptionalColumns.includes(
+                    column
+                );
 
-    li.innerHTML = `
 
-        <strong>
-        ${index + 1}.
-        </strong>
+            if (isOptional) {
 
-        ${getDisplayName(column)}
-
-    `;
-
-}
-
-  selectedColumnsList.appendChild(li);
-
-  const removeBtn =
-li.querySelector(".remove-column-btn");
-
-if(removeBtn){
-
-    removeBtn.addEventListener(
-        "click",
-        function(){
-
-            const column =
-            this.dataset.column;
-
-            selectedOptionalColumns =
-            selectedOptionalColumns.filter(
-                item => item !== column
-            );
-
-            const addButton =
-            document.querySelector(
-                `.add-column-btn[data-column="${column}"]`
-            );
-
-            if(addButton){
-
-                addButton
-                .closest(".column-item")
-                .style.display =
-                "flex";
+                li.classList.add(
+                    "optional-column-output"
+                );
 
             }
 
-            updateUI();
+
+            li.innerHTML = `
+
+                <span
+                    class="drag-handle"
+                    title="Drag to reorder">
+
+                    ☷
+
+                </span>
+
+
+                <strong>
+                    ${index + 1}.
+                </strong>
+
+
+                <span class="output-column-name">
+                    ${escapeHtml(
+                        getDisplayName(column)
+                    )}
+                </span>
+
+
+                ${
+                    isOptional
+                        ? `
+                        <button
+                            type="button"
+                            class="remove-column-btn"
+                            data-column="${escapeAttribute(column)}"
+                            title="Remove column">
+
+                            ✕
+
+                        </button>
+                        `
+                        : ""
+                }
+
+            `;
+
+
+            selectedColumnsList.appendChild(
+                li
+            );
+
+
+            // Remove optional column
+            const removeBtn =
+                li.querySelector(
+                    ".remove-column-btn"
+                );
+
+
+            if (removeBtn) {
+
+                removeBtn.addEventListener(
+                    "click",
+                    function () {
+
+                        const columnName =
+                            this.dataset.column;
+
+
+                        selectedOptionalColumns =
+                            selectedOptionalColumns.filter(
+                                item =>
+                                    item !==
+                                    columnName
+                            );
+
+
+                        columnOrder =
+                            columnOrder.filter(
+                                item =>
+                                    item !==
+                                    columnName
+                            );
+
+
+                        const addButton =
+                            document.querySelector(
+                                `.add-column-btn[data-column="${CSS.escape(columnName)}"]`
+                            );
+
+
+                        if (addButton) {
+
+                            const item =
+                                addButton.closest(
+                                    ".column-item"
+                                );
+
+
+                            if (item) {
+
+                                item.style.display =
+                                    "flex";
+
+                            }
+
+                        }
+
+
+                        updateUI();
+
+                    }
+                );
+
+            }
+
+
+            // Drag start
+            li.addEventListener(
+                "dragstart",
+                function (event) {
+
+                    li.classList.add(
+                        "dragging"
+                    );
+
+
+                    event.dataTransfer.effectAllowed =
+                        "move";
+
+
+                    event.dataTransfer.setData(
+                        "text/plain",
+                        column
+                    );
+
+                }
+            );
+
+
+            // Drag end
+            li.addEventListener(
+                "dragend",
+                function () {
+
+                    li.classList.remove(
+                        "dragging"
+                    );
+
+                }
+            );
+
+
+            // Drag over
+            li.addEventListener(
+                "dragover",
+                function (event) {
+
+                    event.preventDefault();
+
+                    event.dataTransfer.dropEffect =
+                        "move";
+
+                }
+            );
+
+
+            // Drop
+            li.addEventListener(
+                "drop",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    const draggedColumn =
+                        event.dataTransfer.getData(
+                            "text/plain"
+                        );
+
+
+                    if (
+                        !draggedColumn ||
+                        draggedColumn === column
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const fromIndex =
+                        columnOrder.indexOf(
+                            draggedColumn
+                        );
+
+
+                    const toIndex =
+                        columnOrder.indexOf(
+                            column
+                        );
+
+
+                    if (
+                        fromIndex === -1 ||
+                        toIndex === -1
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    columnOrder.splice(
+                        fromIndex,
+                        1
+                    );
+
+
+                    columnOrder.splice(
+                        toIndex,
+                        0,
+                        draggedColumn
+                    );
+
+
+                    // Mandatory columns cannot
+                    // move before another mandatory
+                    // column.
+                    const mandatoryPart =
+                        columnOrder.filter(
+                            col =>
+                                mandatoryColumns.includes(
+                                    col
+                                )
+                        );
+
+
+                    const optionalPart =
+                        columnOrder.filter(
+                            col =>
+                                !mandatoryColumns.includes(
+                                    col
+                                )
+                        );
+
+
+                    // Keep all 16 mandatory columns first
+                    columnOrder = [
+                        ...mandatoryPart,
+                        ...optionalPart
+                    ];
+
+
+                    updateUI();
+
+                }
+            );
 
         }
     );
 
 }
 
- });
-
-}
 
 // ======================================
-// TEMPLATE PREVIEW
+// PREVIEW
 // ======================================
 
-function updatePreview(columns){
+function updatePreview(
+    columns
+) {
 
- previewHeader.innerHTML = "";
- previewRow.innerHTML = "";
+    if (
+        !previewHeader ||
+        !previewRow
+    ) {
 
- columns.forEach((column,index)=>{
+        return;
 
-  const th =
-  document.createElement("th");
+    }
 
-  th.textContent =
-  getDisplayName(column);
 
-  th.draggable = true;
+    previewHeader.innerHTML =
+        "";
 
-  th.dataset.index =
-  index;
 
-  previewHeader.appendChild(th);
+    previewRow.innerHTML =
+        "";
 
- });
 
- columns.forEach(column => {
+    columns.forEach(
+        column => {
 
-  const td =
-  document.createElement("td");
-
-  td.textContent =
-  sampleData[column] || "N/A";
-
-  previewRow.appendChild(td);
-
- });
-
- initializeDragDrop();
-
-}
-
-// ======================================
-// DRAG & DROP
-// ======================================
-
-    function initializeDragDrop() {
-
-    const headers =
-    document.querySelectorAll("#previewHeader th");
-
-    let dragIndex = null;
-
-    headers.forEach((header, index) => {
-
-        header.draggable = true;
-
-        header.addEventListener(
-            "dragstart",
-            function () {
-
-                dragIndex = index;
-
-            }
-        );
-
-        header.addEventListener(
-            "dragover",
-            function (e) {
-
-                e.preventDefault();
-
-            }
-        );
-
-        header.addEventListener(
-            "drop",
-            function (e) {
-
-                e.preventDefault();
-
-                const dropIndex = index;
-
-                if (
-                    dragIndex === null ||
-                    dragIndex === dropIndex
-                ) {
-                    return;
-                }
-
-                const movedColumn =
-                columnOrder.splice(
-                    dragIndex,
-                    1
-                )[0];
-
-                columnOrder.splice(
-                    dropIndex,
-                    0,
-                    movedColumn
+            const th =
+                document.createElement(
+                    "th"
                 );
 
-                // Refresh BOTH Output Columns and Preview
-                updateUI();
 
-            }
-        );
+            th.textContent =
+                getDisplayName(
+                    column
+                );
 
-    });
 
-}
- 
-// closes headers.forEach
+            previewHeader.appendChild(
+                th
+            );
 
-function initializeDropZones(){
 
-    const zones =
-    document.querySelectorAll(
-        ".drop-zone"
+            const td =
+                document.createElement(
+                    "td"
+                );
+
+
+            td.textContent =
+                sampleData[column] ||
+                "N/A";
+
+
+            previewRow.appendChild(
+                td
+            );
+
+        }
     );
 
-    zones.forEach(zone => {
-
-        zone.addEventListener(
-            "dragover",
-            function(e){
-
-                e.preventDefault();
-
-                this.classList.add(
-                    "drag-over"
-                );
-
-            }
-        );
-
-        zone.addEventListener(
-            "dragleave",
-            function(){
-
-                this.classList.remove(
-                    "drag-over"
-                );
-
-            }
-        );
-
-        zone.addEventListener(
-            "drop",
-            function(e){
-
-                e.preventDefault();
-
-                const column =
-                e.dataTransfer.getData(
-                    "text/plain"
-                );
-
-                this.textContent =
-                column;
-
-                this.classList.remove(
-                    "drag-over"
-                );
-
-            }
-        );
-
-    });
-
 }
+
+
 // ======================================
 // SAVE TEMPLATE
 // ======================================
 
-function saveTemplate() {
+async function saveTemplate() {
 
     const name =
-    templateName.value.trim();
+        templateName?.value.trim();
+
 
     const description =
-    templateDescription.value.trim();
+        templateDescription?.value.trim();
 
-    if(name === ""){
 
-        alert("Please enter a Template Name.");
+    if (!name) {
+
+        alert(
+            "Please enter a Template Name."
+        );
+
+        templateName?.focus();
+
+        return;
+
+    }
+
+
+    if (!description) {
+
+        alert(
+            "Please enter a Description."
+        );
+
+        templateDescription?.focus();
+
+        return;
+
+    }
+
+
+    if (
+        !validPattern.test(name)
+    ) {
+
+        alert(
+            "Only letters, numbers, spaces, '_' and '-' are allowed."
+        );
 
         templateName.focus();
 
@@ -789,404 +1471,1121 @@ function saveTemplate() {
 
     }
 
-    if(description === ""){
 
-        alert("Please enter a Description.");
-
-        templateDescription.focus();
-
-        return;
-
-    }
-
-    const validPattern =
-    /^[A-Za-z0-9 _-]+$/;
-
-    if(!validPattern.test(name)){
-
-    templateName.style.borderColor = "red";
-
-    templateName.focus();
-
-    return;
-
-}
-
-    const originalInputs =
-document.querySelectorAll(".original-name");
-
-const displayInputs =
-document.querySelectorAll(".display-name");
-
-for(let i = 0; i < originalInputs.length; i++){
-
-    const original =
-    originalInputs[i].value.trim();
-
-    const display =
-    displayInputs[i].value.trim();
-
-  // User is not using this rename row
-if (original === "" && display === "") {
-    continue;
-}
-
-// User selected a column but didn't provide a display name
-if (original !== "" && display === "") {
-
-    alert("Please enter a Display Name.");
-
-    displayInputs[i].focus();
-
-    return;
-}
-
-// User entered a display name without selecting a column
-if (original === "" && display !== "") {
-
-    alert("Please select an Original Name.");
-
-    originalInputs[i].focus();
-
-    return;
-}
-
-// Validate only when a display name is provided
-if (display !== "" && !validPattern.test(display)) {
-
-    displayInputs[i].style.borderColor = "red";
-
-    displayInputs[i].focus();
-
-    return;
-}
-
-   if(!validPattern.test(display)){
-
-    displayInputs[i].style.borderColor =
-    "red";
-
-    displayInputs[i].focus();
-
-    return;
-
-}
-
-}
-
-    saveModal.style.display = "flex";
-
-}
+    // Validate rename rows
+    const renameRows =
+        document.querySelectorAll(
+            ".rename-row"
+        );
 
 
-function closeSaveModal() {
+    for (
+        const row of renameRows
+    ) {
 
-    saveModal.style.display = "none";
+        const original =
+            row.querySelector(
+                ".original-name"
+            )?.value.trim();
 
-}
 
-function confirmSaveTemplate() {
+        const display =
+            row.querySelector(
+                ".display-name"
+            )?.value.trim();
 
-    saveModal.style.display = "none";
 
-    // Template Details
-    const name = templateName.value.trim();
-    const description = templateDescription.value.trim();
+        if (
+            original === "" &&
+            display === ""
+        ) {
 
-    // Get Rename Columns
-    const originalInputs = document.querySelectorAll(".original-name");
-    const displayInputs = document.querySelectorAll(".display-name");
-
-    // Build Columns Array
-    const columns = [];
-
-    for (let i = 0; i < originalInputs.length; i++) {
-
-        columns.push({
-
-            // Existing fields (Backend uses these)
-            original_column: originalInputs[i].value,
-            display_column: displayInputs[i].value,
-            column_order: i + 1,
-            is_mandatory: true,
-
-            // New standardized JSON fields
-            column_id: i + 1,
-            column_name: originalInputs[i].value,
-            display_name: displayInputs[i].value,
-            type: "string",
-            default_value: "",
-            order: i + 1,
-            mandatory: true,
-            default: true
-
-        });
-
-    }
-
-    const templateData = {
-        template_name: name,
-        description: description,
-        created_by: "Tejal",
-        modified_by: "Tejal",
-        columns: columns
-    };
-
-    fetch(
-
-    currentTemplateId
-        ? getTemplateApiUrl(`/template/${currentTemplateId}`)
-        : getTemplateApiUrl("/create-template"),
-
-{
-        method: currentTemplateId ? "PUT" : "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(templateData)
-    })
-    .then(response => response.json())
-  .then(data => {
-
-        if (data.error) {
-
-            alert(data.error);
-
-        } else {
-
-            alert(data.message);
-
-            currentTemplateId = null;
-
-            document.getElementById("saveTemplateBtn").textContent =
-                "Save Template";
-
-            resetTemplateForm();
-
-            loadTemplates();
+            continue;
 
         }
 
-    })
-    .catch(error => {
 
-        console.error(error);
+        if (
+            original !== "" &&
+            display === ""
+        ) {
 
-        alert("Something went wrong while saving the template.");
+            alert(
+                "Please enter a Display Name."
+            );
 
-    });
+            row.querySelector(
+                ".display-name"
+            ).focus();
+
+            return;
+
+        }
+
+
+        if (
+            original === "" &&
+            display !== ""
+        ) {
+
+            alert(
+                "Please select an Original Name."
+            );
+
+            row.querySelector(
+                ".original-name"
+            ).focus();
+
+            return;
+
+        }
+
+
+        if (
+            !validPattern.test(display)
+        ) {
+
+            alert(
+                "Display Name contains invalid characters."
+            );
+
+            row.querySelector(
+                ".display-name"
+            ).focus();
+
+            return;
+
+        }
+
+    }
+
+
+    // Check duplicate name
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/templates`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const templates =
+            Array.isArray(data)
+                ? data
+                : data.templates || [];
+
+
+        const duplicate =
+            templates.find(
+                template => {
+
+                    const sameName =
+                        String(
+                            template.template_name ||
+                            ""
+                        )
+                        .trim()
+                        .toLowerCase()
+                        ===
+                        name.toLowerCase();
+
+
+                    const differentTemplate =
+                        String(
+                            template.template_id
+                        )
+                        !==
+                        String(
+                            currentTemplateId
+                        );
+
+
+                    return (
+                        sameName &&
+                        (
+                            currentTemplateId ===
+                            null ||
+                            differentTemplate
+                        )
+                    );
+
+                }
+            );
+
+
+        if (duplicate) {
+
+            alert(
+                "A template with this name already exists."
+            );
+
+            return;
+
+        }
+
+
+        if (saveModal) {
+
+            saveModal.style.display =
+                "flex";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Duplicate check error:",
+            error
+        );
+
+
+        alert(
+            "Unable to check existing templates."
+        );
+
+    }
 
 }
-  
 
-const editBtn = document.getElementById("editTemplateBtn");
-const deleteTemplateBtn = document.getElementById("deleteTemplateBtn");
-const deleteModal = document.getElementById("deleteTemplateModal");
-const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-confirmDeleteBtn.addEventListener("click", async () => {
 
-    const id = document.getElementById("deleteTemplateDropdown").value;
+// ======================================
+// CLOSE SAVE MODAL
+// ======================================
 
-    if (!id) {
-        alert("Please select a template.");
-        return;
+function closeSaveModal() {
+
+    if (saveModal) {
+
+        saveModal.style.display =
+            "none";
+
     }
 
-    if (!confirm("Are you sure you want to delete this template?")) {
-        return;
+}
+
+
+// ======================================
+// CONFIRM SAVE
+// ======================================
+
+async function confirmSaveTemplate() {
+
+    if (saveModal) {
+
+        saveModal.style.display =
+            "none";
+
     }
 
-    const response = await fetch(getTemplateApiUrl(`/template/${id}`), {
-        method: "DELETE"
-    });
 
-    const result = await response.json();
+    const name =
+        templateName.value.trim();
 
-    alert(result.message || "Template deleted successfully.");
 
-    deleteTemplateModal.style.display = "none";
+    const description =
+        templateDescription.value.trim();
 
-    loadTemplates();
 
-    resetTemplateForm();
+    const columns =
+        columnOrder.map(
+            (column, index) => {
 
-});
-const addTemplateBtn = document.getElementById("addTemplateBtn");
-const editModal = document.getElementById("editTemplateModal");
-const cancelEditBtn = document.getElementById("cancelEditBtn");
+                const displayName =
+                    getDisplayName(
+                        column
+                    );
 
-editBtn.addEventListener("click", async () => {
 
-    editModal.style.display = "flex";
+                return {
 
-    await loadTemplates();
+                    original_column:
+                        column,
 
-});
+                    display_column:
+                        displayName,
 
-addTemplateBtn.addEventListener("click", () => {
+                    column_order:
+                        index + 1,
 
-    resetTemplateForm();
+                    is_mandatory:
+                        mandatoryColumns.includes(
+                            column
+                        ),
 
-    selectedOptionalColumns = [];
+                    column_id:
+                        index + 1,
 
-    columnOrder = [];
+                    column_name:
+                        column,
 
-    renameContainer.innerHTML = "";
+                    display_name:
+                        displayName,
 
-    addRenameRow();
+                    type:
+                        "string",
+
+                    default_value:
+                        "",
+
+                    order:
+                        index + 1,
+
+                    mandatory:
+                        mandatoryColumns.includes(
+                            column
+                        ),
+
+                    default:
+                        mandatoryColumns.includes(
+                            column
+                        )
+
+                };
+
+            }
+        );
+
+
+    const templateData = {
+
+        template_name:
+            name,
+
+        description:
+            description,
+
+        created_by:
+            "Tejal",
+
+        modified_by:
+            "Tejal",
+
+        columns:
+            columns
+
+    };
+
+
+    try {
+
+        const url =
+            currentTemplateId
+                ? `${API_BASE}/template/${currentTemplateId}`
+                : `${API_BASE}/create-template`;
+
+
+        const method =
+            currentTemplateId
+                ? "PUT"
+                : "POST";
+
+
+        const response =
+            await fetch(
+                url,
+                {
+
+                    method:
+                        method,
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            templateData
+                        )
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            data.error
+        ) {
+
+            alert(
+                data.error ||
+                "Unable to save the template."
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            data.message ||
+            (
+                currentTemplateId
+                    ? "Template updated successfully."
+                    : "Template saved successfully."
+            )
+        );
+
+
+        currentTemplateId =
+            null;
+
+
+        resetTemplateForm();
+
+
+        await loadTemplates();
+
+    } catch (error) {
+
+        console.error(
+            "Save error:",
+            error
+        );
+
+
+        alert(
+            "Something went wrong while saving the template."
+        );
+
+    }
+
+}
+
+
+// ======================================
+// RESET FORM
+// ======================================
+
+function resetTemplateForm() {
+
+    currentTemplateId =
+        null;
+
+
+    if (templateName) {
+
+        templateName.value =
+            "";
+
+        templateName.style.borderColor =
+            "#d1d5db";
+
+    }
+
+
+    if (templateDescription) {
+
+        templateDescription.value =
+            "";
+
+    }
+
+
+    if (saveTemplateBtn) {
+
+        saveTemplateBtn.textContent =
+            "Save Template";
+
+    }
+
+
+    selectedOptionalColumns =
+        [];
+
+
+    columnOrder =
+        [];
+
+
+    document
+        .querySelectorAll(
+            ".column-item"
+        )
+        .forEach(item => {
+
+            item.style.display =
+                "flex";
+
+        });
+
+
+    if (renameContainer) {
+
+        renameContainer.innerHTML =
+            "";
+
+        addRenameRow();
+
+    }
+
 
     updateUI();
 
-});
+}
 
-cancelEditBtn.addEventListener("click", () => {
-    editModal.style.display = "none";
-});
 
-window.addEventListener("click", (event) => {
-    if (event.target === editModal) {
-        editModal.style.display = "none";
+// ======================================
+// EDIT MODAL
+// ======================================
+
+async function openEditModal() {
+
+    if (!editModal) {
+        return;
     }
-});
-let currentTemplateId = null;
+
+
+    editModal.style.display =
+        "flex";
+
+
+    await loadTemplates();
+
+}
+
+
+function closeEditModal() {
+
+    if (editModal) {
+
+        editModal.style.display =
+            "none";
+
+    }
+
+}
+
+
+// ======================================
+// LOAD TEMPLATES
+// ======================================
+
 async function loadTemplates() {
 
     try {
 
-        const response = await fetch(getTemplateApiUrl("/templates"));
+        const response =
+            await fetch(
+                `${API_BASE}/templates`
+            );
 
-        const templates = await response.json();
 
-        const dropdown = document.getElementById("editTemplateDropdown");
+        if (!response.ok) {
 
-        dropdown.innerHTML = `<option value="">Choose Template</option>`;
+            throw new Error(
+                `HTTP error: ${response.status}`
+            );
 
-        templates.forEach(template => {
+        }
 
-            dropdown.innerHTML += `
-                <option value="${template.template_id}">
-                    ${template.template_name}
-                </option>
-            `;
 
-        });
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Templates received:",
+            data
+        );
+
+
+        const templates =
+            Array.isArray(data)
+                ? data
+                : data.templates || [];
+
+
+        populateTemplateDropdown(
+            editTemplateDropdown,
+            templates
+        );
+
+
+        populateTemplateDropdown(
+            deleteTemplateDropdown,
+            templates
+        );
+
+
+        return templates;
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Error loading templates:",
+            error
+        );
 
-        alert("Unable to load templates.");
+
+        alert(
+            "Unable to load templates. Make sure the Flask backend is running."
+        );
+
+
+        return [];
 
     }
 
 }
-async function loadDeleteTemplates() {
 
-    try {
 
-        const response = await fetch(getTemplateApiUrl("/templates"));
+// ======================================
+// POPULATE TEMPLATE DROPDOWN
+// ======================================
 
-        const templates = await response.json();
+function populateTemplateDropdown(
+    dropdown,
+    templates
+) {
 
-        const dropdown = document.getElementById("deleteTemplateDropdown");
-
-        dropdown.innerHTML = `<option value="">Choose Template</option>`;
-
-        templates.forEach(template => {
-
-            dropdown.innerHTML += `
-                <option value="${template.template_id}">
-                    ${template.template_name}
-                </option>
-            `;
-
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Unable to load templates.");
-
-    }
-
-}
-const openEditBtn = document.getElementById("openEditBtn");
-
-openEditBtn.addEventListener("click", async () => {
-
-    const id = document.getElementById("editTemplateDropdown").value;
-
-    if (!id) {
-        alert("Please select a template.");
+    if (!dropdown) {
         return;
     }
 
-    const response = await fetch(getTemplateApiUrl(`/template/${id}`));
-    const template = await response.json();
 
-    currentTemplateId = template.template_id;
+    dropdown.innerHTML =
+        `<option value="">Choose Template</option>`;
 
-document.getElementById("templateName").value =
-    template.template_name || "";
 
-document.getElementById("templateDescription").value =
-    template.description || "";
+    templates.forEach(
+        template => {
 
-document.getElementById("saveTemplateBtn").textContent =
-    "Update Template";
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-editModal.style.display = "none";
-});
-function resetTemplateForm() {
 
-    currentTemplateId = null;
+            option.value =
+                template.template_id;
 
-    document.getElementById("templateName").value = "";
 
-    document.getElementById("templateDescription").value = "";
+            option.textContent =
+                template.template_name;
 
-    document.getElementById("saveTemplateBtn").textContent =
-        "Save Template";
+
+            dropdown.appendChild(
+                option
+            );
+
+        }
+    );
 
 }
 
-cancelDeleteBtn.addEventListener("click", () => {
 
-    deleteModal.style.display = "none";
+// ======================================
+// OPEN SELECTED TEMPLATE
+// ======================================
 
-});
+async function openSelectedTemplate() {
 
-window.addEventListener("click", (event) => {
+    const id =
+        editTemplateDropdown?.value;
 
-    if (event.target === deleteModal) {
 
-        deleteModal.style.display = "none";
+    if (!id) {
 
-    }
+        alert(
+            "Please select a template."
+        );
 
-});
-
-        deleteTemplateBtn.addEventListener("click", async () => {
-
-    deleteModal.style.display = "flex";
-
-    await loadDeleteTemplates();
-
-});
-cancelDeleteBtn.addEventListener("click", () => {
-
-    deleteModal.style.display = "none";
-
-});
-
-window.addEventListener("click", (event) => {
-
-    if (event.target === deleteModal) {
-
-        deleteModal.style.display = "none";
+        return;
 
     }
 
-});
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/template/${id}`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP error: ${response.status}`
+            );
+
+        }
+
+
+        const template =
+            await response.json();
+
+
+        currentTemplateId =
+            template.template_id;
+
+
+        templateName.value =
+            template.template_name ||
+            "";
+
+
+        templateDescription.value =
+            template.description ||
+            "";
+
+
+        if (saveTemplateBtn) {
+
+            saveTemplateBtn.textContent =
+                "Update Template";
+
+        }
+
+
+        loadTemplateColumns(
+            template
+        );
+
+
+        closeEditModal();
+
+    } catch (error) {
+
+        console.error(
+            "Edit error:",
+            error
+        );
+
+
+        alert(
+            "Unable to open the selected template."
+        );
+
+    }
+
+}
+
+
+// ======================================
+// LOAD TEMPLATE COLUMNS
+// ======================================
+
+function loadTemplateColumns(
+    template
+) {
+
+    selectedOptionalColumns =
+        [];
+
+
+    columnOrder =
+        [];
+
+
+    document
+        .querySelectorAll(
+            ".column-item"
+        )
+        .forEach(item => {
+
+            item.style.display =
+                "flex";
+
+        });
+
+
+    if (renameContainer) {
+
+        renameContainer.innerHTML =
+            "";
+
+    }
+
+
+    let columns =
+        template.columns;
+
+
+    // Backend may return JSON string
+    if (
+        !columns &&
+        template.column_configuration
+    ) {
+
+        try {
+
+            columns =
+                typeof template.column_configuration ===
+                "string"
+
+                    ? JSON.parse(
+                        template.column_configuration
+                    )
+
+                    : template.column_configuration;
+
+        } catch (error) {
+
+            console.error(
+                "Column JSON error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    if (
+        !Array.isArray(columns)
+    ) {
+
+        columns = [];
+
+    }
+
+
+    columns.sort(
+        (a, b) => {
+
+            const orderA =
+                Number(
+                    a.order ??
+                    a.column_order ??
+                    9999
+                );
+
+
+            const orderB =
+                Number(
+                    b.order ??
+                    b.column_order ??
+                    9999
+                );
+
+
+            return orderA - orderB;
+
+        }
+    );
+
+
+    columns.forEach(
+        columnData => {
+
+            const column =
+                columnData.column_name ||
+                columnData.original_column ||
+                columnData.column ||
+                "";
+
+
+            if (!column) {
+                return;
+            }
+
+
+            columnOrder.push(
+                column
+            );
+
+
+            // Optional column
+            if (
+                optionalColumns.includes(
+                    column
+                )
+            ) {
+
+                if (
+                    !selectedOptionalColumns.includes(
+                        column
+                    )
+                ) {
+
+                    selectedOptionalColumns.push(
+                        column
+                    );
+
+                }
+
+
+                const addButton =
+                    document.querySelector(
+                        `.add-column-btn[data-column="${CSS.escape(column)}"]`
+                    );
+
+
+                if (addButton) {
+
+                    const item =
+                        addButton.closest(
+                            ".column-item"
+                        );
+
+
+                    if (item) {
+
+                        item.style.display =
+                            "none";
+
+                    }
+
+                }
+
+            }
+
+
+            // Rename
+            const display =
+                columnData.display_name ||
+                columnData.display_column ||
+                "";
+
+
+            if (
+                display &&
+                display.trim() !== "" &&
+                display.trim() !== column
+            ) {
+
+                addRenameRow({
+
+                    original_column:
+                        column,
+
+                    display_column:
+                        display
+
+                });
+
+            }
+
+        }
+    );
+
+
+    if (
+        document.querySelectorAll(
+            ".rename-row"
+        ).length === 0
+    ) {
+
+        addRenameRow();
+
+    }
+
+
+    updateUI();
+
+}
+
+
+// ======================================
+// DELETE MODAL
+// ======================================
+
+async function openDeleteModal() {
+
+    if (!deleteModal) {
+        return;
+    }
+
+
+    deleteModal.style.display =
+        "flex";
+
+
+    await loadTemplates();
+
+}
+
+
+function closeDeleteModal() {
+
+    if (deleteModal) {
+
+        deleteModal.style.display =
+            "none";
+
+    }
+
+}
+
+
+// ======================================
+// DELETE TEMPLATE
+// ======================================
+
+async function deleteSelectedTemplate() {
+
+    const id =
+        deleteTemplateDropdown?.value;
+
+
+    if (!id) {
+
+        alert(
+            "Please select a template."
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this template?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/template/${id}`,
+                {
+                    method:
+                        "DELETE"
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                result.error ||
+                "Unable to delete the template."
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            result.message ||
+            "Template deleted successfully."
+        );
+
+
+        closeDeleteModal();
+
+
+        await loadTemplates();
+
+
+        if (
+            String(currentTemplateId) ===
+            String(id)
+        ) {
+
+            resetTemplateForm();
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Delete error:",
+            error
+        );
+
+
+        alert(
+            "Something went wrong while deleting the template."
+        );
+
+    }
+
+}
+
+
+// ======================================
+// SAVE MODAL BUTTONS
+// ======================================
+
+if (cancelSaveBtn) {
+
+    cancelSaveBtn.addEventListener(
+        "click",
+        closeSaveModal
+    );
+
+}
+
+
+// ======================================
+// ESCAPE HTML
+// ======================================
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// ======================================
+// ESCAPE ATTRIBUTE
+// ======================================
+
+function escapeAttribute(value) {
+
+    return String(value)
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
