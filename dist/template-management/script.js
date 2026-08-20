@@ -1054,59 +1054,129 @@ item.dataset.templateName =
 
         if (confirmBtn) {
 
-            confirmBtn.addEventListener(
-                "click",
+    confirmBtn.addEventListener(
+        "click",
+        function () {
+
+            const original =
+                originalInput.value.trim();
+
+            const display =
+                displayInput.value.trim();
+
+
+            // ======================================
+            // VALIDATE ORIGINAL NAME
+            // ======================================
+
+            if (original === "") {
+
+                alert(
+                    "Please select an Original Name."
+                );
+
+                originalInput.focus();
+
+                return;
+            }
+
+
+            // ======================================
+            // VALIDATE DISPLAY NAME
+            // ======================================
+
+            if (display === "") {
+
+                alert(
+                    "Please enter a Display Name."
+                );
+
+                displayInput.focus();
+
+                return;
+            }
+
+
+            // ======================================
+            // VALIDATE CHARACTERS
+            // ======================================
+
+            const renamePattern =
+                /^[A-Za-z0-9 _-]+$/;
+
+
+            if (!renamePattern.test(display)) {
+
+                alert(
+                    'Display Name can contain only letters, numbers, spaces, "_" and "-".'
+                );
+
+                displayInput.focus();
+
+                return;
+            }
+
+
+            // ======================================
+            // GET CONFIRMATION MODAL
+            // ======================================
+
+            const renameConfirmModal =
+                document.getElementById(
+                    "renameConfirmModal"
+                );
+
+            const renameConfirmMessage =
+                document.getElementById(
+                    "renameConfirmMessage"
+                );
+
+            const renameConfirmYes =
+                document.getElementById(
+                    "renameConfirmYes"
+                );
+
+            const renameConfirmNo =
+                document.getElementById(
+                    "renameConfirmNo"
+                );
+
+
+            if (
+                !renameConfirmModal ||
+                !renameConfirmMessage ||
+                !renameConfirmYes ||
+                !renameConfirmNo
+            ) {
+
+                console.error(
+                    "Rename confirmation modal elements not found."
+                );
+
+                return;
+            }
+
+
+            // ======================================
+            // SHOW CONFIRMATION MESSAGE
+            // ======================================
+
+            renameConfirmMessage.textContent =
+                `Are you sure you want to replace "${original}" with "${display}"?`;
+
+
+            renameConfirmModal.style.display =
+                "flex";
+
+
+            // ======================================
+            // YES
+            // ======================================
+
+            renameConfirmYes.onclick =
                 function () {
 
-                    const original =
-                        originalInput.value.trim();
-
-                    const display =
-                        displayInput.value.trim();
-
-
-                    if (original === "") {
-
-                        alert(
-                            "Please select an Original Name."
-                        );
-
-                        originalInput.focus();
-
-                        return;
-                    }
-
-
-                    if (display === "") {
-
-                        alert(
-                            "Please enter a Display Name."
-                        );
-
-                        displayInput.focus();
-
-                        return;
-                    }
-
-
-                   const renamePattern =
-                        /^[A-Za-z0-9 _-]+$/;
-
-
-                    if (!renamePattern.test(display)) {
-
-                        alert(
-                            'Display Name can contain only letters, numbers, spaces, "_" and "-".'
-                        );
-
-                        displayInput.focus();
-
-                        return;
-                    }
-
-
                     // Store confirmed display name
-
                     row.dataset.confirmedDisplayName =
                         display;
 
@@ -1117,11 +1187,16 @@ item.dataset.templateName =
                         display;
 
 
+                    // Close confirmation modal
+                    renameConfirmModal.style.display =
+                        "none";
+
+
+                    // NOW update Template Preview
                     updateUI();
 
 
-                    // Small confirmation animation
-
+                    // Small tick animation
                     confirmBtn.style.transform =
                         "scale(0.9)";
 
@@ -1132,22 +1207,53 @@ item.dataset.templateName =
 
                     }, 120);
 
-                }
-            );
-        }
+                };
 
+
+            // ======================================
+            // NO
+            // ======================================
+
+            renameConfirmNo.onclick =
+                function () {
+
+                    // Close confirmation modal
+                    renameConfirmModal.style.display =
+                        "none";
+
+
+                    // Keep the entered name.
+                    // User can edit it again.
+                    displayInput.focus();
+
+                };
+
+        }
+    );
+}
 
         // ======================================
         // ORIGINAL COLUMN CHANGE
         // ======================================
 
-        if (originalInput) {
+       if (originalInput) {
 
-            originalInput.addEventListener(
-                "change",
-                updateUI
-            );
+    originalInput.addEventListener(
+        "change",
+        function () {
+
+            if (this.value === "") {
+                this.style.color = "#9ca3af";
+            } else {
+                this.style.color = "#111827";
+            }
+
+            updateUI();
+
         }
+    );
+
+}
 
 
         // ======================================
@@ -1203,6 +1309,15 @@ item.dataset.templateName =
         populateColumnDropdown(
             originalInput
         );
+        populateColumnDropdown(
+    originalInput
+);
+
+if (originalInput.value === "") {
+    originalInput.style.color = "#9ca3af";
+} else {
+    originalInput.style.color = "#111827";
+}
 
     }
     // ======================================

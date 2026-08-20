@@ -337,30 +337,25 @@
 
         <!-- Rename Columns -->
 
-        <div class="card">
+     <div class="card rename-columns-section">
 
-            <h2>Rename Columns</h2>
+    <h2>Rename Columns</h2>
 
-            <div class="rename-header">
-
-                <div>Original Name</div>
-                <div>Display Name</div>
-
-            </div>
-
-            <div id="renameContainer">
-
-            </div>
-
-            <div class="rename-actions">
-
-    <button id="addRenameRow" class="add-btn">
-        + Add Row
-    </button>
-
+  <div class="rename-header">
+    <div>Original Name</div>
+    <div>Display Name</div>
+    <div></div>
 </div>
 
-        </div>
+    <div id="renameContainer"></div>
+
+    <div class="rename-actions">
+        <button id="addRenameRow" class="add-btn">
+            + Add Row
+        </button>
+    </div>
+
+</div>
 
         
 
@@ -495,6 +490,37 @@
 
 
 <script src="script.js?v=1001"></script>
+<!-- Rename Confirmation Modal -->
+<div id="renameConfirmModal" class="rename-confirm-modal">
 
+    <div class="rename-confirm-content">
+
+        <h2>Confirm Rename</h2>
+
+        <p id="renameConfirmMessage">
+            Are you sure you want to replace the original name?
+        </p>
+
+        <div class="rename-confirm-buttons">
+
+            <button
+                type="button"
+                id="renameConfirmNo"
+                class="rename-confirm-no">
+                No
+            </button>
+
+            <button
+                type="button"
+                id="renameConfirmYes"
+                class="rename-confirm-yes">
+                Yes
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>

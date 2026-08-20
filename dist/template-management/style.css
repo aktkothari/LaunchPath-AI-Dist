@@ -268,30 +268,46 @@ body{
 =========================== */
 
 .rename-header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px 36px;
-    column-gap: 10px;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 12px;
-    padding: 0;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    column-gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+
+    align-items: end !important;
 }
 
-.rename-header div {
-    padding: 0;
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #374151;
-    text-align: left;
+.rename-header > div {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    text-align: left !important;
+
+    font-size: 16px !important;
+    line-height: 20px !important;
+    font-weight: 600 !important;
 }
 
-.rename-header div:nth-child(1) {
-    grid-column: 1;
+/* Make Display Name heading start exactly
+   where the Display Name input starts */
+.rename-header > div:nth-child(2) {
+    text-align: left !important;
+    justify-self: start !important;
 }
+.rename-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    column-gap: 12px !important;
 
-.rename-header div:nth-child(2) {
-    grid-column: 2;
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 
@@ -2740,4 +2756,662 @@ tbody td{
 /* Delete */
 #templateViewModal .template-delete-action {
     color: #dc2626 !important;
+}
+/* ==========================================
+   ADDITIONAL & OUTPUT COLUMNS - FONT MATCH
+   ========================================== */
+
+/* Additional Columns */
+.column-list .column-item span {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* Output Columns */
+#selectedColumns .output-column-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+}
+/* ==========================================
+   RENAME COLUMNS - FIXED ALIGNMENT
+   ========================================== */
+
+.rename-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    column-gap: 12px;
+    align-items: start;
+    width: 100%;
+}
+
+/* Keep Original Name and Display Name aligned */
+.rename-row .original-name,
+.rename-row .display-name {
+    width: 100%;
+    height: 58px;
+    box-sizing: border-box;
+}
+
+/* Display name section */
+.rename-row .display-name-container {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Reserve space for the validation message
+   so it does NOT push/change the row alignment */
+.rename-row .displayNameWarning {
+    display: none;
+    height: 18px;
+    margin: 7px 0 0 2px;
+    font-size: 13px;
+    line-height: 18px;
+    color: #ef4444;
+}
+
+/* When JavaScript shows the warning */
+.rename-row .displayNameWarning[style*="display: block"] {
+    display: block !important;
+}
+
+/* Confirm/Delete buttons stay aligned with the inputs */
+.rename-row .rename-actions-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    height: 58px;
+    padding-top: 0;
+}
+
+/* Keep buttons the same size */
+.rename-row .rename-actions-row button {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    margin-top: 13px;
+}
+
+/* Prevent the warning from affecting the input width */
+.rename-row .display-name-container {
+    position: relative;
+}
+
+/* Add Row stays below the rename row */
+.rename-actions {
+    margin-top: 18px;
+}
+/* ==========================================
+   RENAME CONFIRMATION MODAL
+   ========================================== */
+
+.rename-confirm-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    align-items: center;
+    justify-content: center;
+}
+
+.rename-confirm-content {
+    width: 420px;
+    max-width: 90%;
+
+    background: #ffffff;
+
+    border-radius: 14px;
+
+    padding: 28px;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+
+    text-align: center;
+}
+
+.rename-confirm-content h2 {
+    margin: 0 0 15px;
+
+    font-size: 22px;
+    color: #172033;
+}
+
+.rename-confirm-content p {
+    margin: 0 0 25px;
+
+    font-size: 15px;
+    line-height: 1.5;
+
+    color: #4b5563;
+}
+
+.rename-confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.rename-confirm-buttons button {
+    min-width: 90px;
+    height: 40px;
+
+    border-radius: 7px;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.rename-confirm-no {
+    background: #ffffff;
+    color: #374151;
+
+    border: 1px solid #d1d5db;
+}
+
+.rename-confirm-no:hover {
+    background: #f3f4f6;
+}
+
+.rename-confirm-yes {
+    background: #3aa6c1;
+    color: #ffffff;
+
+    border: 1px solid #3aa6c1;
+}
+
+.rename-confirm-yes:hover {
+    background: #2d91aa;
+}
+/* ==========================================
+   RENAME COLUMN TEXT COLORS
+   ========================================== */
+
+/* Default: "Select Column" stays grey */
+.rename-row .original-name {
+    color: #9ca3af;
+}
+
+/* Once an actual column is selected, make it black */
+.rename-row .original-name:valid {
+    color: #111827;
+}
+
+/* Display Name input text should be black */
+.rename-row .display-name {
+    color: #111827;
+}
+
+/* Placeholder text stays grey */
+.rename-row .display-name::placeholder {
+    color: #9ca3af;
+}
+
+/* Dropdown options */
+.rename-row .original-name option {
+    color: #111827;
+}
+
+/* Keep the default Select Column option grey */
+.rename-row .original-name option[value=""] {
+    color: #9ca3af;
+}
+/* ==========================================
+   RENAME COLUMNS - COMPACT SIZE
+   ========================================== */
+
+.rename-columns-section {
+    padding: 18px 24px;
+}
+
+.rename-columns-section h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+
+.rename-header {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.rename-row {
+    column-gap: 10px;
+}
+
+.rename-row .original-name,
+.rename-row .display-name {
+    height: 48px;
+    font-size: 15px;
+    padding: 0 14px;
+}
+
+.rename-row .displayNameWarning {
+    font-size: 12px;
+    line-height: 15px;
+    margin-top: 5px;
+}
+
+.rename-row .rename-actions-row {
+    height: 48px;
+    gap: 6px;
+}
+
+.rename-row .rename-actions-row button {
+    width: 34px;
+    height: 34px;
+    margin-top: 7px;
+    font-size: 16px;
+}
+
+.rename-actions {
+    margin-top: 12px;
+}
+
+.rename-actions .add-btn {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 14px;
+}
+/* ==========================================
+   RENAME COLUMNS - FINAL ALIGNMENT & SIZE
+   ========================================== */
+
+/* Main section heading */
+.rename-columns-section h2 {
+    font-size: 20px;
+    line-height: 24px;
+    margin-bottom: 18px;
+}
+
+/* Original Name / Display Name headings */
+.rename-columns-section .rename-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    column-gap: 12px;
+
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+
+    margin-bottom: 8px;
+}
+
+/* Rename row must use EXACTLY the same columns */
+.rename-columns-section .rename-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    column-gap: 12px;
+    align-items: start;
+    width: 100%;
+}
+
+/* Original Name + Display Name boxes */
+.rename-columns-section .original-name,
+.rename-columns-section .display-name {
+    width: 100%;
+    height: 48px;
+    box-sizing: border-box;
+
+    padding: 0 14px;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+
+    border-radius: 8px;
+}
+
+/* Display Name container */
+.rename-columns-section .display-name-container {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Buttons */
+.rename-columns-section .rename-actions-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    height: 48px;
+}
+
+.rename-columns-section .rename-actions-row button {
+    width: 36px;
+    height: 36px;
+    margin-top: 6px;
+
+    flex-shrink: 0;
+
+    font-size: 16px;
+}
+
+/* Validation message */
+.rename-columns-section .displayNameWarning {
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: 5px;
+}
+
+/* Add Row button */
+.rename-columns-section .rename-actions {
+    margin-top: 14px;
+}
+
+.rename-columns-section .add-btn {
+    height: 38px;
+    padding: 0 16px;
+
+    font-size: 14px;
+}
+.rename-columns-section .rename-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    column-gap: 12px !important;
+    text-align: left !important;
+    padding: 0 !important;
+    margin: 0 0 8px 0 !important;
+}
+
+.rename-columns-section .rename-header > div {
+    text-align: left !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.rename-columns-section .rename-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    column-gap: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.rename-columns-section .display-name-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* ==========================================
+   RENAME COLUMNS - FINAL ALIGNMENT
+   ========================================== */
+
+.rename-columns-section .rename-header {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        auto !important;
+
+    column-gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+
+    text-align: left !important;
+    align-items: start !important;
+}
+
+.rename-columns-section .rename-header > div {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    text-align: left !important;
+
+    font-size: 16px !important;
+    line-height: 20px !important;
+    font-weight: 600 !important;
+}
+
+.rename-columns-section .rename-row {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        auto !important;
+
+    column-gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    align-items: start !important;
+}
+
+.rename-columns-section .original-name,
+.rename-columns-section .display-name {
+    width: 100% !important;
+
+    height: 48px !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+}
+
+.rename-columns-section .display-name-container {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.rename-columns-section .rename-actions-row {
+    display: flex !important;
+
+    gap: 7px !important;
+
+    height: 48px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    align-items: flex-start !important;
+}
+
+.rename-columns-section .rename-actions-row button {
+    width: 36px !important;
+    height: 36px !important;
+
+    margin-top: 6px !important;
+
+    flex-shrink: 0 !important;
+}
+/* =========================================
+   FIX RENAME COLUMNS HEADER ALIGNMENT
+   ========================================= */
+
+.rename-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    align-items: end !important;
+}
+
+.rename-header > div {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    text-align: left !important;
+    justify-self: start !important;
+
+    font-size: 16px !important;
+    line-height: 20px !important;
+    font-weight: 600 !important;
+}
+
+/* Specifically align Display Name heading
+   with the Display Name input */
+.rename-header > div:nth-child(2) {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+    justify-self: start !important;
+}
+
+.rename-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.rename-row .original-name,
+.rename-row .display-name-container {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.rename-row .display-name-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.rename-row .display-name {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+/* =========================================================
+   FINAL FIX - RENAME COLUMNS HEADER/INPUT ALIGNMENT
+   ========================================================= */
+
+/* HEADER:
+   Reserve exactly the same space as the two action buttons
+   in the row below. */
+.rename-columns-section .rename-header {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        79px !important;
+
+    column-gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+
+    align-items: start !important;
+}
+
+/* Header text */
+.rename-columns-section .rename-header > div {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    text-align: left !important;
+    justify-self: start !important;
+
+    font-size: 16px !important;
+    line-height: 20px !important;
+    font-weight: 600 !important;
+}
+
+/* ROW:
+   Use EXACTLY the same three columns as the header. */
+.rename-columns-section .rename-row {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        79px !important;
+
+    column-gap: 12px !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    align-items: start !important;
+}
+
+/* Original Name */
+.rename-columns-section .rename-row .original-name {
+    grid-column: 1 !important;
+
+    width: 100% !important;
+    height: 48px !important;
+
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Display Name container */
+.rename-columns-section .rename-row .display-name-container {
+    grid-column: 2 !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Display Name input */
+.rename-columns-section .rename-row .display-name {
+    width: 100% !important;
+    height: 48px !important;
+
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Tick + Cross */
+.rename-columns-section .rename-row .rename-actions-row {
+    grid-column: 3 !important;
+
+    width: 79px !important;
+    height: 48px !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+
+    gap: 7px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Buttons */
+.rename-columns-section .rename-row .rename-actions-row button {
+    width: 36px !important;
+    height: 36px !important;
+
+    min-width: 36px !important;
+
+    margin: 6px 0 0 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
 }
