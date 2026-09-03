@@ -17,7 +17,7 @@ body{
 
 .main-content{
     width:100%;
-    padding:30px;
+    padding:15px 4px;
     overflow-x:hidden;
 }
 
@@ -778,7 +778,7 @@ tbody td{
 
     background:white;
 
-    width:420px;
+    width:min(390px, calc(100vw - 24px));
 
     padding:30px;
 
@@ -3119,6 +3119,37 @@ tbody td{
     line-height: 1.4;
 }
 
+/* Compact section spacing within the LaunchPath layout. */
+.template-management-root .main-content {
+    padding: 8px 30px 30px;
+}
+
+.template-management-root .card {
+    padding-top: 8px;
+}
+
+.template-management-root .rename-columns-card,
+.template-management-root .template-preview-card {
+    padding-bottom: 8px;
+}
+
+.template-management-root .template-details-header {
+    align-items: center;
+}
+
+.template-management-root .template-details-header h2 {
+    margin: 0 !important;
+    transform: translateY(-2px);
+}
+
+.template-management-root .template-preview-card .preview-header {
+    margin-bottom: 6px;
+}
+
+.template-management-root .template-preview-card .preview-header h2 {
+    margin-bottom: 0;
+}
+
 .template-management-root * {
     font-family: inherit !important;
 }
@@ -3189,6 +3220,21 @@ tbody td{
 .template-management-root .confirm-btn {
     font-size: var(--tm-font-body);
     line-height: 20px;
+}
+
+.template-management-root .modal-buttons button {
+    width: 88px;
+    height: 42px;
+    padding: 0;
+}
+
+.template-management-root .rename-row {
+    align-items: start;
+}
+
+.template-management-root .rename-actions-row {
+    height: 46px;
+    align-items: center;
 }
 
 .template-management-root .validation-warning {
