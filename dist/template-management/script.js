@@ -521,6 +521,70 @@ function closeTemplateView() {
     // LOAD TEMPLATE VIEW LIST
     // ======================================
 
+    function confirmDefaultTemplate(template, currentDefault) {
+        const dialog = document.createElement("dialog");
+        dialog.className = "template-default-dialog";
+        dialog.setAttribute("aria-label", "Set Default Template");
+        const title = document.createElement("h2");
+        title.textContent = "Set Default Template";
+        const message = document.createElement("p");
+        message.textContent = `Set ‘${template.template_name}’ as the default template?` +
+            (currentDefault ? ` This will replace ‘${currentDefault.template_name}’ as the default template.` : "");
+        const error = document.createElement("p");
+        error.className = "template-default-error";
+        error.setAttribute("role", "alert");
+        const buttons = document.createElement("div");
+        buttons.className = "modal-buttons";
+        const cancel = document.createElement("button");
+        cancel.className = "cancel-btn";
+        cancel.textContent = "Cancel";
+        const confirmButton = document.createElement("button");
+        confirmButton.className = "confirm-btn";
+        confirmButton.textContent = "Set as Default";
+        buttons.append(cancel, confirmButton);
+        dialog.append(title, message, error, buttons);
+        document.body.appendChild(dialog);
+        let pending = false;
+        dialog.addEventListener("cancel", (event) => {
+            if (pending) event.preventDefault();
+        });
+        dialog.addEventListener("close", () => dialog.remove());
+        cancel.addEventListener("click", () => dialog.close());
+        confirmButton.addEventListener("click", async () => {
+            if (pending) return;
+            const email = getLoggedInUserEmail();
+            if (!email) {
+                error.textContent = "The logged-in user's email is unavailable. Please sign in again.";
+                return;
+            }
+            pending = true;
+            cancel.disabled = confirmButton.disabled = true;
+            confirmButton.textContent = "Setting default…";
+            error.textContent = "";
+            try {
+                const response = await fetch(`${API_BASE}/templates/default`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ template_id: Number(template.template_id), changed_by: email }),
+                });
+                const result = await response.json();
+                if (!response.ok || result.error) {
+                    throw new Error(result.error || "Unable to set the default template.");
+                }
+                dialog.close();
+                await loadTemplateViewList();
+                alert("Default template updated successfully.");
+            } catch (failure) {
+                error.textContent = failure.message || "Unable to set the default template.";
+            } finally {
+                pending = false;
+                cancel.disabled = confirmButton.disabled = false;
+                confirmButton.textContent = "Set as Default";
+            }
+        });
+        dialog.showModal();
+    }
+
     async function loadTemplateViewList() {
 
         if (!templateList) {
@@ -625,6 +689,29 @@ item.dataset.templateId =
 item.dataset.templateName =
     template.template_name || "";
                 templateList.appendChild(item);
+
+                const isDefault = Number(template.is_default) === 1;
+                const star = document.createElement("button");
+                star.type = "button";
+                star.className = `template-icon-action template-default-action${isDefault ? " is-default" : ""}`;
+                star.textContent = isDefault ? "★" : "☆";
+                star.title = isDefault ? "Current default template" : "Set as default template";
+                star.setAttribute("aria-label", `${template.template_name}: ${star.title}`);
+                star.setAttribute("aria-pressed", String(isDefault));
+                star.disabled = isDefault;
+                star.addEventListener("click", () => confirmDefaultTemplate(
+                    template, templates.find((candidate) => Number(candidate.is_default) === 1)
+                ));
+                item.insertBefore(star, item.querySelector(".template-menu-container"));
+                if (isDefault) {
+                    const badge = document.createElement("span");
+                    badge.className = "template-default-badge";
+                    badge.textContent = "Default";
+                    item.querySelector(".template-view-name").appendChild(badge);
+                    const deleteAction = item.querySelector(".template-delete-action");
+                    deleteAction.disabled = true;
+                    deleteAction.title = "Select another default template before deleting this template";
+                }
 
                 // ==============================
                 // THREE DOT BUTTON
