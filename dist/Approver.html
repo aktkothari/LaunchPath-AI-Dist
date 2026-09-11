@@ -3389,7 +3389,7 @@ document.addEventListener('click', (event) => {
                     if(!unmatchedCard) return;
                     if(canOpen) {
                         unmatchedCard.classList.add('clickable-card', 'cursor-pointer', 'group', 'hover:bg-red-50');
-                        unmatchedCard.setAttribute('onclick', "switchView('exports')");
+                        unmatchedCard.setAttribute('onclick', "switchView('exports', { column: 'pct_consumed', direction: 'asc' })");
                         if(unmatchedArrow) unmatchedArrow.classList.remove('hidden');
                         if(unmatchedLabel) unmatchedLabel.classList.add('group-hover:text-red-700');
                     } else {
@@ -3645,7 +3645,7 @@ function toggleSidebar() {
 applySidebarState(localStorage.getItem('drawbackflowSidebarCollapsed') === 'true');
 
 
-function switchView(viewId) {
+function switchView(viewId, initialSort = null) {
             // ðŸ›¡ï¸ NEW: Data Loss Prevention Check
             if (stagedData && stagedData.length > 0) {
                 if (!confirm("âš ï¸ Unsaved Data Warning\n\nYou have uncommitted data in the staging area. Switching tabs will discard this data.\n\nClick OK to discard and switch.\nClick Cancel to stay and commit.")) {
@@ -3713,7 +3713,7 @@ function switchView(viewId) {
                 }
 
                 resetUpload();
-                loadTableData(viewId);
+                loadTableData(viewId, 'global', initialSort);
             }
 
 
@@ -3946,7 +3946,7 @@ async function loadStats() {
 
 
 
-async function loadTableData(target, loadingScope = 'global') {
+async function loadTableData(target, loadingScope = 'global', initialSort = null) {
     setScopedLoading(loadingScope, target, true, "Loading Data...");
     const tbody = document.querySelector('#data-table tbody');
     const tableContainer = document.getElementById('data-table-container');
@@ -4070,6 +4070,13 @@ async function loadTableData(target, loadingScope = 'global') {
                 bRows += `</tr>`;
             });
             tbody.innerHTML = bRows;
+            if (initialSort) {
+                const columnIndex = renderConfig.findIndex(col => col.k === initialSort.column);
+                if (columnIndex !== -1) {
+                    // Reuse the popup sort after rendering, including any frozen-column ordering.
+                    sortTable('data-table', columnIndex + (hasActionColumn === 3 ? 2 : 0), initialSort.direction);
+                }
+            }
         }
     } finally {
         setScopedLoading(loadingScope, target, false);
