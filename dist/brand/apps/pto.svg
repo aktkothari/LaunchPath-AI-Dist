@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PTO">
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="#122b55" stroke="#2a4a80" stroke-width="2"/>
+  <rect x="12" y="25" width="36" height="27" rx="4.5" fill="none" stroke="#7edcff" stroke-width="3"/>
+  <path d="M12 34h36M21 21v8M31 21v8" fill="none" stroke="#7edcff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="46" cy="17" r="6.5" fill="#ff9a4d" stroke="#122b55" stroke-width="3" paint-order="stroke"/>
+  <path d="M46 6.5v-2.5M53.4 9.6l1.8-1.8M56.5 17h2.5M38.6 9.6l-1.8-1.8" fill="none" stroke="#ff9a4d" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M20 42.5h6M30 42.5h6" fill="none" stroke="#3fa2b9" stroke-width="3" stroke-linecap="round"/>
+</svg>

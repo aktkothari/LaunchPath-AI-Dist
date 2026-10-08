@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AI Workspace">
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="#122b55" stroke="#2a4a80" stroke-width="2"/>
+  <path d="M13 18.5a5.5 5.5 0 0 1 5.5-5.5h27a5.5 5.5 0 0 1 5.5 5.5V36a5.5 5.5 0 0 1-5.5 5.5H30l-9.5 8.5v-8.5h-2A5.5 5.5 0 0 1 13 36z" fill="none" stroke="#7edcff" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M32 17.5l2.6 6 6 2.6-6 2.6-2.6 6-2.6-6-6-2.6 6-2.6z" fill="#a593ff"/>
+</svg>
